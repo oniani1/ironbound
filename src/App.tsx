@@ -55,8 +55,8 @@ export default function App() {
         <ScrollToTop />
         <Suspense fallback={<div className="min-h-[100dvh] bg-ink-950" />}>
           <Routes>
-            <Route path="/lab" element={<Lab />} />
-            <Route path="/dev/render/:id" element={<RenderChest />} />
+            {import.meta.env.DEV && <Route path="/lab" element={<Lab />} />}
+            {import.meta.env.DEV && <Route path="/dev/render/:id" element={<RenderChest />} />}
             <Route path="/" element={<Shell><Landing /></Shell>} />
             <Route path="/chests" element={<Shell><Chests /></Shell>} />
             <Route path="/chests/:id" element={<Shell><ChestDetail /></Shell>} />
