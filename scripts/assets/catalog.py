@@ -266,14 +266,28 @@ def length_weight(dim):
     if m:
         length = f"{float(m.group(1)):.0f} cm"
     weight = None
-    m = re.search(r"\(([\d.,]+)\s*g\)", dim)
+    kg = None
+    # Prefer the metric figure given with the weight itself; a length can be mistyped in grams.
+    m = re.search(r"Wt\.[^;]*?\(([\d.,]+)\s*(kg|g)\)", dim)
     if m:
-        g = float(m.group(1).replace(",", ""))
-        weight = f"{g / 1000:.1f} kg" if g >= 1000 else f"{g:.0f} g"
+        kg = float(m.group(1).replace(",", "")) / (1 if m.group(2) == "kg" else 1000)
     else:
-        m = re.search(r"\(([\d.]+)\s*kg\)", dim)
+        m = re.search(r"\(([\d.,]+)\s*g\)", dim)
         if m:
-            weight = f"{float(m.group(1)):.1f} kg"
+            kg = float(m.group(1).replace(",", "")) / 1000
+        else:
+            m = re.search(r"\(([\d.]+)\s*kg\)", dim)
+            if m:
+                kg = float(m.group(1))
+    # The metric figure is sometimes mistyped (kg written for g); the pounds and ounces
+    # given beside it settle which one is right.
+    imp = re.search(r"Wt\.\s*(?:([\d.]+)\s*lbs?\.?)?\s*(?:([\d.]+)\s*oz\.?)?", dim)
+    if kg and imp and (imp.group(1) or imp.group(2)):
+        lb_kg = float(imp.group(1) or 0) * 0.45359237 + float(imp.group(2) or 0) * 0.028349523
+        if lb_kg > 0 and not (1 / 3 < kg / lb_kg < 3):
+            kg = lb_kg
+    if kg:
+        weight = f"{kg:.1f} kg" if kg >= 1 else f"{kg * 1000:.0f} g"
     return length, weight
 
 
