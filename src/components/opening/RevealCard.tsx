@@ -140,6 +140,11 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         {item.blurb}
       </motion.p>
 
+      {trial && sold == null && (
+        <motion.p {...rise(0.9)} className="relative mt-4 rounded-[12px] border border-brass-500/25 bg-brass-500/[0.07] px-3.5 py-2.5 text-[13px] leading-snug text-bone-200">
+          This piece is yours. Every pull ends with the same choice: keep it in your vault, sell it back instantly, or ship it home.
+        </motion.p>
+      )}
       <motion.div {...rise(0.95)} className="relative mt-4 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-2.5">
         {sold != null ? (
           <div className="col-span-2 flex items-center justify-between rounded-[12px] border border-moss-400/30 bg-moss-400/10 px-4 py-3">
@@ -154,7 +159,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
             <Button data-testid="sell" variant="secondary" onClick={sellWithCoins} sub={`${Math.round(chest.buyback * 100)}% instant`}>
               Sell for {money(offer)}
             </Button>
-            <Button variant="secondary" onClick={onShip} sub="Insured courier">
+            <Button variant="secondary" onClick={onShip} sub={trial ? 'After you claim your purse' : 'Insured courier'} disabled={trial}>
               Ship to me
             </Button>
           </>
