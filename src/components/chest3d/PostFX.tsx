@@ -5,7 +5,7 @@ import { BlendFunction, ToneMappingMode, type BloomEffect, type ChromaticAberrat
 import * as THREE from 'three'
 import type { ChestAnim } from './animState'
 
-export function PostFX({ anim, base = 0.85 }: { anim: ChestAnim; base?: number }) {
+export function PostFX({ anim, base = 0.85, msaa = 0 }: { anim: ChestAnim; base?: number; msaa?: number }) {
   const bloom = useRef<BloomEffect>(null)
   const chroma = useRef<ChromaticAberrationEffect>(null)
   const offset = useRef(new THREE.Vector2(0, 0))
@@ -16,7 +16,7 @@ export function PostFX({ anim, base = 0.85 }: { anim: ChestAnim; base?: number }
     if (chroma.current) chroma.current.offset = offset.current
   })
   return (
-    <EffectComposer multisampling={0} enableNormalPass={false}>
+    <EffectComposer multisampling={msaa} enableNormalPass={false}>
       <Bloom ref={bloom} mipmapBlur intensity={base} luminanceThreshold={0.72} luminanceSmoothing={0.2} radius={0.72} />
       <ChromaticAberration ref={chroma} offset={offset.current} radialModulation modulationOffset={0.25} blendFunction={BlendFunction.NORMAL} />
       <Vignette eskil={false} offset={0.22} darkness={0.72} />

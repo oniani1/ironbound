@@ -68,7 +68,7 @@ function Hero() {
   return (
     <section className="relative -mt-[calc(var(--header-h)+var(--ticker-h))] min-h-[100svh] overflow-hidden">
       <div
-        className="absolute inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] top-[40%] [mask-image:linear-gradient(180deg,transparent,black_14%,black_80%,transparent)] md:inset-0 md:left-[30%] md:[mask-image:linear-gradient(180deg,black_70%,transparent)]"
+        className="absolute inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] top-[38%] [mask-image:linear-gradient(180deg,transparent,black_14%,black_93%,transparent)] md:inset-0 md:left-[30%] md:[mask-image:linear-gradient(180deg,black_70%,transparent)]"
         onPointerEnter={() => hover(true)}
         onPointerLeave={() => hover(false)}
       >
@@ -104,9 +104,12 @@ function Hero() {
             ))}
           </h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.65, ease }} className="mt-4 max-w-[50ch] text-[15px] leading-relaxed text-bone-300 sm:text-[17px] md:mt-6">
-            Every chest holds one real piece of history, from a $20 crossbow bolt to a Gothic armor worth over a million. Authenticated, vaulted and insured. Keep it, ship it home, or sell it back in one tap.
+            <span className="sm:hidden">One real piece of history in every chest. Keep it, ship it or sell it back.</span>
+            <span className="hidden sm:inline">
+              Every chest holds one real piece of history, from a $20 crossbow bolt to a Gothic armor worth over a million. Authenticated, vaulted and insured. Keep it, ship it home, or sell it back in one tap.
+            </span>
           </motion.p>
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8, ease }} className="mt-6 flex flex-wrap items-center gap-3 md:mt-8">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8, ease }} className="mt-5 flex flex-wrap items-center gap-1 sm:gap-3 md:mt-8">
             {signedIn ? (
               <Link to="/chests">
                 <Button size="lg" tabIndex={-1}>
@@ -118,7 +121,7 @@ function Hero() {
                 Open a free chest
               </Button>
             )}
-            <Link to="/chests" className="rounded-[14px] px-5 py-4 text-[15px] font-medium text-bone-200 transition-colors hover:bg-bone-100/[0.06] hover:text-bone-50">
+            <Link to="/chests" className="whitespace-nowrap rounded-[14px] px-4 py-4 text-[15px] font-medium text-bone-200 transition-colors hover:bg-bone-100/[0.06] hover:text-bone-50 sm:px-5">
               See the chests →
             </Link>
           </motion.div>

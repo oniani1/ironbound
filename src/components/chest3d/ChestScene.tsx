@@ -131,6 +131,8 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
   const bg = useMemo(() => cssColorToHex('--color-ink-950'), [])
   // Start sharp, drop resolution if the device cannot hold the frame rate.
   const [dpr, setDpr] = useState(() => Math.min(typeof window === 'undefined' ? 1 : window.devicePixelRatio, 1.75))
+  // Low-density screens alias on the gold trim, so they get 4x MSAA until the frame rate drops.
+  const [msaa, setMsaa] = useState(() => (typeof window !== 'undefined' && window.devicePixelRatio < 1.5 ? 4 : 0))
   return (
     <Canvas
       className={className}
@@ -140,7 +142,13 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
       camera={render ? { fov: 26, position: [1.25, 1.0, 2.75], near: 0.05, far: 40 } : { fov: 32, position: [0, 1.05, 3.15], near: 0.05, far: 40 }}
       onCreated={render ? ({ camera }) => camera.lookAt(0, 0.3, 0) : undefined}
     >
-      {!render && <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(Math.min(window.devicePixelRatio, 1.75))} />}
+      {!render && <PerformanceMonitor
+          onDecline={() => {
+            setDpr(1)
+            setMsaa(0)
+          }}
+          onIncline={() => setDpr(Math.min(window.devicePixelRatio, 1.75))}
+        />}
       {!render && <color attach="background" args={[bg]} />}
       {!render && <fog attach="fog" args={[bg, 4.5, 11]} />}
       <Suspense fallback={null}>
@@ -156,7 +164,7 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
         </Suspense>
       )}
       {!render && <CameraRig anim={anim} parallax={parallax} distance={distance} />}
-      {fx && !render && <PostFX anim={anim} />}
+      {fx && !render && <PostFX anim={anim} msaa={msaa} />}
       {import.meta.env.DEV && <DebugHandle anim={anim} />}
     </Canvas>
   )
