@@ -7,6 +7,7 @@ import { ITEM_BY_ID } from '../../data/items'
 import { Button } from '../ui/Button'
 import { ItemImg } from '../ui/ItemImg'
 import { useOnboarding } from './OnboardingContext'
+import './onboarding.css'
 
 /**
  * After the free chest, a guest lands where their choice took them: the vault after Keep,
@@ -32,14 +33,14 @@ export function GuestInvite() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, transition: { duration: 0.2 } }}
           transition={{ duration: reduced ? 0.2 : 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="mx-auto max-w-[1400px] px-4 pt-4 sm:px-6"
+          className="ib-guest-invite"
           data-testid="guest-invite"
         >
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[16px] border border-brass-500/25 bg-brass-500/[0.07] p-3 sm:p-4">
-            <div className="h-12 w-12 shrink-0 rounded-xl bg-ink-950/60 p-1">
+          <div className="ib-invite-strip">
+            <div className="ib-invite-object">
               <ItemImg item={item} className="h-full w-full" />
             </div>
-            <p className="min-w-0 flex-1 text-[14px] leading-snug text-bone-200">
+            <p className="ib-invite-copy tabular">
               {trial.status === 'sold' ? (
                 <>
                   <b className="font-semibold text-bone-50">{item.name} sold.</b> {money(trial.soldFor ?? 0)} demo credit added.
@@ -51,13 +52,13 @@ export function GuestInvite() {
               )}
               <span className="block text-bone-300">Claim $1,000 demo credit toward your next chest. A banner is optional.</span>
             </p>
-            <div className="flex w-full gap-2 sm:w-auto">
-              <Button size="sm" className="!h-11 flex-1 sm:flex-none" onClick={start} data-testid="claim-credit">
+            <div className="ib-invite-actions">
+              <Button size="md" variant="secondary" onClick={start} data-testid="claim-credit">
                 Claim demo credit
               </Button>
-              <Button size="sm" variant="ghost" className="!h-11" onClick={() => setDismissed(true)}>
+              <button type="button" className="ib-invite-dismiss" onClick={() => setDismissed(true)}>
                 Not now
-              </Button>
+              </button>
             </div>
           </div>
         </motion.div>

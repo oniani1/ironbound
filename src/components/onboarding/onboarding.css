@@ -1,0 +1,37 @@
+.ib-setup-header { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: max(16px, env(safe-area-inset-top)) 32px 12px; border-bottom: 1px solid color-mix(in oklch, var(--color-bone-100) 10%, transparent); }
+.ib-setup-progress { display: flex; align-items: center; gap: 32px; padding: 0; margin: 0; list-style: none; }
+.ib-setup-progress li { position: relative; display: flex; align-items: center; gap: 8px; min-height: 44px; color: var(--color-bone-400); }
+.ib-setup-progress [aria-current="step"] { color: var(--color-bone-100); }
+.ib-setup-line { position: absolute; inset-inline: 0; bottom: -13px; height: 1px; background: var(--color-brass-400); }
+.ib-setup-skip { min-height: 44px; border: 0; padding: 0 4px; background: none; color: var(--color-bone-400); }
+.ib-setup-skip:hover { color: var(--color-bone-100); }
+.ib-setup-receipt { position: relative; display: flex; align-items: center; gap: 16px; width: min(100% - 40px, 880px); padding-block: 16px; margin: 8px auto 0; border-bottom: 1px solid color-mix(in oklch, var(--color-bone-100) 10%, transparent); }
+.ib-setup-receipt p { margin: 0; }
+.ib-setup h1:focus { outline: none; }
+.ib-setup .ib-arms-layout { margin-top: 16px; }
+.ib-setup .ib-arms-layout .ib-step-footer { margin-top: 4px; }
+.ib-guest-invite { width: min(100% - 40px, 1248px); margin-inline: auto; }
+.ib-invite-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding-block: 16px; border-bottom: 1px solid color-mix(in oklch, var(--color-bone-100) 10%, transparent); }
+.ib-invite-object { width: 40px; height: 48px; flex-shrink: 0; }
+.ib-invite-copy { flex: 1; min-width: 180px; margin: 0; color: var(--color-bone-200); font-size: 13px; line-height: 1.6; }
+.ib-invite-actions { display: flex; align-items: center; gap: 20px; }
+.ib-invite-dismiss { min-height: 44px; border: 0; padding: 0; background: none; color: var(--color-bone-400); font: inherit; font-size: 13px; text-underline-offset: 4px; }
+.ib-invite-dismiss:hover { color: var(--color-bone-100); text-decoration: underline; }
+@media (min-width: 768px) {
+  .ib-guest-invite { width: min(100% - 96px, 1248px); }
+  .ib-setup-receipt { padding-block: 12px; }
+  .ib-setup .ib-step { padding-block: 20px 32px; }
+  .ib-setup .ib-step-top { margin-bottom: 8px; }
+  .ib-setup .ib-arms-layout { margin-top: 12px; }
+  .ib-setup .ib-arms-controls { gap: 8px; }
+  .ib-setup .ib-ordinary { min-height: 80px !important; padding-block: 8px; gap: 6px; }
+  .ib-setup .ib-arms-picker legend { margin-bottom: 8px; }
+}
+@media (max-width: 767px) {
+  .ib-setup-header { gap: 8px; padding-inline: 20px; }
+  .ib-setup-progress { gap: 16px; }
+  .ib-setup-progress li { gap: 6px; }
+  .ib-setup-header > svg { width: 24px; }
+  .ib-invite-actions { width: 100%; justify-content: space-between; }
+  .ib-invite-actions > button:first-child { flex: 1; }
+}
