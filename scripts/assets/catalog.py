@@ -334,6 +334,59 @@ def orientation(rgba, category, oid=0):
     return 90 if left >= right else -90
 
 
+# Kabuto photographed on a pale wooden cross stand.
+STAND_IDS = {27587}
+
+
+def strip_post(rgba):
+    """Removes a wooden cross stand from a kabuto photo. The post is found under the first
+    narrow neck below the helmet and followed up to where it meets the brim; the image is
+    cut straight across there, so the helmet ends cleanly at its brim."""
+    a = np.asarray(rgba).copy()
+    h, w = a.shape[:2]
+    alpha = a[..., 3] > 40
+    widths = alpha.sum(axis=1)
+    if widths.max() == 0:
+        return rgba
+    rgb = a[..., :3].astype(np.int16)
+    run = max(4, h // 50)
+    narrow = (widths > 0) & (widths < widths.max() * 0.22)
+    cut = next((y for y in range(h // 2, h - run) if narrow[y:y + run].all()), None)
+    if cut is None or h - cut < h * 0.05:
+        return rgba
+    rows = slice(cut, cut + run)
+    # The post's columns: the longest run that stays opaque through the neck rows.
+    solid = alpha[rows].mean(axis=0) > 0.8
+    best, x = (0, -1), 0
+    while x < w:
+        if solid[x]:
+            end = x
+            while end + 1 < w and solid[end + 1]:
+                end += 1
+            if end - x > best[1] - best[0]:
+                best = (x, end)
+            x = end + 1
+        else:
+            x += 1
+    if best[1] - best[0] < 4:
+        return rgba
+    x0, x1 = best[0], best[1] + 1
+    # Follow the post up while its columns stay warm, mid to light wood.
+    top = cut
+    for y in range(cut - 1, max(0, cut - int(h * 0.35)), -1):
+        seg = rgb[y, x0:x1]
+        lum = (0.299 * seg[:, 0] + 0.587 * seg[:, 1] + 0.114 * seg[:, 2]) / 255
+        warm = seg[:, 0] - seg[:, 2]
+        wood = alpha[y, x0:x1] & (lum > 0.33) & (warm > 15) & (warm < 95)
+        if wood.mean() < 0.6:
+            break
+        top = y
+    a[top:, :, 3] = 0
+    im = Image.fromarray(a, "RGBA")
+    bbox = im.getbbox()
+    return im.crop(bbox) if bbox else im
+
+
 def strip_stand(rgba):
     """Removes a museum display pole under a helmet: thin rows at the bottom are cleared."""
     a = np.asarray(rgba).copy()
@@ -393,6 +446,8 @@ def main():
         rgba = Image.open(cut_path).convert("RGBA")
         if cat in ("helmet", "armor"):
             rgba = strip_stand(rgba)
+        if oid in STAND_IDS:
+            rgba = strip_post(rgba)
         rot = orientation(rgba, cat, oid)
         if rot:
             # Bake the rotation in, so every consumer gets an upright image. PIL rotates counter-clockwise.
