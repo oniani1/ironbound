@@ -7,7 +7,7 @@ export const CHESTS: Chest[] = [
     id: 'squire',
     name: "Squire's Coffer",
     epithet: 'Relics of the field',
-    tagline: 'Arrowheads, spurs and camp blades, with a long shot at a knight’s sword.',
+    tagline: 'Arrowheads, spurs and new camp steel, with a long shot at a knight’s sword.',
     price: 50,
     buyback: 0.85,
     theme: { wood: '#e6d2bc', woodSat: 0.45, woodGain: 1.45, metal: '#8d9298', metalness: 0.8, roughness: 1, glow: '#ffb35c', form: 'coffer' },
@@ -24,7 +24,7 @@ export const CHESTS: Chest[] = [
     id: 'knight',
     name: "Knight's Chest",
     epithet: 'Steel that saw service',
-    tagline: 'Daggers, axes and sword guards, and a real chance at a blade worth thousands.',
+    tagline: 'Daggers, axes, new helms and trainers, and a real chance at a blade worth thousands.',
     price: 100,
     buyback: 0.88,
     theme: { wood: '#d2a478', woodSat: 0.85, woodGain: 1.25, metal: '#e4e9ef', metalness: 0.95, roughness: 0.55, glow: '#ffcf8a', form: 'strongbox' },
@@ -60,7 +60,7 @@ export const CHESTS: Chest[] = [
     id: 'warlord',
     name: "Warlord's Hoard",
     epithet: 'Arms of captains',
-    tagline: 'Rapiers, sabres, helmets and shields. Every pull is a wall piece.',
+    tagline: 'Rapiers, Albion swords, helmets and shields. Every pull is a wall piece.',
     price: 1000,
     buyback: 0.9,
     theme: { wood: '#4a4038', woodSat: 0.25, woodGain: 0.75, woodRough: 0.85, metal: '#d4924a', metalness: 1, roughness: 0.5, glow: '#ffb347', ornament: 'spikes', form: 'hoard' },
@@ -77,7 +77,7 @@ export const CHESTS: Chest[] = [
     id: 'king',
     name: "King's Reliquary",
     epithet: 'Museum grade',
-    tagline: 'Armor, helmets and swords fit for a royal armory. Grails up to $1.2M.',
+    tagline: 'Antique armor, signed katana and made-to-measure harness. Grails up to $1.2M.',
     price: 5000,
     buyback: 0.92,
     theme: { wood: '#b8323a', woodSat: 1.15, woodGain: 0.95, woodRough: 0.6, metal: '#ffd884', metalness: 1, roughness: 0.32, glow: '#ffe1a3', ornament: 'crown', form: 'reliquary' },
@@ -104,7 +104,7 @@ export const CHESTS: Chest[] = [
 ]
 
 /** The item every new player receives from the trial chest. */
-export const TRIAL_ITEM_ID = 'fencing-feder-27910'
+export const TRIAL_ITEM_ID = 'regenyei-standard-feder'
 
 export const CHEST_BY_ID = Object.fromEntries(CHESTS.map((c) => [c.id, c])) as Record<string, Chest>
 

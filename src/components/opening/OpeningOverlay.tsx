@@ -30,6 +30,7 @@ const CATEGORY_CLUE: Record<string, string> = {
   helmet: 'A helm',
   shield: 'A shield',
   armor: 'Armor',
+  crossbow: 'A crossbow',
   fitting: 'A fitting',
 }
 
@@ -513,7 +514,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         <AnimatePresence>
           {showClues && (
             <motion.div key="clues" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-display text-[19px] italic text-bone-50 [text-shadow:0_2px_14px_oklch(0%_0_0/.9)] sm:text-[21px]" exit={{ opacity: 0, transition: { duration: 0.2 } }}>
-              {[CATEGORY_CLUE[first.item.category] ?? 'An object', first.item.provenance === 'forged' ? 'Master-forged' : shortEra(first.item.era), first.item.origin].map((c, i) => (
+              {[CATEGORY_CLUE[first.item.category] ?? 'An object', first.item.provenance === 'forged' ? 'New work' : shortEra(first.item.era), first.item.origin].map((c, i) => (
                 <motion.span
                   key={c + i}
                   className="flex items-center gap-3"

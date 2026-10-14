@@ -1,3 +1,5 @@
+import type { Item } from '../types'
+
 const usd0 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 const usd2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
@@ -40,4 +42,13 @@ export function shortEra(era: string): string {
   e = e.replace(/^Blade,?\s*/i, '').replace(/^probably\s+/i, '').replace(/^possibly\s+/i, '')
   e = e.replace(/^dated\b/i, 'Dated')
   return e.charAt(0).toUpperCase() + e.slice(1)
+}
+
+/** One line on where a piece comes from: era and origin for antiques, maker for new work. */
+export function provenanceLine(item: Pick<Item, 'provenance' | 'era' | 'origin' | 'maker'>): string {
+  return item.provenance === 'antique' ? `${shortEra(item.era)} · ${item.origin} · Antique, authenticated` : `New · ${item.maker ?? 'Workshop'} · ${item.origin}`
+}
+
+export function resaleLabel(r: Item['resale']): string {
+  return r === 'strong' ? 'Strong resale' : r === 'medium' ? 'Steady resale' : 'Low resale'
 }

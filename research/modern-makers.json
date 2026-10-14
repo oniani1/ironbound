@@ -1,0 +1,1549 @@
+{
+  "makers": [
+    {
+      "id": "windlass-steelcrafts",
+      "name": "Windlass Steelcrafts",
+      "country": "India",
+      "city": "Dehradun",
+      "founded": 1943,
+      "specialty": "Production swords, military dress blades and historical replicas.",
+      "priceRange": "$50 to $380",
+      "reputation": "Has supplied kukris to British Gurkha regiments since 1943.",
+      "resale": "low",
+      "website": "https://windlass.com/"
+    },
+    {
+      "id": "cold-steel",
+      "name": "Cold Steel",
+      "country": "United States",
+      "city": null,
+      "founded": 1980,
+      "specialty": "Production swords, spears and axes made by overseas suppliers.",
+      "priceRange": "$45 to $170",
+      "reputation": "Its historical weapons include designs developed with Dave Baker and Rich McDonald.",
+      "resale": "low",
+      "website": "https://www.coldsteel.com/"
+    },
+    {
+      "id": "deepeeka",
+      "name": "Deepeeka",
+      "country": "India",
+      "city": null,
+      "founded": null,
+      "specialty": "Budget historical weapons, shields and reenactment armour.",
+      "priceRange": "$90 to $226",
+      "reputation": "Kult of Athena is its US distributor and carries replicas from antiquity through the modern period.",
+      "resale": "low",
+      "website": "https://deepeeka.com/"
+    },
+    {
+      "id": "hanwei",
+      "name": "Hanwei",
+      "country": "China",
+      "city": null,
+      "founded": null,
+      "specialty": "Production Japanese swords and recent European sword models.",
+      "priceRange": "$240 to $325",
+      "reputation": "Paul Chen's sword brand is distributed by CAS Iberia; production changed after the original factory closed in 2025.",
+      "resale": "medium",
+      "website": "https://casiberia.com/"
+    },
+    {
+      "id": "regenyei-armory",
+      "name": "Regenyei Armory",
+      "country": "Hungary",
+      "city": "Töltéstava",
+      "founded": null,
+      "specialty": "HEMA training swords and historical European sword replicas.",
+      "priceRange": "$313 to $638",
+      "reputation": "Its Standard Feder is made for HEMA clubs and tournaments.",
+      "resale": "medium",
+      "website": "https://regenyei.com/"
+    },
+    {
+      "id": "darksword-armory",
+      "name": "Darksword Armory",
+      "country": "Canada",
+      "city": null,
+      "founded": null,
+      "specialty": "European swords forged from 5160 carbon steel.",
+      "priceRange": "$690 to $850",
+      "reputation": "Lists hand-forged Canadian swords based on museum examples.",
+      "resale": "medium",
+      "website": "https://www.darksword-armory.com/"
+    },
+    {
+      "id": "albion-swords",
+      "name": "Albion Swords",
+      "country": "United States",
+      "city": "New Glarus",
+      "founded": 1998,
+      "specialty": "European swords designed from museum research.",
+      "priceRange": "$633 to $1,899",
+      "reputation": "Works with sword researcher Peter Johnsson and produced the Royal Armouries I:33 practice sword.",
+      "resale": "strong",
+      "website": "https://albion-swords.com/"
+    },
+    {
+      "id": "arms-and-armor",
+      "name": "Arms & Armor",
+      "country": "United States",
+      "city": "Minneapolis",
+      "founded": 1982,
+      "specialty": "Historical European swords, daggers and polearms.",
+      "priceRange": "$225 to $1,075",
+      "reputation": "Makes replicas based on originals in collections including the Wallace Collection.",
+      "resale": "medium",
+      "website": "https://www.arms-n-armor.com/"
+    },
+    {
+      "id": "tods-workshop",
+      "name": "Tod's Workshop / Tod Cutler",
+      "country": "United Kingdom",
+      "city": null,
+      "founded": 2001,
+      "specialty": "Custom historical crossbows and daggers, plus production Cutler replicas.",
+      "priceRange": "$703 to $9,950",
+      "reputation": "Publishes historical weapon experiments and makes replicas from museum originals.",
+      "resale": "medium",
+      "website": "https://todsworkshop.com/"
+    },
+    {
+      "id": "armstreet",
+      "name": "ArmStreet",
+      "country": "Ukraine",
+      "city": null,
+      "founded": null,
+      "specialty": "Made-to-measure armour and historical costume equipment.",
+      "priceRange": "$999 to $7,299",
+      "reputation": "Its armour catalog targets SCA, WMA and reenactment use.",
+      "resale": "medium",
+      "website": "https://armstreet.com/"
+    },
+    {
+      "id": "steel-mastery",
+      "name": "Steel Mastery",
+      "country": "Ukraine",
+      "city": "Kyiv",
+      "founded": 2001,
+      "specialty": "Custom plate armour and full historical harnesses.",
+      "priceRange": "$6,157 to $20,151",
+      "reputation": "Its Kyiv workshop lists made-to-measure armour and separate interior display suits.",
+      "resale": "low",
+      "website": "https://steel-mastery.com/"
+    },
+    {
+      "id": "akamatsu-taro",
+      "name": "Akamatsu Taro / Kimura Swordsmith Workshop",
+      "country": "Japan",
+      "city": "Yatsushiro",
+      "founded": null,
+      "specialty": "Signed shinsakuto in self-smelted steel, including Kiyomaro-style katana.",
+      "priceRange": "$10,098 to $15,777",
+      "reputation": "Kanetsugu and Kanemitsu are named contemporary smiths with sword exhibition awards.",
+      "resale": "medium",
+      "website": "https://japanesesword.net/products/authentic-japanese-sword-katana-kanetsugu-nbsk-shinsakuto-certificate-tozando"
+    },
+    {
+      "id": "lord-of-battles",
+      "name": "Lord of Battles",
+      "country": "India",
+      "city": "Dehradun",
+      "founded": 2006,
+      "specialty": "Production armour, shields and reenactment equipment.",
+      "priceRange": "$50 to $200",
+      "reputation": "Supplies historical armour and costume equipment to film and television productions.",
+      "resale": "low",
+      "website": "https://lordofbattles.com/"
+    }
+  ],
+  "items": [
+    {
+      "id": "albion-alexandria",
+      "makerId": "albion-swords",
+      "name": "The Alexandria",
+      "category": "sword",
+      "priceUsd": 1582,
+      "priceSource": "https://albion-swords.com/product/the-alexandria/",
+      "length": "111 cm",
+      "weight": "1.68 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A broad-bladed longsword based on fifteenth-century swords sent to Alexandria.",
+      "image": {
+        "url": "https://live.staticflickr.com/2856/9823763053_3a12970dff_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Alexandria_Medieval_Sword_(9823763053).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-archduke",
+      "makerId": "albion-swords",
+      "name": "The ArchDuke",
+      "category": "sword",
+      "priceUsd": 1783,
+      "priceSource": "https://albion-swords.com/product/the-archduke/",
+      "length": "140 cm",
+      "weight": "2.4 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A two-handed sword with a double-fullered blade and a long grip.",
+      "image": {
+        "url": "https://live.staticflickr.com/5199/14226095099_5e7e120d67_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Arch_Duke_Two-handed_Medieval_Sword_01_(14226095099)_(II).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-bayeux",
+      "makerId": "albion-swords",
+      "name": "The Bayeux",
+      "category": "sword",
+      "priceUsd": 1012,
+      "priceSource": "https://albion-swords.com/product/the-bayeux/",
+      "length": "92.27 cm",
+      "weight": "1.12 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A single-handed Type X sword with a broad blade and a long fuller.",
+      "image": {
+        "url": "https://live.staticflickr.com/6193/6092759238_b76dd65bc2_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Bayeux_Medieval_Sword_2_(6092759238).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-burgundian",
+      "makerId": "albion-swords",
+      "name": "The Burgundian",
+      "category": "sword",
+      "priceUsd": 1076,
+      "priceSource": "https://albion-swords.com/product/the-burgundian/",
+      "length": "99.4 cm",
+      "weight": "1.21 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A Type XVIII arming sword with a sculpted guard and scent-stopper pommel.",
+      "image": {
+        "url": "https://live.staticflickr.com/6191/6092254281_9e07a768a7_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Burgundian_Medieval_Sword_2_(6092254281).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-crecy",
+      "makerId": "albion-swords",
+      "name": "The Crecy",
+      "category": "sword",
+      "priceUsd": 1012,
+      "priceSource": "https://albion-swords.com/product/the-crecy/",
+      "length": "113.7 cm",
+      "weight": "1.39 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A Type XVIa war sword with a tapered blade and a two-hand grip.",
+      "image": {
+        "url": "https://live.staticflickr.com/6204/6091941691_f96931e688_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Crecy_Medieval_Sword_4_(6091941691).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-duke",
+      "makerId": "albion-swords",
+      "name": "The Duke",
+      "category": "sword",
+      "priceUsd": 1248,
+      "priceSource": "https://albion-swords.com/product/the-duke/",
+      "length": "117 cm",
+      "weight": "1.47 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A Type XIIIa war sword with a wide cutting blade and wheel pommel.",
+      "image": {
+        "url": "https://live.staticflickr.com/6081/6092497042_f1c7303ef2_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Duke_Medieval_Sword_1_(6092497042).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-doge",
+      "makerId": "albion-swords",
+      "name": "The Doge",
+      "category": "sword",
+      "priceUsd": 1518,
+      "priceSource": "https://albion-swords.com/product/the-doge/",
+      "length": "102.9 cm",
+      "weight": "1.1 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A Venetian-style Type XIX sword with a ricasso and finger spur.",
+      "image": {
+        "url": "https://live.staticflickr.com/6186/6092593689_efd744007c_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Doge_Medieval_Sword_1_(6092593689).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-hospitaller",
+      "makerId": "albion-swords",
+      "name": "The Hospitaller",
+      "category": "sword",
+      "priceUsd": 966,
+      "priceSource": "https://albion-swords.com/product/the-hospitaller/",
+      "length": "102 cm",
+      "weight": "1.2 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A long, single-handed Type XI sword based on a Royal Armouries example.",
+      "image": {
+        "url": "https://live.staticflickr.com/6194/6092737619_f2822712e9_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Hospitaller_Medieval_Sword_1_(6092737619)_(II).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-huskarl",
+      "makerId": "albion-swords",
+      "name": "The Huskarl",
+      "category": "sword",
+      "priceUsd": 1771,
+      "priceSource": "https://albion-swords.com/product/the-hersir/",
+      "length": "94 cm",
+      "weight": "1.22 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A Viking sword with a lobed pommel separated by silver wire.",
+      "image": {
+        "url": "https://live.staticflickr.com/6061/6094601852_00cd0ab4c8_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Huskarl_Viking_Sword_4_(6094601852)_(cropped).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-kern",
+      "makerId": "albion-swords",
+      "name": "The Kern",
+      "category": "sword",
+      "priceUsd": 1518,
+      "priceSource": "https://albion-swords.com/product/the-kern/",
+      "length": "101.6 cm",
+      "weight": "0.865 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "An Irish-style Type XIX sword with a ring pommel and curved guard.",
+      "image": {
+        "url": "https://live.staticflickr.com/7094/7312940144_1e61ec33a3_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Kern_Medieval_Sword_04_(7312940144).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-knight",
+      "makerId": "albion-swords",
+      "name": "The Knight",
+      "category": "sword",
+      "priceUsd": 1012,
+      "priceSource": "https://albion-swords.com/product/the-knight/",
+      "length": "96.8 cm",
+      "weight": "1.2 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A Type XII arming sword with a wheel pommel and a straight guard.",
+      "image": {
+        "url": "https://live.staticflickr.com/6206/6093640326_4ff4b74e96_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Knight_Medieval_Sword_3_(6093640326).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-mercenary",
+      "makerId": "albion-swords",
+      "name": "The Mercenary",
+      "category": "sword",
+      "priceUsd": 1012,
+      "priceSource": "https://albion-swords.com/product/the-mercenary/",
+      "length": "108 cm",
+      "weight": "1.35 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A compact Type XVa longsword with a stiff, sharply tapered blade.",
+      "image": {
+        "url": "https://live.staticflickr.com/6073/6092611904_c4dd905c0b_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Mercenary_Medieval_Sword_2_(6092611904).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-principe",
+      "makerId": "albion-swords",
+      "name": "The Principe",
+      "category": "sword",
+      "priceUsd": 1645,
+      "priceSource": "https://albion-swords.com/product/the-principe/",
+      "length": "116.8 cm",
+      "weight": "1.8 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "A wide-bladed Italian-style longsword with a curved guard and extended grip.",
+      "image": {
+        "url": "https://live.staticflickr.com/7312/9824156644_48469d5422_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Principe_Medieval_sword_(9824156644).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-royal-armouries-i33",
+      "makerId": "albion-swords",
+      "name": "Royal Armouries I:33 Practice Sword",
+      "category": "sword",
+      "priceUsd": 633,
+      "priceSource": "https://albion-swords.com/product/the-royal-armouries-i33-practice-sword/",
+      "length": null,
+      "weight": null,
+      "materials": "80CrV2 steel, leather-wrapped grip",
+      "blurb": "A blunt practice sword developed with the Royal Armouries for sword-and-buckler fencing.",
+      "image": {
+        "url": "https://live.staticflickr.com/3716/13423914254_6bc1992777_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Maestro_Line_I33_(13423914254).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "hanwei-agincourt",
+      "makerId": "hanwei",
+      "name": "Agincourt Sword",
+      "category": "sword",
+      "priceUsd": 239.99,
+      "priceSource": "https://www.kultofathena.com/product/hanwei-agincourt-sword/",
+      "length": "90.2 cm",
+      "weight": "1.15 kg",
+      "materials": "carbon steel, leather-wrapped wood grip",
+      "blurb": "An English-style arming sword with a steel guard and leather-covered scabbard.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Hanwei-Agincourt.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Hanwei-Agincourt.jpg",
+        "author": "Nicubunu",
+        "license": "CC BY-SA 3.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "hanwei-river-witham",
+      "makerId": "hanwei",
+      "name": "River Witham Sword",
+      "category": "sword",
+      "priceUsd": 249.99,
+      "priceSource": "https://www.kultofathena.com/product/hanwei-river-witham-sword/",
+      "length": "97.2 cm",
+      "weight": "1.53 kg",
+      "materials": "1566 carbon steel, stainless steel fittings, leather grip",
+      "blurb": "An arming sword with a blade inscription copied from the River Witham find.",
+      "image": {
+        "url": "https://live.staticflickr.com/6065/6093837284_f34c4dc5e4_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Reeve_Medieval_Sword_4_(6093837284).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "hanwei-practical-katana",
+      "makerId": "hanwei",
+      "name": "Practical Katana",
+      "category": "sword",
+      "priceUsd": 324.99,
+      "priceSource": "https://www.kultofathena.com/product/hanwei-practical-katana/",
+      "length": "100.6 cm",
+      "weight": "1.05 kg",
+      "materials": "1566 carbon steel, cotton-wrapped grip",
+      "blurb": "A differentially hardened katana with a removable handle and a black lacquered scabbard.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Antique_Japanese_(samurai)_katana.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Antique_Japanese_(samurai)_katana.jpg",
+        "author": "Samuraiantiqueworld",
+        "license": "CC BY-SA 3.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "regenyei-standard-feder",
+      "makerId": "regenyei-armory",
+      "name": "Standard Feder",
+      "category": "sword",
+      "priceUsd": 313,
+      "priceSource": "https://regenyei.com/product/standard-feder/",
+      "length": "133 cm",
+      "weight": "1.33 to 1.46 kg",
+      "materials": "51CrV4 spring steel",
+      "blurb": "A blunt longsword trainer with a folded tip and a protective schilt.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Federschwert.JPG",
+        "page": "https://commons.wikimedia.org/wiki/File:Federschwert.JPG",
+        "author": "Wellcrafted",
+        "license": "CC BY-SA 3.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "regenyei-harbinger",
+      "makerId": "regenyei-armory",
+      "name": "LS 02 Harbinger",
+      "category": "sword",
+      "priceUsd": 638,
+      "priceSource": "https://regenyei.com/product/longsword-02/",
+      "length": "115.5 cm",
+      "weight": "1.67 kg",
+      "materials": "51CrV4 steel, leather and wire grip",
+      "blurb": "A Type XVIIIc longsword with a broad blade and a diamond pommel.",
+      "image": {
+        "url": "https://live.staticflickr.com/6073/6092146663_3bfd472606_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Sempach_Medieval_Sword_5_(6092146663).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "darksword-german-longsword-1337",
+      "makerId": "darksword-armory",
+      "name": "The German Longsword (1337)",
+      "category": "sword",
+      "priceUsd": 690,
+      "priceSource": "https://www.darksword-armory.com/medieval-weapon/medieval-swords/two-handed-german-longsword-1337/",
+      "length": "129 cm",
+      "weight": "1.65 kg",
+      "materials": "5160 carbon steel",
+      "blurb": "A long German-style sword with a tapered blade and a scent-stopper pommel.",
+      "image": {
+        "url": "https://live.staticflickr.com/6069/6091969173_e660fd2d31_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Earl_Medieval_Sword_06_(6091969173).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "windlass-arbedo",
+      "makerId": "windlass-steelcrafts",
+      "name": "Signature Series Arbedo Sword",
+      "category": "sword",
+      "priceUsd": 349.95,
+      "priceSource": "https://www.kultofathena.com/product/windlass-signature-series-arbedo-sword/",
+      "length": "100.6 cm",
+      "weight": "1.35 kg",
+      "materials": "1075 carbon steel, leather-wrapped wood grip",
+      "blurb": "A hand-and-a-half sword with a wheel pommel and a leather-covered wood scabbard.",
+      "image": {
+        "url": "https://live.staticflickr.com/6195/6092575982_3a48c6fd1e_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Gallowglass_Medieval_Sword_3_(6092575982).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "windlass-towton",
+      "makerId": "windlass-steelcrafts",
+      "name": "Signature Series Towton Sword",
+      "category": "sword",
+      "priceUsd": 379.95,
+      "priceSource": "https://www.kultofathena.com/product/windlass-signature-series-towton-sword/",
+      "length": "113 cm",
+      "weight": "1.28 kg",
+      "materials": "1075 carbon steel, leather-wrapped wood grip",
+      "blurb": "A tapered fifteenth-century-style sword with a scent-stopper pommel.",
+      "image": {
+        "url": "https://live.staticflickr.com/6185/6092708422_82a799ab2b_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Talhoffer_Medieval_Sword_05_(6092708422).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-roman-mainz-gladius",
+      "makerId": "deepeeka",
+      "name": "Roman Mainz Gladius, Red Scabbard",
+      "category": "sword",
+      "priceUsd": 149.99,
+      "priceSource": "https://www.kultofathena.com/product/roman-mainz-gladius/",
+      "length": "72.4 cm",
+      "weight": "0.78 kg",
+      "materials": "C60 carbon steel, wood grip, brass scabbard fittings",
+      "blurb": "An unsharpened Roman short sword supplied with a red leather-covered scabbard.",
+      "image": {
+        "url": "https://live.staticflickr.com/6188/6094198768_4206333446_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Augustus_Roman_Gladius_2_(6094198768).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-fulham-gladius",
+      "makerId": "deepeeka",
+      "name": "Fulham Gladius Sword with Simple Scabbard",
+      "category": "sword",
+      "priceUsd": 131.99,
+      "priceSource": "https://www.kultofathena.com/product/fulham-gladius-sword-ah2010/",
+      "length": "72.1 cm",
+      "weight": "0.7 kg",
+      "materials": "C60 carbon steel, bone grip, hardwood fittings",
+      "blurb": "A Roman short sword with an unsharpened blade and a bone grip.",
+      "image": {
+        "url": "https://live.staticflickr.com/6081/6093710695_bb3b937953_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Pedite_Roman_Gladius_2_(6093710695)_(II).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-late-roman-spatha",
+      "makerId": "deepeeka",
+      "name": "Late Roman Spatha Sword",
+      "category": "sword",
+      "priceUsd": 139.99,
+      "priceSource": "https://www.kultofathena.com/product/late-roman-spatha-sword/",
+      "length": "97.8 cm",
+      "weight": "1.2 kg",
+      "materials": "C60 carbon steel, bone grip, wood fittings",
+      "blurb": "A late Roman cavalry sword with a red leather-covered wood scabbard.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/4/4f/The_Decurio_02.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:The_Decurio_02.jpg",
+        "author": "Albion Europe ApS",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "akamatsu-taro-kanemitsu-2025-752",
+      "makerId": "akamatsu-taro",
+      "name": "Kanemitsu Katana (75.2 cm, 2025)",
+      "category": "sword",
+      "priceUsd": 11360,
+      "priceSource": "https://japanesesword.net/products/authentic-japanese-sword-katana-kanemitsu-nbsk-shinsakuto-certificate-tozando-2",
+      "length": "75.2 cm blade",
+      "weight": "1.34 kg",
+      "materials": "self-smelted steel, wood grip, lacquered wood saya",
+      "blurb": "A signed July 2025 katana by Kanemitsu supplied in dragon-themed mounts.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/sfsbx11s1.JPG",
+        "page": "https://commons.wikimedia.org/wiki/File:Blade_and_Mounting_for_a_Sword_(Katana)_MET_sfsbx11s1.jpeg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "akamatsu-taro-kanetsugu-2025-744",
+      "makerId": "akamatsu-taro",
+      "name": "Kanetsugu Katana (74.4 cm, 2025)",
+      "category": "sword",
+      "priceUsd": 10098,
+      "priceSource": "https://japanesesword.net/products/authentic-japanese-sword-katana-kanetsugu-nbsk-shinsakuto-certificate-tozando",
+      "length": "74.4 cm blade",
+      "weight": "1.02 kg",
+      "materials": "self-smelted steel, wrapped wood grip",
+      "blurb": "A signed July 2025 katana by Kanetsugu supplied in purple-wrapped mounts.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/sfsbx11s2.JPG",
+        "page": "https://commons.wikimedia.org/wiki/File:Blade_and_Mounting_for_a_Sword_(Katana)_MET_sfsbx11s2.jpeg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "akamatsu-taro-kanemitsu-2026-774",
+      "makerId": "akamatsu-taro",
+      "name": "Kanemitsu Katana (77.4 cm, 2026)",
+      "category": "sword",
+      "priceUsd": 15777,
+      "priceSource": "https://japanesesword.net/products/authentic-japanese-sword-katana-kanemitsu-nbsk-shinsakuto-certificate-tozando-1",
+      "length": "77.4 cm blade",
+      "weight": "1.06 kg blade only",
+      "materials": "self-smelted steel, silver habaki, shirasaya",
+      "blurb": "A signed May 2026 katana by Kanemitsu supplied in a plain wood shirasaya.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/DP372017.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Blade_for_a_Sword_(Katana)_MET_DP372017.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "akamatsu-taro-kanetsugu-2026-736",
+      "makerId": "akamatsu-taro",
+      "name": "Kanetsugu Katana (73.6 cm, 2026)",
+      "category": "sword",
+      "priceUsd": 11360,
+      "priceSource": "https://japanesesword.net/products/authentic-japanese-katana-akamatsu-taro-kanetsugu-nbsk-shinsakuto-certificate-tozando",
+      "length": "73.6 cm blade",
+      "weight": "0.96 kg blade only",
+      "materials": "self-smelted steel, wood shirasaya",
+      "blurb": "A signed April 2026 katana by Kanetsugu supplied in a plain wood shirasaya.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/DP368606.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Blade_for_a_Sword_(Katana)_MET_DP368606.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "akamatsu-taro-kanetsugu-2025-764",
+      "makerId": "akamatsu-taro",
+      "name": "Kanetsugu Katana (76.4 cm, 2025)",
+      "category": "sword",
+      "priceUsd": 13253,
+      "priceSource": "https://japanesesword.net/products/authentic-katana-for-sale-akamatsu-taro-kanetsugu-nbsk-certificate-tozando",
+      "length": "76.4 cm blade",
+      "weight": "0.99 kg blade only",
+      "materials": "self-smelted steel, silver habaki, wood shirasaya",
+      "blurb": "A signed June 2025 katana by Kanetsugu supplied with a silver habaki and shirasaya.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/DP162177.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Blade_for_a_Sword_(Katana)_MET_DP162177.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tods-english-rondel",
+      "makerId": "tods-workshop",
+      "name": "14thC English Rondel Dagger",
+      "category": "dagger",
+      "priceUsd": 703,
+      "priceSource": "https://todsworkshop.com/products/14thc-english-rondel/",
+      "length": "36 cm",
+      "weight": null,
+      "materials": "EN45 steel, bronze, boxwood grip",
+      "blurb": "A single-edged rondel dagger based on a fourteenth-century Thames find.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/63973.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Roundel_Dagger_MET_63973.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tods-burgundian-rondel",
+      "makerId": "tods-workshop",
+      "name": "Burgundian Rondel Dagger, Rothenburg Collection",
+      "category": "dagger",
+      "priceUsd": 1592,
+      "priceSource": "https://todsworkshop.com/products/rothenberg-medieval-rondel-dagger-in-gold-and-silver/",
+      "length": "48 cm",
+      "weight": null,
+      "materials": "EN45 steel, bronze hilt",
+      "blurb": "A heavy rondel dagger copied from a surviving example in Rothenburg.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/1/12/Rondel_dagger_leeds.JPG",
+        "page": "https://commons.wikimedia.org/wiki/File:Rondel_dagger_leeds.JPG",
+        "author": "Geni",
+        "license": "CC BY-SA 4.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tods-dance-of-death",
+      "makerId": "tods-workshop",
+      "name": "Dance of Death Dagger",
+      "category": "dagger",
+      "priceUsd": 9950,
+      "priceSource": "https://todsworkshop.com/products/dance-of-death-dagger-order-here-2/?v=1",
+      "length": "40 cm dagger; 45 cm with sheath",
+      "weight": "0.975 kg set",
+      "materials": "EN45 carbon steel, gilded bronze, ebony",
+      "blurb": "A Swiss-style dagger with a cast Dance of Death scene on its sheath.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/DP273705.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Swiss_Dagger_with_Sheath,_Bodkin,_and_By-Knife_MET_DP273705.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "cold-steel-large-parrying-dagger",
+      "makerId": "cold-steel",
+      "name": "Large Parrying Dagger",
+      "category": "dagger",
+      "priceUsd": 169.99,
+      "priceSource": "https://www.kultofathena.com/product/cold-steel-large-parrying-dagger/",
+      "length": "48.3 cm",
+      "weight": "0.72 kg",
+      "materials": "1055 carbon steel, wire-wrapped grip",
+      "blurb": "A parrying dagger with downturned quillons and a side ring.",
+      "image": {
+        "url": "https://openaccess-cdn.clevelandart.org/1916.1657/1916.1657_print.jpg",
+        "page": "https://clevelandart.org/art/1916.1657",
+        "author": "The Cleveland Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "windlass-primitive-scottish-dirk",
+      "makerId": "windlass-steelcrafts",
+      "name": "Primitive Scottish Dirk",
+      "category": "dagger",
+      "priceUsd": 119.95,
+      "priceSource": "https://www.kultofathena.com/product/primitive-scottish-dirk/",
+      "length": "49.8 cm",
+      "weight": "0.38 kg",
+      "materials": "carbon steel, hardwood grip",
+      "blurb": "An early-style Scottish dirk with an unsharpened single-edged blade.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Scottish_dirk,_blade_by_Andrew_Boog,_Edinburgh,_c._1795_-_Royal_Ontario_Museum_-_DSC09484.JPG",
+        "page": "https://commons.wikimedia.org/wiki/File:Scottish_dirk,_blade_by_Andrew_Boog,_Edinburgh,_c._1795_-_Royal_Ontario_Museum_-_DSC09484.JPG",
+        "author": "Daderot",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "arms-armor-rondel-dagger",
+      "makerId": "arms-and-armor",
+      "name": "Rondel Dagger",
+      "category": "dagger",
+      "priceUsd": 420,
+      "priceSource": "https://www.arms-n-armor.com/products/rondel-dagger",
+      "length": "42.5 cm",
+      "weight": null,
+      "materials": "steel blade, fluted grip",
+      "blurb": "A single-edged dagger with a hexagonal guard and pommel.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Roundel_dagger,_perhaps_England,_circa_1480_-_Higgins_Armory_Museum_-_DSC05476.JPG",
+        "page": "https://commons.wikimedia.org/wiki/File:Roundel_dagger,_perhaps_England,_circa_1480_-_Higgins_Armory_Museum_-_DSC05476.JPG",
+        "author": "Daderot",
+        "license": "Public domain",
+        "exact": false
+      }
+    },
+    {
+      "id": "arms-armor-burgundian-poleaxe",
+      "makerId": "arms-and-armor",
+      "name": "Burgundian Poleaxe, New Version",
+      "category": "polearm",
+      "priceUsd": 1075,
+      "priceSource": "https://www.arms-n-armor.com/products/burgundian-poleaxe",
+      "length": "188 cm",
+      "weight": "2.38 kg",
+      "materials": "4140 steel, hardwood haft",
+      "blurb": "A poleaxe based on Wallace Collection A925 with steel langets on all four sides.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/14.25.288_002jan2015.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Pollaxe_MET_14.25.288_002jan2015.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "arms-armor-italian-bill",
+      "makerId": "arms-and-armor",
+      "name": "Italian Bill",
+      "category": "polearm",
+      "priceUsd": 950,
+      "priceSource": "https://www.arms-n-armor.com/products/italian-bill",
+      "length": "234 cm",
+      "weight": "2.4 kg",
+      "materials": "steel, wood haft",
+      "blurb": "A hooked sixteenth-century-style bill with a faceted head and long top spike.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/14.25.140_001dec2014.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Bill_MET_14.25.140_001dec2014.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "arms-armor-celtic-spear",
+      "makerId": "arms-and-armor",
+      "name": "Celtic Spear",
+      "category": "polearm",
+      "priceUsd": 225,
+      "priceSource": "https://www.arms-n-armor.com/products/celtic-spear",
+      "length": "173 cm",
+      "weight": "0.64 kg",
+      "materials": "cast steel, ash haft",
+      "blurb": "A leaf-headed spear with a selectively hardened edge on an ash shaft.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/gr/original/DP9071.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Spearhead_MET_DP9071.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "arms-armor-norseman-spear",
+      "makerId": "arms-and-armor",
+      "name": "Norseman Spear",
+      "category": "polearm",
+      "priceUsd": 305,
+      "priceSource": "https://www.arms-n-armor.com/products/norseman-spear",
+      "length": "213 cm",
+      "weight": null,
+      "materials": "steel, wood haft",
+      "blurb": "A long diamond-section spear based on a tenth-century Norwegian example.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/gr/original/DP9075.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Spearhead_MET_DP9075.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "cold-steel-boar-spear",
+      "makerId": "cold-steel",
+      "name": "Boar Hunting Spear",
+      "category": "polearm",
+      "priceUsd": 129.99,
+      "priceSource": "https://www.kultofathena.com/product/cold-steel-boar-hunting-spear/",
+      "length": "209.6 cm",
+      "weight": "1.91 kg",
+      "materials": "SK-5 steel, ash shaft",
+      "blurb": "A broad-bladed boar spear supplied with an ash shaft and a plastic sheath.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/14.25.323_001feb2015.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Boar_Spear_MET_14.25.323_001feb2015.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "windlass-european-spear-head",
+      "makerId": "windlass-steelcrafts",
+      "name": "European Spear Head",
+      "category": "polearm",
+      "priceUsd": 49.95,
+      "priceSource": "https://www.kultofathena.com/product/european-spear-head/",
+      "length": "41.4 cm head only",
+      "weight": "0.45 kg",
+      "materials": "carbon steel",
+      "blurb": "An unsharpened socketed spearhead sold without a shaft.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/gr/original/DP9070.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Spearhead_MET_DP9070.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "cold-steel-viking-hand-axe",
+      "makerId": "cold-steel",
+      "name": "Viking Hand Axe",
+      "category": "axe",
+      "priceUsd": 44.99,
+      "priceSource": "https://www.kultofathena.com/product/cold-steel-viking-hand-axe/",
+      "length": "78.7 cm",
+      "weight": "0.91 kg",
+      "materials": "1065 carbon steel, American hickory",
+      "blurb": "A bearded axe with an upswept point and a hickory haft.",
+      "image": {
+        "url": "https://live.staticflickr.com/7149/6851553343_a756acf2a8_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Axe_(6851553343).jpg",
+        "author": "The Swedish History Museum, Stockholm",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "cold-steel-viking-battle-axe",
+      "makerId": "cold-steel",
+      "name": "Viking Battle Axe",
+      "category": "axe",
+      "priceUsd": 59.99,
+      "priceSource": "https://www.kultofathena.com/product/cold-steel-viking-battle-axe/",
+      "length": "83.8 cm",
+      "weight": "0.97 kg",
+      "materials": "1055 carbon steel, American hickory",
+      "blurb": "A broad-headed axe with a long forward point and a hickory haft.",
+      "image": {
+        "url": "https://live.staticflickr.com/7066/6908985285_5e2d07bd88_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Axe,_broad-bladed_(6908985285).jpg",
+        "author": "The Swedish History Museum, Stockholm",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "cold-steel-viking-great-axe",
+      "makerId": "cold-steel",
+      "name": "Viking Great Axe",
+      "category": "axe",
+      "priceUsd": 169.99,
+      "priceSource": "https://www.kultofathena.com/product/cold-steel-viking-great-axe/",
+      "length": "120.7 cm",
+      "weight": "1.86 kg",
+      "materials": "carbon steel, wood haft",
+      "blurb": "A two-handed axe with a broad hooked cutting edge.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/DaneAxe.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:DaneAxe.jpg",
+        "author": "EricMcHugh",
+        "license": "CC BY-SA 4.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "windlass-viking-throwing-axe",
+      "makerId": "windlass-steelcrafts",
+      "name": "Viking Throwing Axe",
+      "category": "axe",
+      "priceUsd": 49.95,
+      "priceSource": "https://www.kultofathena.com/product/viking-throwing-axe-3/",
+      "length": "51.4 cm",
+      "weight": null,
+      "materials": "1065 carbon steel, hardwood haft",
+      "blurb": "A throwing axe with a blued head engraved with knotwork.",
+      "image": {
+        "url": "https://live.staticflickr.com/7186/6908981377_5e333e93d6_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Axe_(6908981377).jpg",
+        "author": "The Swedish History Museum, Stockholm",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "arms-armor-horsemans-axe",
+      "makerId": "arms-and-armor",
+      "name": "Horseman's Axe",
+      "category": "axe",
+      "priceUsd": 590,
+      "priceSource": "https://www.arms-n-armor.com/products/horseman-axe",
+      "length": "61 cm",
+      "weight": null,
+      "materials": "steel, wood haft",
+      "blurb": "A compact axe with a curved blade and a long rear spike based on a Spanish original.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/DP163747.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Saddle_Axe_MET_DP163747.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-gothic-sallet",
+      "makerId": "deepeeka",
+      "name": "Gothic Sallet with Movable Visor",
+      "category": "helmet",
+      "priceUsd": 125.99,
+      "priceSource": "https://www.kultofathena.com/product/deepeeka-gothic-sallet-with-movable-visor/",
+      "length": null,
+      "weight": "2.52 kg",
+      "materials": "18 gauge steel, brass, leather liner",
+      "blurb": "A sallet with a hinged visor and an adjustable leather liner.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/61902.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Sallet_MET_61902.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-kettle-helm",
+      "makerId": "deepeeka",
+      "name": "Late Medieval Kettle Helm, 16 Gauge",
+      "category": "helmet",
+      "priceUsd": 114.99,
+      "priceSource": "https://www.kultofathena.com/product/late-medieval-kettle-helm-16-gauge/",
+      "length": null,
+      "weight": "2.84 kg",
+      "materials": "16 gauge mild steel, leather liner",
+      "blurb": "A riveted kettle helmet with a wide brim and leather suspension liner.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/DP101950.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:War_Hat_MET_DP101950.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-great-helm",
+      "makerId": "deepeeka",
+      "name": "Great Helm, 14 Gauge",
+      "category": "helmet",
+      "priceUsd": 199.99,
+      "priceSource": "https://www.kultofathena.com/product/great-helm-14-gauge/",
+      "length": null,
+      "weight": "2.98 kg",
+      "materials": "14 gauge steel, brass accents",
+      "blurb": "A great helm with brass fleur-de-lis decoration and an unlined interior.",
+      "image": {
+        "url": "https://www.khm.at/pics/373606/HJRK_B_74_201904_01.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Great_helm_of_Albert_von_Pranckh,_14th_century.jpg",
+        "author": "KHM-Museumsverband",
+        "license": "CC BY 4.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-corinthian-brass",
+      "makerId": "deepeeka",
+      "name": "Greek Corinthian Helm, Brass",
+      "category": "helmet",
+      "priceUsd": 189.99,
+      "priceSource": "https://www.kultofathena.com/product/greek-corinthian-helm-brass/",
+      "length": null,
+      "weight": "1.11 kg",
+      "materials": "18 gauge brass",
+      "blurb": "A Corinthian-style helmet supplied with a padded cotton arming cap.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/gr/original/DP119913.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Bronze_helmet_of_Corinthian_type_MET_DP119913.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-morion",
+      "makerId": "deepeeka",
+      "name": "Combed Morion Helm, 18 Gauge",
+      "category": "helmet",
+      "priceUsd": 89.99,
+      "priceSource": "https://www.kultofathena.com/product/combed-morion-helm-18-gauge-steel/",
+      "length": null,
+      "weight": "1.58 kg",
+      "materials": "18 gauge mild steel, brass studs",
+      "blurb": "A morion with a raised comb, wide brim and unlined interior.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/DP22433.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Comb_Morion_MET_DP22433.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-close-helm",
+      "makerId": "deepeeka",
+      "name": "Close Helm, 18 Gauge",
+      "category": "helmet",
+      "priceUsd": 103.99,
+      "priceSource": "https://www.kultofathena.com/product/close-helm-18-gauge/",
+      "length": null,
+      "weight": null,
+      "materials": "18 gauge steel",
+      "blurb": "A steel close helmet reproducing a Renaissance form.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/DP160171.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Armet_MET_DP160171.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "armstreet-knight-of-fortune-bascinet",
+      "makerId": "armstreet",
+      "name": "Knight of Fortune Bascinet",
+      "category": "helmet",
+      "priceUsd": 1259,
+      "priceSource": "https://armstreet.com/store/armor/bascinet-helmet-knight-of-fortune-with-laser-cut-visor",
+      "length": null,
+      "weight": null,
+      "materials": "stainless steel, leather straps",
+      "blurb": "A made-to-measure bascinet supplied with two removable visors.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/04.3.247_001june2015.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Visored_Bascinet_MET_04.3.247_001june2015.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "armstreet-kings-guard-bascinet",
+      "makerId": "armstreet",
+      "name": "The King's Guard Houndskull Bascinet",
+      "category": "helmet",
+      "priceUsd": 1249,
+      "priceSource": "https://armstreet.com/store/armor/medieval-bascinet-helmet-hounskull-sca-bargrill-the-kings-guard",
+      "length": null,
+      "weight": null,
+      "materials": "stainless steel, brass, leather straps",
+      "blurb": "A made-to-measure houndskull bascinet with a second barred visor.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/04.3.240_004june2015.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Visored_Bascinet_MET_04.3.240_004june2015.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "windlass-soldiers-buckler",
+      "makerId": "windlass-steelcrafts",
+      "name": "Battlecry Soldier's Buckler",
+      "category": "shield",
+      "priceUsd": 94.99,
+      "priceSource": "https://www.kultofathena.com/product/windlass-battlecry-soldiers-buckler-20-gauge-steel/",
+      "length": null,
+      "weight": "1.05 kg",
+      "materials": "1065 carbon steel, wood grip",
+      "blurb": "A blued steel buckler with a central hand grip.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Type_Ia.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Type_Ia.jpg",
+        "author": "Schmidt Herbert",
+        "license": "CC BY-SA 4.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "lord-of-battles-rotella-rodela-16-gauge",
+      "makerId": "lord-of-battles",
+      "name": "Rotella / Rodela Shield, 16 Gauge Steel",
+      "category": "shield",
+      "priceUsd": 199.99,
+      "priceSource": "https://www.kultofathena.com/product/lord-of-battles-rotella-rodela-shield-16-gauge-steel/",
+      "length": null,
+      "weight": "3.49 kg",
+      "materials": "16 gauge mild steel, brass rivets, leather straps",
+      "blurb": "A Renaissance round shield with brass rivets and leather arm straps.",
+      "image": {
+        "url": "https://openaccess-cdn.clevelandart.org/1916.1504/1916.1504_print.jpg",
+        "page": "https://clevelandart.org/art/1916.1504",
+        "author": "The Cleveland Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "lord-of-battles-steel-round-shield-20-gauge",
+      "makerId": "lord-of-battles",
+      "name": "Medieval / Renaissance Steel Round Shield, 20 Gauge Steel",
+      "category": "shield",
+      "priceUsd": 109.99,
+      "priceSource": "https://www.kultofathena.com/product/medieval-renaissance-steel-round-shield-20-gauge-steel/",
+      "length": "57.8 cm diameter",
+      "weight": "2.61 kg",
+      "materials": "20 gauge mild steel, wood grip, leather strap",
+      "blurb": "A round steel shield with a rolled edge and a padded forearm rest.",
+      "image": {
+        "url": "https://openaccess-cdn.clevelandart.org/1916.1615/1916.1615_print.jpg",
+        "page": "https://clevelandart.org/art/1916.1615",
+        "author": "The Cleveland Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-roman-centurion-shield",
+      "makerId": "deepeeka",
+      "name": "Roman Centurion Shield",
+      "category": "shield",
+      "priceUsd": 225.99,
+      "priceSource": "https://www.kultofathena.com/product/deepeeka-roman-centurion-shield/",
+      "length": "121.9 cm",
+      "weight": null,
+      "materials": "poplar, linen, brass boss and edging",
+      "blurb": "A Roman shield with painted centurion insignia and brass edging.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Roman_Scutum_(reconstruction_-_R%C3%B6mermuseum_Wei%C3%9Fenburg).jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Roman_Scutum_(reconstruction_-_R%C3%B6mermuseum_Wei%C3%9Fenburg).jpg",
+        "author": "Wolfgang Sauber",
+        "license": "CC BY-SA 3.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-praetorian-shield",
+      "makerId": "deepeeka",
+      "name": "Praetorian Shield",
+      "category": "shield",
+      "priceUsd": 225.99,
+      "priceSource": "https://www.kultofathena.com/product/deepeeka-praetorian-shield/",
+      "length": "121.9 cm",
+      "weight": "6.8 kg",
+      "materials": "poplar, linen, brass boss and edging",
+      "blurb": "A Roman shield painted with a scorpion design.",
+      "image": {
+        "url": "https://live.staticflickr.com/24/50880090_158ee4e2f6_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Roman_shield.jpg",
+        "author": "Linda",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-crusader-shield",
+      "makerId": "deepeeka",
+      "name": "13th Century Crusader Shield",
+      "category": "shield",
+      "priceUsd": 209.99,
+      "priceSource": "https://www.kultofathena.com/product/13th-century-crusader-shield/",
+      "length": "115.6 cm",
+      "weight": "3.23 kg",
+      "materials": "poplar, linen, leather straps",
+      "blurb": "A curved shield with a painted cross and adjustable arm straps.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/a/af/Escudo_medieval_de_la_familia_Oma%C3%B1a.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Escudo_medieval_de_la_familia_Oma%C3%B1a.jpg",
+        "author": "Miguel Angel Omaña Rojas",
+        "license": "CC BY 4.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-sixteenth-century-knight",
+      "makerId": "steel-mastery",
+      "name": "Knight Armor Set of the XVI Century",
+      "category": "armor",
+      "priceUsd": 8732,
+      "priceSource": "https://steel-mastery.com/classic-16th-century-knights-armor.html",
+      "length": null,
+      "weight": null,
+      "materials": "1 mm cold-rolled steel, leather straps",
+      "blurb": "A made-to-measure full plate suit supplied in the maker's base steel specification.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/69988.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Armor_MET_69988.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-german-gothic",
+      "makerId": "steel-mastery",
+      "name": "German Gothic Armor Set of XV Century",
+      "category": "armor",
+      "priceUsd": 20151,
+      "priceSource": "https://steel-mastery.com/german-gothic-full-plate-armor.html",
+      "length": null,
+      "weight": null,
+      "materials": "1 mm cold-rolled steel, leather straps",
+      "blurb": "A made-to-measure Gothic harness with fluted plate surfaces.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/158414.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Gothic_Armor_MET_158414.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-landsknecht",
+      "makerId": "steel-mastery",
+      "name": "Landsknecht Armor Kit, XVI Century",
+      "category": "armor",
+      "priceUsd": 16681,
+      "priceSource": "https://steel-mastery.com/landsknecht-plate-armor-xvi-century.html",
+      "length": null,
+      "weight": null,
+      "materials": "1 mm cold-rolled steel, leather straps",
+      "blurb": "A made-to-measure armour kit based on sixteenth-century Landsknecht equipment.",
+      "image": {
+        "url": "https://www.khm.at/pics/372771/HJRK_A_374_Grau_201604_18%20%282%29.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Landsknecht_costume_armour_of_Wilhelm_von_Rogendorf,_1523.jpg",
+        "author": "KHM-Museumsverband",
+        "license": "CC BY-SA 4.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-interior-knight",
+      "makerId": "steel-mastery",
+      "name": "Full Knight Armor Set for Interior",
+      "category": "armor",
+      "priceUsd": 6157,
+      "priceSource": "https://steel-mastery.com/full-knights-armour-for-interior.html",
+      "length": null,
+      "weight": null,
+      "materials": "1 mm cold-rolled steel, leather straps",
+      "blurb": "A full plate suit made for interior display.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/4859.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Armor_MET_4859.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-english-1483",
+      "makerId": "steel-mastery",
+      "name": "English Full Armor Set, Dated 1483",
+      "category": "armor",
+      "priceUsd": 6695,
+      "priceSource": "https://steel-mastery.com/steel-english-full-plate-armour-dated-1483.html",
+      "length": null,
+      "weight": null,
+      "materials": "1 mm cold-rolled steel, leather straps",
+      "blurb": "A made-to-measure Gothic-style harness based on English armour of 1483.",
+      "image": {
+        "url": "https://www.khm.at/pics/547245/HJRK_A_79_201804_09_ret.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Gothic_armour_HJRK_A_79_201804_09_ret.jpg",
+        "author": "Kunsthistorisches Museum Wien (photo); Lorenz Helmschmied (armour)",
+        "license": "CC BY 4.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tods-bow-irons-crossbow",
+      "makerId": "tods-workshop",
+      "name": "15thC Medieval Crossbow, Bow Irons",
+      "category": "crossbow",
+      "priceUsd": 1857,
+      "priceSource": "https://todsworkshop.com/products/copy-of-14thc-steel-crossbow/",
+      "length": null,
+      "weight": null,
+      "materials": "steel bow, wood stock",
+      "blurb": "A made-to-order steel-bow crossbow offered with several draw weights and spanning devices.",
+      "image": {
+        "url": "https://live.staticflickr.com/1510/24251583960_6006b28554_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Medieval_crossbow_(24251583960).jpg",
+        "author": "Thomas Quine",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tods-lashed-munition-crossbow",
+      "makerId": "tods-workshop",
+      "name": "15thC Lashed Medieval Munition Crossbow",
+      "category": "crossbow",
+      "priceUsd": 1645,
+      "priceSource": "https://todsworkshop.com/products/copy-of-15thc-munition-crossbow-lashed-350lb-jan23/",
+      "length": null,
+      "weight": null,
+      "materials": "steel bow, wood stock",
+      "blurb": "A made-to-order military-style crossbow with a lashed bow attachment.",
+      "image": {
+        "url": "https://live.staticflickr.com/3925/14202597237_16605e7e39_o.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Medieval_crossbow_(14202597237).jpg",
+        "author": "Thomas Quine",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tods-windlass-crossbow",
+      "makerId": "tods-workshop",
+      "name": "15thC Windlass Crossbow",
+      "category": "crossbow",
+      "priceUsd": 4113,
+      "priceSource": "https://todsworkshop.com/products/15thc-windlass-crossbow-1/",
+      "length": null,
+      "weight": null,
+      "materials": "steel bow, ash stock, linen string",
+      "blurb": "A windlass-spanned crossbow with an ash stock and an 880-pound draw.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/DP282586.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Target_Crossbow_with_Windlass_MET_DP282586.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tods-sporting-crossbow",
+      "makerId": "tods-workshop",
+      "name": "16thC Sporting Crossbow",
+      "category": "crossbow",
+      "priceUsd": 1632,
+      "priceSource": "https://todsworkshop.com/products/16thc-sporting-crossbow/",
+      "length": null,
+      "weight": null,
+      "materials": "steel bow, wood stock",
+      "blurb": "A slender-stock crossbow based on Italian and Spanish sporting examples.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/DP214035.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Crossbow_of_Count_Ulrich_V_of_W%C3%BCrttemberg_(1413%E2%80%931480)_MET_DP214035.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "lord-of-battles-hour-glass-gauntlets",
+      "makerId": "lord-of-battles",
+      "name": "Hour Glass Gauntlets",
+      "category": "armor",
+      "priceUsd": 144.99,
+      "priceSource": "https://www.kultofathena.com/product/hour-glass-gauntlets/",
+      "length": "27.6 cm each",
+      "weight": "0.77 kg each",
+      "materials": "16 gauge mild steel, suede leather gloves",
+      "blurb": "A pair of articulated finger gauntlets with flared cuffs and fitted suede gloves.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/21658.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Left_Gauntlet_MET_21658.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "lord-of-battles-clamshell-gauntlets-16-gauge",
+      "makerId": "lord-of-battles",
+      "name": "Clamshell Gauntlets, 16 Gauge Steel",
+      "category": "armor",
+      "priceUsd": 149.99,
+      "priceSource": "https://www.kultofathena.com/product/clamshell-gauntlets-16-gauge-steel/",
+      "length": "34.3 cm each",
+      "weight": null,
+      "materials": "16 gauge mild steel, leather gloves",
+      "blurb": "A pair of articulated mitten gauntlets supplied with separate leather gloves.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/225419.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Left_Gauntlet_MET_225419.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "lord-of-battles-gorget-standing-collar",
+      "makerId": "lord-of-battles",
+      "name": "Gorget with Standing Collar, 18 Gauge",
+      "category": "armor",
+      "priceUsd": 56.99,
+      "priceSource": "https://www.kultofathena.com/product/gorget-with-standing-collar/",
+      "length": null,
+      "weight": "1.51 kg",
+      "materials": "18 gauge mild steel, leather straps",
+      "blurb": "A two-piece steel gorget with a raised collar and straps for attaching pauldrons.",
+      "image": {
+        "url": "https://images.metmuseum.org/CRDImages/aa/original/sfma27.183.57_70993.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Gorget_MET_sfma27.183.57_70993.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    }
+  ]
+}

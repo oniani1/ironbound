@@ -22,7 +22,7 @@ export function itemPlaneSize(aspect: number) {
 }
 
 /** The detail a macro shot lands on: hilts and heads high, visors a little above center, boss and plates centered. */
-const MACRO_BIAS: Record<string, number> = { sword: 0.3, dagger: 0.28, polearm: 0.32, axe: 0.28, helmet: 0.06, shield: 0, armor: 0.12, fitting: 0 }
+const MACRO_BIAS: Record<string, number> = { sword: 0.3, dagger: 0.28, polearm: 0.32, axe: 0.28, helmet: 0.06, shield: 0, armor: 0.12, crossbow: 0.1, fitting: 0 }
 
 const VERT = /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`
 

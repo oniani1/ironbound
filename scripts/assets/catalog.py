@@ -145,7 +145,7 @@ E = [
     (694438, "Axe Head with Gold Inlay", "axe", 2600, "a", None, "A heavy axe head with gold scrolls, sixteenth century."),
     (29617, "Indo-Persian Mace", "axe", 2800, "a", None, "A gilded mace from the seventeenth century."),
     # Helmets
-    (27119, "Bascinet, Revival Work", "helmet", 4800, "f", "Munich revival workshop, 19th century", "A nineteenth-century armorer's tribute to a fourteenth-century helm."),
+    (27119, "Bascinet, Revival Work", "helmet", 4800, "a", None, "A nineteenth-century armorer's tribute to a fourteenth-century helm."),
     (34119, "Bascinet Visor", "helmet", 6800, "a", None, "Italian, around 1440. The pointed visor of a knight's helm."),
     (26514, "Comb Morion", "helmet", 7200, "a", None, "A high-combed infantry helmet, German, around 1585."),
     (32137, "Deccan Helmet", "helmet", 8200, "a", None, "A seventeenth-century helmet with sliding nasal and plumes."),
@@ -213,23 +213,10 @@ E = [
     (23090, "Half Armor", "armor", 190000, "a", None, "Augsburg, around 1515. Breast, back and arms for a mounted officer."),
     (22274, "Augsburg Field Armor", "armor", 1200000, "a", None, "A complete armor from Augsburg, about 1545. A grail of the armory."),
     # Crossbows
-    (25600, "Crossbow with Cranequin", "fitting", 18000, "a", None, "A hunting crossbow spanned by a geared cranequin."),
-    (34790, "Crossbow", "fitting", 26000, "a", None, "German, possibly fifteenth century, steel bow and wooden tiller."),
-    (33738, "Central European Crossbow", "fitting", 42000, "a", None, "Late fifteenth century, with bone inlay along the tiller."),
-    (23336, "Gilded Crossbow", "fitting", 68000, "a", None, "Central Europe, around 1450, decorated in gold."),
-    # Master-forged pieces (modern work, priced as new)
-    (27910, "Fencing Feder", "sword", 460, "f", "Kessler Werkstatt, Nuremberg", "A flexible training longsword in the style of the 1570s, made for real fencing."),
-    (25929, "Partisan", "polearm", 780, "f", "Brannoc Forge, Wales", "Hand-forged partisan head, mounted on ash."),
-    (35888, "Hand-and-a-Half Sword", "sword", 1650, "f", "Brannoc Forge, Wales", "Forged after a fifteenth-century original. Sharp, balanced, made to be swung."),
-    (26575, "Breastplate", "armor", 1800, "f", "Kessler Werkstatt, Nuremberg", "Hand-raised in 1.6 mm spring steel after a Nuremberg original."),
-    (30878, "Tantō", "dagger", 1600, "f", "Ōmi Tanren, Shiga", "A modern tantō by a licensed Japanese smith, polished by hand."),
-    (24690, "Swept-Hilt Rapier", "sword", 2200, "f", "Atelier Vauclair, Lyon", "A working rapier with a forged cage hilt, after an early 1600s original."),
-    (21984, "Gothic Sallet", "helmet", 2600, "f", "Kessler Werkstatt, Nuremberg", "Raised from a single sheet after an Innsbruck sallet of 1480."),
-    (21868, "Tantō, Hira-Zukuri", "dagger", 2800, "f", "Ōmi Tanren, Shiga", "A flat-sided tantō with a wavy temper line, forged by hand."),
-    (26446, "Visored Sallet", "helmet", 3200, "f", "Atelier Vauclair, Lyon", "A sallet with a pivoting visor, fitted and lined for wear."),
-    (22224, "Tudor Armet", "helmet", 3900, "f", "Brannoc Forge, Wales", "After an English armet of 1510, raised and polished by hand."),
-    (24810, "Italian Armet", "helmet", 4600, "f", "Kessler Werkstatt, Nuremberg", "After a Milanese armet of 1490. Opens on hinged cheek plates."),
-    (21880, "Katana", "sword", 8800, "f", "Ōmi Tanren, Shiga", "A modern katana from a licensed smith, with a full polish."),
+    (25600, "Crossbow with Cranequin", "crossbow", 18000, "a", None, "A hunting crossbow spanned by a geared cranequin."),
+    (34790, "Crossbow", "crossbow", 26000, "a", None, "German, possibly fifteenth century, steel bow and wooden tiller."),
+    (33738, "Central European Crossbow", "crossbow", 42000, "a", None, "Late fifteenth century, with bone inlay along the tiller."),
+    (23336, "Gilded Crossbow", "crossbow", 68000, "a", None, "Central Europe, around 1450, decorated in gold."),
 ]
 
 ORIGIN = {

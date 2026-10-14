@@ -39,3 +39,5 @@ Founder feedback: the UI reads default, the opening is too fast with too little 
 New dependencies: `lenis` (smooth scroll), `@phosphor-icons/react` (icons). Audio files only under CC0 or similar licenses, bundled locally.
 
 Verification adds: the opening's phase timings measured per rarity, every new image's license recorded in `items.json`, expected value tests updated for the new pools, Codex reviews until no must-fix items remain.
+
+Amendment (2026-10-15): the founder stopped the search for exact product photos ("enough; mock is fine for the rest"). New work uses the 73 researched products in `research/modern-makers.json` (13 real makers, real retail prices and sources) with the freely licensed photos picked there: 14 show the exact model, the rest are examples of the type and are labeled "Example photo". `scripts/assets/modern.py` builds `src/data/modern.json` from that file. The 12 invented-maker pieces from round 1 are gone; the trial chest gives the Regenyei Standard Feder; crossbows are their own category.

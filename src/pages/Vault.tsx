@@ -17,7 +17,7 @@ import { EXPO, Reveal } from '../components/vault/Experience'
 import { ItemArtwork } from '../components/vault/ItemArtwork'
 import { ItemDetail } from '../components/vault/ItemDetail'
 
-const CATEGORIES: { id: Category | 'all'; label: string }[] = [{ id: 'all', label: 'All' }, { id: 'sword', label: 'Swords' }, { id: 'dagger', label: 'Daggers' }, { id: 'polearm', label: 'Polearms' }, { id: 'axe', label: 'Axes' }, { id: 'helmet', label: 'Helmets' }, { id: 'shield', label: 'Shields' }, { id: 'armor', label: 'Armor' }, { id: 'fitting', label: 'Fittings' }]
+const CATEGORIES: { id: Category | 'all'; label: string }[] = [{ id: 'all', label: 'All' }, { id: 'sword', label: 'Swords' }, { id: 'dagger', label: 'Daggers' }, { id: 'polearm', label: 'Polearms' }, { id: 'axe', label: 'Axes' }, { id: 'helmet', label: 'Helmets' }, { id: 'shield', label: 'Shields' }, { id: 'armor', label: 'Armor' }, { id: 'crossbow', label: 'Crossbows' }, { id: 'fitting', label: 'Fittings' }]
 type Status = 'all' | 'vaulted' | 'shipping' | 'sold'
 const STATUSES: { id: Status; label: string }[] = [{ id: 'all', label: 'All statuses' }, { id: 'vaulted', label: 'In vault' }, { id: 'shipping', label: 'Shipping' }, { id: 'sold', label: 'Sold' }]
 const statusLabel = (pull: Pull) => pull.status === 'vaulted' ? 'In vault' : pull.status === 'sold' ? 'Sold' : pull.status === 'shipped' ? 'Shipped' : 'Shipping'

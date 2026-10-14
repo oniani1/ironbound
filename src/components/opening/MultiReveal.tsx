@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Check, X } from '@phosphor-icons/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
-import { money, shortEra } from '../../lib/format'
+import { money, provenanceLine } from '../../lib/format'
 import { sfx } from '../../lib/audio'
 import { Button, IconButton } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
@@ -375,7 +375,7 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
           <RarityTag rarity={result.rarity} size="md" />
           <h3 className="font-display mt-2 text-[28px] font-semibold leading-[1.05] text-bone-50">{item.name}</h3>
           <p className="mt-1 text-[13px] text-bone-300">
-            {item.provenance === 'antique' ? `${shortEra(item.era)} · ${item.origin} · Antique, authenticated` : `${shortEra(item.era)} · Forged by ${item.maker ?? 'a master smith'}`}
+            {provenanceLine(item)}
           </p>
         </div>
         <dl className="mt-4 grid grid-cols-2 items-end gap-3 border-t border-bone-100/10 pt-3 tabular">

@@ -1,6 +1,6 @@
 export type RarityId = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'relic'
 
-export type Category = 'sword' | 'dagger' | 'polearm' | 'axe' | 'helmet' | 'shield' | 'armor' | 'fitting'
+export type Category = 'sword' | 'dagger' | 'polearm' | 'axe' | 'helmet' | 'shield' | 'armor' | 'crossbow' | 'fitting'
 
 export type Provenance = 'antique' | 'forged'
 
@@ -24,6 +24,27 @@ export interface Item {
   aspect: number
   credit: string
   sourceUrl: string
+  /** New work only: the maker's catalog id. */
+  makerId?: string
+  /** New work only: false when the photo shows an example of the type, not this exact model. */
+  photoExact?: boolean
+  /** New work only: where the retail price was read. */
+  priceSource?: string
+  /** New work only: how well the maker's pieces hold value on resale. */
+  resale?: 'strong' | 'medium' | 'low'
+}
+
+export interface Maker {
+  id: string
+  name: string
+  country: string | null
+  city: string | null
+  founded: number | null
+  specialty: string
+  priceRange: string
+  reputation: string
+  resale: 'strong' | 'medium' | 'low'
+  website: string
 }
 
 export interface ChestBand {

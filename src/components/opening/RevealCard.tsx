@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { ArrowCounterClockwise, MagnifyingGlass, ShareNetwork } from '@phosphor-icons/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES } from '../../config/rarity'
-import { money, shortEra } from '../../lib/format'
+import { money, provenanceLine, resaleLabel } from '../../lib/format'
 import { sfx } from '../../lib/audio'
 import { Button } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
@@ -43,6 +43,7 @@ const CATEGORY_LABEL: Record<Item['category'], string> = {
   helmet: 'Helmet',
   shield: 'Shield',
   armor: 'Armor',
+  crossbow: 'Crossbow',
   fitting: 'Fitting',
 }
 
@@ -171,12 +172,18 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         {item.name}
       </motion.h2>
       <motion.p {...rise(0.32)} className="relative mt-2 text-[13px] text-bone-300">
-        {item.provenance === 'antique' ? `${shortEra(item.era)} · ${item.origin} · Antique, authenticated` : `${shortEra(item.era)} · Forged by ${item.maker ?? 'a master smith'}`}
+        {provenanceLine(item)}
       </motion.p>
+      {item.provenance === 'forged' && (
+        <motion.div {...rise(0.36)} className="relative mt-2 flex items-center gap-4">
+          <Tag tone={item.resale === 'strong' ? 'moss' : 'bone'}>{resaleLabel(item.resale)}</Tag>
+          {item.photoExact === false && <span className="text-[11px] text-bone-400">Example photo of the type</span>}
+        </motion.div>
+      )}
 
       <motion.div {...rise(0.4)} className="relative mt-3 grid grid-cols-[1fr_auto] items-end gap-3 border-t border-bone-100/10 pt-3 sm:mt-5 sm:pt-4">
         <div>
-          <p className="eyebrow !text-[11px]">Estimated item value</p>
+          <p className="eyebrow !text-[11px]">{item.provenance === 'forged' ? 'Retail price, new' : 'Estimated item value'}</p>
           <p className="mt-1 text-[36px] font-semibold leading-none text-bone-50 sm:text-[46px]">
             <CountUp to={item.value} duration={instant ? 0.01 : rarity === 'common' ? 0.7 : 1.4} delay={instant ? 0 : 0.45} ticks={!instant} onDone={() => setCounted(true)} />
           </p>
