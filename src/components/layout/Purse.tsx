@@ -36,7 +36,7 @@ export function Purse() {
         <span className="grid h-5 w-5 place-items-center rounded-full bg-[radial-gradient(circle_at_35%_30%,#f6dc95,#b98734)] text-[10px] font-bold text-ink-950 shadow-[inset_0_-1px_0_#7a5420]">
           $
         </span>
-        <CountUp key={balance} from={from} to={balance} duration={0.9} format={(n) => money(n, { cents: true })} />
+        <CountUp key={balance} from={from} to={balance} duration={0.9} format={(n) => money(n, { cents: !Number.isInteger(balance) })} />
         <span className="ml-0.5 text-brass-400 opacity-60 transition-opacity group-hover:opacity-100">+</span>
       </button>
       <AnimatePresence>

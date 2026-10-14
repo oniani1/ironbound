@@ -36,6 +36,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
   const allFlipped = flipped.size === results.length
   const total = results.reduce((s, r) => s + r.item.value, 0)
   const cost = chest.price * results.length
+  const cash = Math.round(total * chest.buyback)
   const best = useMemo(
     () => results.reduce((a, b) => (RARITY_ORDER.indexOf(b.rarity) > RARITY_ORDER.indexOf(a.rarity) || (b.rarity === a.rarity && b.item.value > a.item.value) ? b : a)),
     [results],
@@ -143,16 +144,19 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="plate w-full rounded-[18px] p-4">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <p className="eyebrow !text-[10px]">Spoils</p>
+                <p className="eyebrow !text-[10px]">Spoils · item value</p>
                 <p className="mt-1 text-[30px] font-semibold leading-none text-bone-50">
                   <CountUp to={total} duration={1} ticks />
                 </p>
               </div>
-              <p className={`text-right text-[13px] tabular ${total >= cost ? 'text-moss-400' : 'text-bone-400'}`}>
-                Cost {money(cost)}
-                <br />
-                {total >= cost ? `+${money(total - cost)}` : money(total - cost)}
-              </p>
+              <dl className="grid grid-cols-3 gap-x-4 text-right text-[12px] tabular">
+                <dt className="text-bone-400">Cost</dt>
+                <dt className="text-bone-400">As cash</dt>
+                <dt className="text-bone-400">Net cash</dt>
+                <dd className="font-semibold text-bone-100">{money(cost)}</dd>
+                <dd className="font-semibold text-bone-100">{money(cash)}</dd>
+                <dd className={`font-semibold ${cash >= cost ? 'text-moss-400' : 'text-bone-300'}`}>{cash >= cost ? '+' : ''}{money(cash - cost)}</dd>
+              </dl>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <Button variant="primary" onClick={onDone}>

@@ -166,7 +166,23 @@ function Showcase() {
           Browse every item →
         </Link>
       </div>
-      <div className="group relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
+      {/* Phones swipe through snap cards; larger screens get a slow drifting river. */}
+      <div className="hide-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 md:hidden">
+        {items.map((it) => (
+          <div key={it.id} className="w-[64vw] shrink-0 snap-center rounded-[18px] border border-bone-100/[0.06] bg-ink-900/70 p-3">
+            <div className="relative aspect-[4/5]">
+              <div className="absolute inset-x-[20%] bottom-[4%] h-[24%] rounded-[50%] bg-brass-500/20 blur-xl" />
+              <ItemImg item={it} alt={it.name} className="relative h-full w-full" />
+            </div>
+            <p className="font-display mt-2 line-clamp-1 text-[17px] font-semibold text-bone-50">{it.name}</p>
+            <p className="flex justify-between text-[12px] text-bone-400">
+              <span className="truncate pr-2">{shortEra(it.era)}</span>
+              <span className="font-semibold text-bone-200 tabular">{money(it.value, { compact: true })}</span>
+            </p>
+          </div>
+        ))}
+      </div>
+      <div className="group relative hidden overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)] md:block">
         <div className="flex w-max animate-marquee gap-4 group-hover:[animation-play-state:paused]">
           {loop.map((it, i) => (
             <div key={`${it.id}-${i}`} className="w-[180px] shrink-0 rounded-[18px] border border-bone-100/[0.06] bg-ink-900/70 p-3 sm:w-[210px]">

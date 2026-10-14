@@ -355,7 +355,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
           className="absolute right-4 top-[calc(max(1rem,env(safe-area-inset-top))+44px)] rounded-full bg-ink-900/70 px-3 py-1.5 text-xs text-bone-300 backdrop-blur sm:right-6"
           data-coin-target
         >
-          Purse <span className="font-semibold text-bone-100 tabular">{money(balance, { cents: true })}</span>
+          Purse <span className="font-semibold text-bone-100 tabular">{money(balance, { cents: !Number.isInteger(balance) })}</span>
         </motion.div>
       )}
     </motion.div>

@@ -140,7 +140,7 @@ export default function ChestDetail() {
             <div className="mt-3 flex items-center justify-between text-[12px] text-bone-400">
               {signedIn ? (
                 <span>
-                  Purse <span className="text-bone-200 tabular">{money(balance, { cents: true })}</span>
+                  Purse <span className="text-bone-200 tabular">{money(balance, { cents: !Number.isInteger(balance) })}</span>
                 </span>
               ) : (
                 <span>No sign-up needed to try it.</span>
