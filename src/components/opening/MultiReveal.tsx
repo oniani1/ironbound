@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import { Check, X } from '@phosphor-icons/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
 import { money, shortEra } from '../../lib/format'
 import { sfx } from '../../lib/audio'
-import { Button } from '../ui/Button'
+import { Button, IconButton } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
-import { RarityTag } from '../ui/RarityTag'
+import { RarityTag, Tag } from '../ui/RarityTag'
 import { ItemImg } from '../ui/ItemImg'
 
 export interface MultiResult {
@@ -126,7 +127,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                 <button
                   type="button"
                   onClick={() => flip(r)}
-                  className="absolute inset-0 overflow-hidden rounded-[14px] border outline-none focus-visible:ring-2 focus-visible:ring-brass-300"
+                  className="absolute inset-0 overflow-hidden rounded-[10px] border outline-none focus-visible:ring-2 focus-visible:ring-brass-300"
                   style={{
                     backfaceVisibility: 'hidden',
                     pointerEvents: isUp ? 'none' : 'auto',
@@ -138,7 +139,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                   aria-hidden={isUp}
                   aria-label={`Flip face-down card, ${rr.label}`}
                 >
-                  <span className="absolute inset-3 rounded-[10px] border border-bone-100/10" />
+                  <span className="absolute inset-3 rounded-[6px] border border-bone-100/10" />
                   <span className="absolute inset-0 grid place-items-center">
                     <svg viewBox="0 0 64 80" className="h-16 w-14 opacity-70 transition-transform duration-300 group-hover:scale-110" aria-hidden>
                       <path d="M4 4 H60 V36 C60 56 46 70 32 76 C18 70 4 56 4 36 Z" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: rr.cssVar }} />
@@ -150,15 +151,15 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
 
                 {/* Front: the item, an Inspect target and a select control. */}
                 <div
-                  className={`absolute inset-0 flex flex-col overflow-hidden rounded-[14px] border bg-ink-900 transition-shadow duration-200 ${isSold ? 'opacity-70' : ''}`}
+                  className={`absolute inset-0 flex flex-col overflow-hidden rounded-[10px] border bg-ink-900 transition-[box-shadow,border-color] duration-200 ${isSold ? 'opacity-70' : ''}`}
                   style={{
                     backfaceVisibility: 'hidden',
                     transform: 'rotateY(180deg)',
                     pointerEvents: isUp ? 'auto' : 'none',
-                    borderColor: isPicked ? 'var(--color-brass-300)' : `color-mix(in oklch, ${rr.cssVar} 45%, transparent)`,
+                    borderColor: isPicked ? 'var(--color-brass-400)' : `color-mix(in oklch, ${rr.cssVar} 35%, transparent)`,
                     boxShadow: isPicked
-                      ? '0 0 0 2px var(--color-brass-300), 0 20px 50px -20px oklch(70% 0.14 70 / .6)'
-                      : `0 20px 50px -20px color-mix(in oklch, ${rr.cssVar} 55%, transparent)`,
+                      ? 'inset 0 0 0 1px var(--color-brass-400), 0 24px 50px -24px oklch(0% 0 0 / .8)'
+                      : `0 24px 50px -24px color-mix(in oklch, ${rr.cssVar} 45%, transparent)`,
                   }}
                   aria-hidden={!isUp}
                 >
@@ -173,7 +174,9 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                     <ItemImg item={r.item} eager className="absolute inset-2 h-[calc(100%-16px)] w-[calc(100%-16px)] drop-shadow-[0_10px_18px_oklch(0%_0_0/.6)]" />
                   </button>
                   {isSold ? (
-                    <span className="absolute right-2 top-2 rounded-full bg-moss-400/20 px-2 py-0.5 text-[12px] font-semibold text-moss-400 tabular">Sold +{money(offerOf(r))}</span>
+                    <span className="absolute inset-x-0 top-0 flex justify-center bg-ink-950/80 py-1.5">
+                      <Tag tone="moss">Sold +{money(offerOf(r))}</Tag>
+                    </span>
                   ) : (
                     <button
                       type="button"
@@ -185,9 +188,9 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                       aria-label={`${isPicked ? 'Unselect' : 'Select'} ${r.item.name} for sell-back at ${money(offerOf(r))}`}
                     >
                       <span
-                        className={`grid h-6 w-6 place-items-center rounded-full border text-[13px] font-bold transition-colors ${isPicked ? 'border-brass-300 bg-brass-300 text-ink-950' : 'border-bone-100/30 bg-ink-950/60 text-transparent'}`}
+                        className={`grid h-[22px] w-[22px] place-items-center rounded-[3px] transition-colors ${isPicked ? 'bg-brass-400 text-ink-950' : 'bg-ink-950/60 text-transparent shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_35%,transparent)]'}`}
                       >
-                        ✓
+                        <Check size={13} weight="bold" aria-hidden />
                       </span>
                     </button>
                   )}
@@ -219,7 +222,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
             initial={{ opacity: 0, y: instant ? 0 : 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: instant ? 0.2 : 0.5, ease }}
-            className="plate w-full rounded-[18px] p-4"
+            className="plate w-full p-4 sm:p-5"
             data-testid="multi-summary"
           >
             <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
@@ -356,16 +359,16 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
       <motion.div
         ref={panel}
         onClick={(e) => e.stopPropagation()}
-        className="plate relative w-full max-w-[480px] rounded-t-[22px] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-[22px]"
+        className="plate relative w-full max-w-[480px] rounded-b-none p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-b-[10px]"
         initial={{ y: instant ? 0 : 40 }}
         animate={{ y: 0 }}
         exit={{ y: instant ? 0 : 30 }}
         transition={{ duration: instant ? 0.2 : 0.35, ease }}
       >
-        <button ref={closeRef} type="button" onClick={onClose} className="absolute right-2 top-2 z-10 grid h-11 w-11 place-items-center rounded-full text-bone-300 hover:bg-bone-100/5 hover:text-bone-50" aria-label="Close">
-          ✕
-        </button>
-        <div className="h-[min(42vh,340px)] rounded-[14px]" style={{ background: `radial-gradient(70% 60% at 50% 65%, color-mix(in oklch, ${r.cssVar} 26%, transparent), transparent)` }}>
+        <IconButton ref={closeRef} type="button" onClick={onClose} className="absolute right-3 top-3 z-10" aria-label="Close">
+          <X size={16} weight="light" />
+        </IconButton>
+        <div className="h-[min(42vh,340px)] rounded-[6px]" style={{ background: `radial-gradient(70% 60% at 50% 65%, color-mix(in oklch, ${r.cssVar} 26%, transparent), transparent)` }}>
           <ItemImg item={item} eager className="h-full w-full drop-shadow-[0_14px_24px_oklch(0%_0_0/.6)]" />
         </div>
         <div className="mt-4">
@@ -389,9 +392,9 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
         </dl>
         <div className="mt-4 grid grid-cols-2 gap-2">
           {sold ? (
-            <div className="col-span-2 flex items-center justify-between rounded-[12px] border border-moss-400/30 bg-moss-400/10 px-4 py-3">
-              <span className="text-[13px] text-bone-200">Sold back. Added to your purse.</span>
-              <span className="font-semibold text-moss-400 tabular">+{money(offer)}</span>
+            <div className="col-span-2 flex items-center justify-between border-y border-moss-400/25 py-3">
+              <Tag tone="moss">Sold back to your purse</Tag>
+              <span className="text-[17px] font-semibold text-moss-400 tabular">+{money(offer)}</span>
             </div>
           ) : (
             <>

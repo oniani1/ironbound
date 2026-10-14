@@ -258,7 +258,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       // Tab cycles inside the opening; the batch Inspect sheet runs its own cycle.
       if (e.key === 'Tab' && root.current && !e.defaultPrevented) {
         const active = document.activeElement
-        if (active?.closest('[data-testid="multi-inspect"]')) return
+        if (active?.closest('[data-testid="multi-inspect"], [data-testid="share-sheet"]')) return
         const nodes = [...root.current.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter((n) => n.getClientRects().length > 0)
         const firstNode = nodes[0]
         const lastNode = nodes[nodes.length - 1]
@@ -574,7 +574,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         {phase === 'reveal' && collapsed && !multi && (
           <motion.p
             key="inspect-hint"
-            className="pointer-events-none absolute inset-x-0 top-[calc(max(1rem,env(safe-area-inset-top))+64px)] px-4 text-center text-[13px] text-bone-300"
+            className="caps pointer-events-none absolute inset-x-0 top-[calc(max(1rem,env(safe-area-inset-top))+96px)] px-6 text-center text-bone-300 [text-shadow:0_1px_8px_oklch(0%_0_0/.9)] sm:top-[calc(max(1rem,env(safe-area-inset-top))+64px)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 1, 1, 0] }}
             transition={{ duration: 4.5, times: [0, 0.08, 0.8, 1] }}
@@ -645,7 +645,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         )}
       </AnimatePresence>
 
-      {/* Purse, bottom-left, so the cost and the sell-back credit are visible here too. */}
+      {/* Purse under the controls, so the cost and the sell-back credit are visible here too. */}
       {!trial && phase === 'reveal' && (
         <motion.div
           initial={{ opacity: 0, y: -6 }}

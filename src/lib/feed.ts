@@ -2,7 +2,8 @@ import { useSyncExternalStore } from 'react'
 import type { RarityId } from '../types'
 import { CHEST_BY_ID, VISIBLE_CHESTS } from '../config/chests'
 import { ITEMS } from '../data/items'
-import { rollItem } from './gacha'
+import { rollItem, rollItemIn } from './gacha'
+import { rarityAtLeast } from '../config/rarity'
 import { pickWeighted, random, uid } from './rng'
 
 export interface FeedEntry {
@@ -17,7 +18,13 @@ export interface FeedEntry {
 
 const MAX = 40
 let entries: FeedEntry[] = []
+/** Rare and better pulls, kept longer than the ticker so the wall of notable pulls fills. */
+let notable: FeedEntry[] = []
 const listeners = new Set<() => void>()
+
+function keepNotable(e: FeedEntry) {
+  if (rarityAtLeast(e.rarity, 'rare')) notable = [e, ...notable].slice(0, 24)
+}
 
 function emit() {
   listeners.forEach((l) => l())
@@ -25,22 +32,29 @@ function emit() {
 
 export function pushFeed(e: Omit<FeedEntry, 'id' | 'at'>, delayMs = 0) {
   const add = () => {
-    entries = [{ ...e, id: uid(), at: Date.now() }, ...entries].slice(0, MAX)
+    const entry = { ...e, id: uid(), at: Date.now() }
+    entries = [entry, ...entries].slice(0, MAX)
+    keepNotable(entry)
     emit()
   }
   if (delayMs > 0) window.setTimeout(add, delayMs)
   else add()
 }
 
+function subscribe(l: () => void) {
+  listeners.add(l)
+  return () => {
+    listeners.delete(l)
+  }
+}
+
 export function useFeed(): FeedEntry[] {
-  return useSyncExternalStore(
-    (l) => {
-      listeners.add(l)
-      return () => listeners.delete(l)
-    },
-    () => entries,
-    () => entries,
-  )
+  return useSyncExternalStore(subscribe, () => entries, () => entries)
+}
+
+/** Notable pulls, newest first: Rare and better, yours included. */
+export function useNotable(): FeedEntry[] {
+  return useSyncExternalStore(subscribe, () => notable, () => notable)
 }
 
 const NAMES = [
@@ -62,7 +76,38 @@ function simulateOne(backdate = 0) {
   }
   const { item, rarity } = roll
   const name = NAMES[Math.floor(random() * NAMES.length)] ?? 'Wanderer'
-  entries = [{ id: uid(), name, itemId: item.id, chestId: chest.id, rarity, at: Date.now() - backdate }, ...entries].slice(0, MAX)
+  const entry = { id: uid(), name, itemId: item.id, chestId: chest.id, rarity, at: Date.now() - backdate }
+  entries = [entry, ...entries].slice(0, MAX)
+  keepNotable(entry)
+}
+
+/** Earlier notable pulls, spread over the last day, so the wall is never empty on arrival. */
+const PAST: { chest: string; rarity: RarityId; minutesAgo: number }[] = [
+  { chest: 'warlord', rarity: 'epic', minutesAgo: 6 },
+  { chest: 'knight', rarity: 'rare', minutesAgo: 19 },
+  { chest: 'king', rarity: 'legendary', minutesAgo: 47 },
+  { chest: 'shogun', rarity: 'epic', minutesAgo: 95 },
+  { chest: 'squire', rarity: 'rare', minutesAgo: 160 },
+  { chest: 'warlord', rarity: 'legendary', minutesAgo: 290 },
+  { chest: 'knight', rarity: 'epic', minutesAgo: 520 },
+  { chest: 'king', rarity: 'relic', minutesAgo: 1310 },
+]
+
+function seedNotable() {
+  const seeded: FeedEntry[] = []
+  PAST.forEach((p, i) => {
+    const chest = CHEST_BY_ID[p.chest]
+    if (!chest) return
+    try {
+      const { item, rarity } = rollItemIn(chest, ITEMS, p.rarity)
+      if (seeded.some((s) => s.itemId === item.id)) return
+      const name = NAMES[(i * 11 + 3) % NAMES.length] ?? 'Wanderer'
+      seeded.push({ id: uid(), name, itemId: item.id, chestId: chest.id, rarity, at: Date.now() - p.minutesAgo * 60_000 })
+    } catch {
+      // An empty band in a demo pool is skipped.
+    }
+  })
+  notable = [...notable, ...seeded].sort((a, b) => b.at - a.at).slice(0, 24)
 }
 
 let started = false
@@ -71,12 +116,15 @@ let started = false
 export function startFeed() {
   if (started || typeof window === 'undefined') return
   started = true
+  seedNotable()
   for (let i = 14; i > 0; i--) simulateOne(i * 9000 + random() * 6000)
   // A couple of memorable recent pulls so the feed is not all commons on first load.
   const big = ITEMS.filter((i) => i.value > 8000).sort(() => random() - 0.5).slice(0, 2)
   big.forEach((item, i) => {
     const chest = CHEST_BY_ID[item.value > 60000 ? 'king' : 'warlord'] ?? VISIBLE_CHESTS[0]!
-    entries.splice(3 + i * 4, 0, { id: uid(), name: NAMES[(i * 7) % NAMES.length] ?? 'Wanderer', itemId: item.id, chestId: chest.id, rarity: i === 0 ? 'legendary' : 'epic', at: Date.now() - (40000 + i * 50000) })
+    const entry: FeedEntry = { id: uid(), name: NAMES[(i * 7) % NAMES.length] ?? 'Wanderer', itemId: item.id, chestId: chest.id, rarity: i === 0 ? 'legendary' : 'epic', at: Date.now() - (40000 + i * 50000) }
+    entries.splice(3 + i * 4, 0, entry)
+    notable = [...notable, entry].sort((a, b) => b.at - a.at).slice(0, 24)
   })
   emit()
   const tick = () => {
