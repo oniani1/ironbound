@@ -61,6 +61,8 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
   }
 
   const box = useRef<HTMLElement>(null)
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const keepRef = useRef<HTMLButtonElement>(null)
   const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   // After an Inspect, the card comes back as it was, without a second entrance.
   const [revisit, setRevisit] = useState(false)
@@ -74,6 +76,12 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
     const t = window.setTimeout(() => sfx.stamp(), fast || reduced ? 0 : 200)
     return () => window.clearTimeout(t)
   }, [])
+
+  // Keyboard focus lands on the main action, then follows the Inspect toggle.
+  useEffect(() => {
+    if (collapsed || revisit) toggleRef.current?.focus({ preventScroll: true })
+    else keepRef.current?.focus({ preventScroll: true })
+  }, [collapsed])
 
   useEffect(() => {
     const el = box.current
@@ -103,7 +111,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         <span className="font-gothic text-[22px] leading-none" style={{ color: r.cssVar }}>{r.stamp}</span>
         <span className="min-w-0 flex-1 truncate font-display text-[17px] text-bone-50 sm:flex-none">{item.name}</span>
         <span className="text-[15px] font-semibold text-bone-100 tabular">{money(item.value)}</span>
-        <Button size="sm" variant="secondary" className="!h-11" onClick={onToggle}>
+        <Button ref={toggleRef} size="sm" variant="secondary" className="!h-11" onClick={onToggle} aria-label="Show the result card">
           Details
         </Button>
       </motion.aside>
@@ -138,7 +146,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         </motion.div>
         <div className="flex items-center">
           {onToggle && (
-            <button onClick={onToggle} className="min-h-11 rounded-full px-3 text-[13px] text-bone-300 transition-colors hover:bg-bone-100/5 hover:text-bone-100" aria-label="Hide the card and inspect the piece">
+            <button ref={toggleRef} onClick={onToggle} className="min-h-11 rounded-full px-3 text-[13px] text-bone-300 transition-colors hover:bg-bone-100/5 hover:text-bone-100" aria-label="Hide the card and inspect the piece">
               Inspect
             </button>
           )}
@@ -209,7 +217,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
           </div>
         ) : (
           <>
-            <Button data-testid="keep" variant="primary" size="lg" className="col-span-2" onClick={onKeep}>
+            <Button ref={keepRef} data-testid="keep" variant="primary" size="lg" className="col-span-2" onClick={onKeep}>
               Keep in vault
             </Button>
             <Button

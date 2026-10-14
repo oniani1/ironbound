@@ -286,18 +286,25 @@ function InspectSheet({ result, chest, sold, instant, onSell, onClose }: { resul
   const r = RARITIES[result.rarity]
   const offer = Math.round(item.value * chest.buyback)
   const closeRef = useRef<HTMLButtonElement>(null)
+  const closeCb = useRef(onClose)
+  closeCb.current = onClose
 
   useEffect(() => {
+    // Focus moves into the sheet and returns to the card that opened it.
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
     closeRef.current?.focus()
     // Escape closes the sheet before it can close the whole opening.
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       e.stopPropagation()
-      onClose()
+      closeCb.current()
     }
     window.addEventListener('keydown', onKey, true)
-    return () => window.removeEventListener('keydown', onKey, true)
-  }, [onClose])
+    return () => {
+      window.removeEventListener('keydown', onKey, true)
+      opener?.focus({ preventScroll: true })
+    }
+  }, [])
 
   return (
     <motion.div
