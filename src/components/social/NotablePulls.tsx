@@ -59,6 +59,8 @@ export function NotablePulls({ limit = 6, className = '', chestId }: { limit?: n
               <ItemVitrine
                 item={item}
                 rarity={p.rarity}
+                to={`/item/${item.id}`}
+                state={{ pull: p }}
                 aspect="aspect-[5/6]"
                 footer={
                   <p className="mt-2 flex items-center gap-1.5 border-t border-bone-100/[0.07] pt-2 text-[12px] text-bone-400">

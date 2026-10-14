@@ -9,7 +9,6 @@ import { OnboardingProvider } from './components/onboarding/OnboardingContext'
 import { GuestInvite } from './components/onboarding/GuestInvite'
 import { Toasts } from './components/layout/Toasts'
 import { startFeed } from './lib/feed'
-import { sfx } from './lib/audio'
 import { scrollToTop, startSmoothScroll } from './lib/smoothScroll'
 import 'lenis/dist/lenis.css'
 import Landing from './pages/Landing'
@@ -19,6 +18,7 @@ const ChestDetail = lazy(() => import('./pages/ChestDetail'))
 const Lab = lazy(() => import('./pages/Lab'))
 const RenderChest = lazy(() => import('./pages/RenderChest'))
 const Vault = lazy(() => import('./pages/Vault'))
+const ItemPage = lazy(() => import('./pages/Item'))
 
 /** Page key: the vault list and an item inside it are different pages; chest ids too. */
 function pageKey(pathname: string) {
@@ -59,6 +59,7 @@ function AppRoutes() {
                 <Route path="/chests/:id" element={<ChestDetail />} />
                 <Route path="/vault" element={<Vault />} />
                 <Route path="/vault/:uid" element={<Vault />} />
+                <Route path="/item/:id" element={<ItemPage />} />
                 <Route path="*" element={<Landing />} />
               </Routes>
             </Suspense>
@@ -75,17 +76,7 @@ function AppRoutes() {
 export default function App() {
   useEffect(() => startSmoothScroll(), [])
 
-  useEffect(() => {
-    startFeed()
-    // Browsers only allow audio after a gesture; the first tap anywhere arms the sound engine.
-    const arm = () => sfx.unlock()
-    window.addEventListener('pointerdown', arm, { once: true })
-    window.addEventListener('keydown', arm, { once: true })
-    return () => {
-      window.removeEventListener('pointerdown', arm)
-      window.removeEventListener('keydown', arm)
-    }
-  }, [])
+  useEffect(() => startFeed(), [])
   return (
     <OpeningProvider>
       <OnboardingProvider>

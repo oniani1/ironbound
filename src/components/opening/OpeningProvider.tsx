@@ -6,7 +6,7 @@ import { rollItem, rollItemIn } from '../../lib/gacha'
 import { drawId, uid } from '../../lib/rng'
 import { actions, getState } from '../../lib/store'
 import { pushFeed } from '../../lib/feed'
-import type { Chest, Pull } from '../../types'
+import type { Chest, Pull, RarityId } from '../../types'
 import type { MultiResult } from './MultiReveal'
 
 const loadOverlay = () => import('./OpeningOverlay')
@@ -16,6 +16,8 @@ export interface OpenOptions {
   trial?: boolean
   fixedItemId?: string
   onClose?: (pulls: Pull[]) => void
+  /** Watch someone's pull: no charge, nothing enters the vault or the feed. */
+  spectate?: { itemId: string; rarity: RarityId; by?: string }
 }
 
 export interface OpeningSession {
@@ -25,6 +27,8 @@ export interface OpeningSession {
   results: MultiResult[]
   trial: boolean
   onClose?: (pulls: Pull[]) => void
+  /** Set when watching another opener's pull. */
+  spectate?: { by?: string }
 }
 
 type OpenResult = { ok: true } | { ok: false; reason: 'funds' | 'unknown-chest' }
@@ -68,6 +72,21 @@ export function OpeningProvider({ children }: { children: ReactNode }) {
   const open = useCallback((chestId: string, count = 1, opts: OpenOptions = {}): OpenResult => {
     const chest = CHEST_BY_ID[chestId]
     if (!chest) return { ok: false, reason: 'unknown-chest' }
+    if (opts.spectate) {
+      // A replay of someone's pull: the same ritual, with no purchase and no record.
+      const item = ITEM_BY_ID[opts.spectate.itemId]
+      if (!item) return { ok: false, reason: 'unknown-chest' }
+      useTexture.preload(item.image)
+      const results: MultiResult[] = [{ uid: uid(), item, rarity: opts.spectate.rarity, draw: drawId() }]
+      const watch: OpeningSession = { key: uid(), chest, pulls: [], results, trial: false, spectate: { by: opts.spectate.by } }
+      if (!current.current) {
+        const active = document.activeElement
+        opener.current = active instanceof HTMLElement && active !== document.body ? active : null
+      }
+      current.current = watch
+      setSession(watch)
+      return { ok: true }
+    }
     const trial = !!opts.trial
     const total = chest.price * count
     if (!trial && !actions.spend(total)) return { ok: false, reason: 'funds' }

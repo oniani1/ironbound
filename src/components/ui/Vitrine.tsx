@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import type { Item, RarityId } from '../../types'
 import { RARITIES } from '../../config/rarity'
 import { money, shortEra } from '../../lib/format'
@@ -17,6 +18,8 @@ export function ItemVitrine({
   showRarity = true,
   meta,
   footer,
+  to,
+  state,
 }: {
   item: Item
   rarity?: RarityId
@@ -26,10 +29,14 @@ export function ItemVitrine({
   /** Replaces the era line under the name. */
   meta?: ReactNode
   footer?: ReactNode
+  /** Makes the whole vitrine a link, usually to the piece's page. */
+  to?: string
+  state?: unknown
 }) {
   const light = rarity ? RARITIES[rarity].cssVar : 'var(--color-brass-500)'
   return (
     <figure className={`group relative m-0 ${className}`}>
+      {to && <Link to={to} state={state} aria-label={`${item.name}, ${money(item.value)}`} className="absolute inset-0 z-10" style={{ outlineOffset: 2 }} />}
       <div className={`vitrine relative ${aspect} overflow-hidden rounded-[2px]`} style={{ '--light': light } as CSSProperties}>
         <span
           className="pointer-events-none absolute inset-x-[22%] bottom-[7%] h-[9%] rounded-[50%] bg-[oklch(0%_0_0/.55)] blur-md transition-[transform,opacity] duration-500 ease-out group-hover:scale-x-90 group-hover:opacity-70"

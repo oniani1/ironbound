@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react'
+import { Link } from 'react-router-dom'
 import { useFeed } from '../../lib/feed'
 import { ITEM_BY_ID } from '../../data/items'
 import { RARITIES } from '../../config/rarity'
@@ -36,8 +37,9 @@ export function LiveTicker() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex items-center gap-2 text-[12px]"
+                  className="relative flex items-center gap-2 text-[12px]"
                 >
+                  <Link to={`/item/${item.id}`} state={{ pull: e }} aria-label={`${item.name} pulled by ${e.self ? 'you' : e.name}`} className="absolute -inset-y-1.5 inset-x-0" />
                   <span className="block h-[5px] w-[5px] rotate-45" style={{ background: r.cssVar }} aria-hidden />
                   <span className={e.self ? 'font-semibold text-brass-300' : 'text-bone-400'}>{e.self ? 'You' : e.name}</span>
                   <span className="font-medium" style={{ color: r.tier >= 4 ? r.cssVar : 'var(--color-bone-200)' }}>

@@ -9,7 +9,6 @@ import { chanceToBeatPrice, chestPool, expectedValue } from '../lib/gacha'
 import { money, oneIn, pct, timeAgo } from '../lib/format'
 import { actions, useStore } from '../lib/store'
 import { useFeed } from '../lib/feed'
-import { sfx } from '../lib/audio'
 import { ChestScene } from '../components/chest3d/ChestScene'
 import { ChestAnim } from '../components/chest3d/animState'
 import { OddsBar } from '../components/chest/OddsBar'
@@ -57,7 +56,6 @@ export default function ChestDetail() {
   const topUp = () => {
     actions.addFunds(1000)
     setShort(false)
-    sfx.coins(8)
   }
   const pick = (q: (typeof QTY)[number]) => {
     setQty(q)
@@ -219,7 +217,7 @@ export default function ChestDetail() {
                       viewport={{ once: true, amount: 0.15 }}
                       transition={{ duration: 0.5, delay: reduced ? 0 : (i % 6) * 0.04, ease }}
                     >
-                      <ItemVitrine item={it} rarity={band.rarity} showRarity={false} />
+                      <ItemVitrine item={it} rarity={band.rarity} showRarity={false} to={`/item/${it.id}`} />
                     </motion.div>
                   ))}
                 </div>
@@ -262,7 +260,8 @@ export default function ChestDetail() {
               const it = ITEM_BY_ID[f.itemId]
               if (!it) return null
               return (
-                <li key={f.id} className="flex items-center gap-4 py-3 text-[13px]">
+                <li key={f.id} className="relative flex items-center gap-4 py-3 text-[13px] transition-colors hover:bg-bone-100/[0.02]">
+                  <Link to={`/item/${it.id}`} state={{ pull: f }} aria-label={`${it.name}, pulled by ${f.self ? 'you' : f.name}`} className="absolute inset-0" />
                   <span className="vitrine block h-10 w-10 shrink-0 rounded-[2px]" style={{ ['--light' as string]: RARITIES[f.rarity].cssVar }}>
                     <ItemImg item={it} className="h-full w-full p-1" />
                   </span>
