@@ -14,10 +14,7 @@ const Chests = lazy(() => import('./pages/Chests'))
 const ChestDetail = lazy(() => import('./pages/ChestDetail'))
 const Lab = lazy(() => import('./pages/Lab'))
 const RenderChest = lazy(() => import('./pages/RenderChest'))
-
-function VaultSoon() {
-  return <div className="mx-auto max-w-[1400px] px-6 py-24 text-bone-300">Vault coming in the next merge.</div>
-}
+const Vault = lazy(() => import('./pages/Vault'))
 
 /** Page key: the vault list and an item inside it are different pages; chest ids too. */
 function pageKey(pathname: string) {
@@ -55,7 +52,8 @@ function AppRoutes() {
                 <Route path="/" element={<Landing />} />
                 <Route path="/chests" element={<Chests />} />
                 <Route path="/chests/:id" element={<ChestDetail />} />
-                <Route path="/vault/*" element={<VaultSoon />} />
+                <Route path="/vault" element={<Vault />} />
+                <Route path="/vault/:uid" element={<Vault />} />
                 <Route path="*" element={<Landing />} />
               </Routes>
             </Suspense>

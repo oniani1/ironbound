@@ -55,7 +55,17 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
 
   let body: ReactNode
   if (step === 'arms') body = <Steps.Arms onNext={() => go('how')} />
-  else if (step === 'how') body = <Steps.How onNext={() => go('trial')} onBack={() => go('arms')} />
+  else if (step === 'how')
+    body = (
+      <Steps.How
+        onNext={() => {
+          // The last story's button reads "Open my free chest": open it straight away.
+          setStep('trial')
+          openTrial()
+        }}
+        onBack={() => go('arms')}
+      />
+    )
   else if (step === 'trial') body = <TrialIntro onOpen={openTrial} />
   else body = <Steps.Claim onNext={finish} />
 
