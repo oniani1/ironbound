@@ -92,7 +92,72 @@ function rig(scene: THREE.Object3D, theme: ChestTheme) {
     hinge.add(lidObj)
   }
   const lockObj = lock as THREE.Mesh | null
+  const ornament = buildOrnament(theme)
+  if (ornament) hinge.add(ornament)
   return { clone, hinge, lock: lockObj, lockBase: lockObj ? lockObj.position.clone() : new THREE.Vector3(), lockMat }
+}
+
+/**
+ * Tier ornaments, in hinge-local space (origin on the hinge line; the lid's crown sits
+ * around y 0.2, z 0.26; its front edge around z 0.52).
+ */
+function buildOrnament(theme: ChestTheme): THREE.Object3D | null {
+  if (!theme.ornament) return null
+  const g = new THREE.Group()
+  const metal = new THREE.MeshStandardMaterial({ color: theme.metal, metalness: 1, roughness: 0.32 })
+  if (theme.ornament === 'crown') {
+    g.position.set(0, 0.196, 0.26)
+    g.scale.setScalar(1.25)
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.08, 0.035, 28, 1, true), metal)
+    band.material = metal.clone()
+    ;(band.material as THREE.MeshStandardMaterial).side = THREE.DoubleSide
+    band.position.y = 0.018
+    g.add(band)
+    const jewel = new THREE.MeshStandardMaterial({ color: '#c3122a', emissive: '#ff2a3a', emissiveIntensity: 0.9, metalness: 0.2, roughness: 0.15 })
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2
+      const spike = new THREE.Mesh(new THREE.ConeGeometry(0.016, 0.055, 10), metal)
+      spike.position.set(Math.cos(a) * 0.072, 0.06, Math.sin(a) * 0.072)
+      g.add(spike)
+      const gem = new THREE.Mesh(new THREE.SphereGeometry(0.011, 12, 10), jewel)
+      gem.position.set(Math.cos(a) * 0.072, 0.093, Math.sin(a) * 0.072)
+      g.add(gem)
+    }
+    const center = new THREE.Mesh(new THREE.SphereGeometry(0.02, 16, 12), jewel)
+    center.position.set(0, 0.03, 0.08)
+    g.add(center)
+  } else if (theme.ornament === 'tassel') {
+    // A vermilion silk knot and tassel tied at the front of the lid.
+    g.position.set(0, 0.035, 0.528)
+    const silk = new THREE.MeshStandardMaterial({ color: '#c8281e', roughness: 0.75, metalness: 0 })
+    const knot = new THREE.Mesh(new THREE.TorusKnotGeometry(0.018, 0.007, 48, 8, 2, 3), silk)
+    g.add(knot)
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.014, 0.016, 16), metal)
+    cap.position.y = -0.03
+    g.add(cap)
+    const tassel = new THREE.Mesh(new THREE.ConeGeometry(0.022, 0.1, 18, 1, true), silk)
+    tassel.material = silk.clone()
+    ;(tassel.material as THREE.MeshStandardMaterial).side = THREE.DoubleSide
+    tassel.rotation.x = Math.PI
+    tassel.position.y = -0.085
+    g.add(tassel)
+  } else if (theme.ornament === 'spikes') {
+    // Iron studs along the crown of the lid.
+    const iron = new THREE.MeshStandardMaterial({ color: '#2a2622', metalness: 0.9, roughness: 0.45 })
+    for (const x of [-0.33, -0.11, 0.11, 0.33]) {
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.028, 0.012, 14), metal)
+      base.position.set(x, 0.198, 0.26)
+      g.add(base)
+      const spike = new THREE.Mesh(new THREE.ConeGeometry(0.018, 0.06, 12), iron)
+      spike.position.set(x, 0.232, 0.26)
+      g.add(spike)
+    }
+  }
+  g.traverse((o) => {
+    const mesh = o as THREE.Mesh
+    if (mesh.isMesh) mesh.castShadow = true
+  })
+  return g
 }
 
 export function ChestModel({ theme, anim }: Props) {

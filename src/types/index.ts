@@ -48,6 +48,8 @@ export interface ChestTheme {
   roughness: number
   /** Color of the idle light leaking from the seams. */
   glow: string
+  /** Tier ornament fixed to the lid. */
+  ornament?: 'crown' | 'tassel' | 'spikes'
 }
 
 export interface Chest {

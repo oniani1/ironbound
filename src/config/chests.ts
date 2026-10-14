@@ -44,7 +44,7 @@ export const CHESTS: Chest[] = [
     tagline: 'Sword guards, tantō, katana and kabuto from Japan. 500 boxes only.',
     price: 250,
     buyback: 0.9,
-    theme: { wood: '#5a1c16', woodSat: 0.6, woodGain: 0.6, woodRough: 0.3, metal: '#f0c066', metalness: 1, roughness: 0.42, glow: '#ff6a3d' },
+    theme: { wood: '#5a1c16', woodSat: 0.6, woodGain: 0.6, woodRough: 0.3, metal: '#f0c066', metalness: 1, roughness: 0.42, glow: '#ff6a3d', ornament: 'tassel' },
     limited: { total: 500, remaining: 137, endsInHours: 41 },
     filter: (item) => item.origin.toLowerCase().includes('japan'),
     bands: [
@@ -63,7 +63,7 @@ export const CHESTS: Chest[] = [
     tagline: 'Rapiers, sabres, helmets and shields. Every pull is a wall piece.',
     price: 1000,
     buyback: 0.9,
-    theme: { wood: '#4a4038', woodSat: 0.25, woodGain: 0.75, woodRough: 0.85, metal: '#d4924a', metalness: 1, roughness: 0.5, glow: '#ffb347' },
+    theme: { wood: '#4a4038', woodSat: 0.25, woodGain: 0.75, woodRough: 0.85, metal: '#d4924a', metalness: 1, roughness: 0.5, glow: '#ffb347', ornament: 'spikes' },
     bands: [
       B('common', 0.8257, 380, 950),
       B('uncommon', 0.137, 950, 1900),
@@ -80,7 +80,7 @@ export const CHESTS: Chest[] = [
     tagline: 'Armor, helmets and swords fit for a royal armory. Grails up to $1.2M.',
     price: 5000,
     buyback: 0.92,
-    theme: { wood: '#b8323a', woodSat: 1.15, woodGain: 0.95, woodRough: 0.6, metal: '#ffd884', metalness: 1, roughness: 0.32, glow: '#ffe1a3' },
+    theme: { wood: '#b8323a', woodSat: 1.15, woodGain: 0.95, woodRough: 0.6, metal: '#ffd884', metalness: 1, roughness: 0.32, glow: '#ffe1a3', ornament: 'crown' },
     bands: [
       B('common', 0.7764, 1800, 4800),
       B('uncommon', 0.1757, 4800, 9000),
