@@ -4,7 +4,6 @@ import { Check, X } from '@phosphor-icons/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
 import { money, provenanceLine, resaleLabel } from '../../lib/format'
-import { sfx } from '../../lib/audio'
 import { Button, IconButton } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
 import { RarityTag, Tag } from '../ui/RarityTag'
@@ -72,10 +71,6 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
 
   const flip = (r: MultiResult) => {
     if (flipped.has(r.uid)) return
-    const tier = RARITIES[r.rarity].tier
-    sfx.whoosh(0.5)
-    if (tier >= 3) window.setTimeout(() => sfx.ting(tier - 2), 160)
-    if (tier >= 5) window.setTimeout(() => sfx.burst(tier), 200)
     setFlipped((s) => new Set(s).add(r.uid))
   }
 
@@ -228,7 +223,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
             <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
               <div>
                 <p className="eyebrow !text-[11px]">Spoils · item value</p>
-                <p className="mt-1 text-[30px] font-semibold leading-none text-bone-50">{instant ? <span className="tabular">{money(total)}</span> : <CountUp to={total} duration={1} ticks />}</p>
+                <p className="mt-1 text-[30px] font-semibold leading-none text-bone-50">{instant ? <span className="tabular">{money(total)}</span> : <CountUp to={total} duration={1} />}</p>
               </div>
               <dl className="grid grid-cols-3 gap-x-4 text-right text-[12px] tabular">
                 <dt className="text-bone-400">Cost</dt>

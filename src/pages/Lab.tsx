@@ -6,7 +6,6 @@ import { applyCharge, introTimeline, revealTimeline, type Phase } from '../compo
 import { CHEST_BY_ID } from '../config/chests'
 import { RARITIES, RARITY_ORDER } from '../config/rarity'
 import { tellSequence } from '../lib/gacha'
-import { sfx } from '../lib/audio'
 import type { Item, RarityId } from '../types'
 import { ITEMS, ITEM_BY_ID } from '../data/items'
 
@@ -26,24 +25,18 @@ export default function Lab() {
   useEffect(() => () => void tl.current?.kill(), [])
 
   const run = (fast: boolean) => {
-    sfx.unlock()
     tl.current?.kill()
     setPhase('intro')
     tl.current = introTimeline(anim, () => {
       // Auto-charge for the lab.
       const o = { p: 0 }
-      sfx.startCharge()
       {
         gsap.to(o, {
           p: 1,
           duration: fast ? 0.3 : 1.2,
           ease: 'power1.in',
-          onUpdate: () => {
-            applyCharge(anim, o.p)
-            sfx.setCharge(o.p)
-          },
+          onUpdate: () => applyCharge(anim, o.p),
           onComplete: () => {
-            sfx.stopCharge()
             tl.current = revealTimeline(anim, { tell: tellSequence(rarity), fast, onPhase: setPhase })
           },
         })

@@ -12,7 +12,6 @@
 .ib-text-link { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; color: var(--color-bone-200); font-size: 13px; text-decoration: none; text-underline-offset: 5px; transition: color .2s var(--ease-out-expo); }
 .ib-text-link:hover { color: var(--color-bone-50); text-decoration: underline; }
 .ib-text-link.caps { font-size: 11px; }
-.ib-sound { display: inline-flex; flex-shrink: 0; white-space: nowrap; align-items: center; gap: 8px; min-height: 44px; border: 0; background: none; color: var(--color-bone-300); font-size: 13px; padding: 8px; }
 .ib-seal { display: inline-grid; place-items: center; width: 56px; height: 56px; border: 1px solid color-mix(in oklch, var(--color-bone-100) 18%, transparent); border-radius: 2px; color: var(--color-bone-300); outline: 1px solid color-mix(in oklch, var(--color-bone-100) 8%, transparent); outline-offset: -6px; flex-shrink: 0; }
 .ib-seal > span { font-family: var(--font-sans); font-size: 13px; }
 .ib-coin-burst { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; overflow: visible; }

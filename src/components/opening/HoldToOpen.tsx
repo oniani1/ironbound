@@ -1,6 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { motion } from 'motion/react'
-import { sfx } from '../../lib/audio'
 
 interface Props {
   /** Seconds of holding needed to break the seal. */
@@ -51,33 +50,25 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
       value.current = Math.max(0, Math.min(1, value.current + dir * dt))
       setP(value.current)
       cb.current.onProgress(value.current)
-      sfx.setCharge(value.current)
       rattleAcc.current += dt * (4 + value.current * 14)
       if (holding.current && rattleAcc.current > 1) {
         rattleAcc.current = 0
-        sfx.rattle(value.current)
         if (navigator.vibrate && value.current > 0.2) navigator.vibrate(8)
       }
       if (value.current >= 1 && !finished.current) {
         finished.current = true
         holding.current = false
-        sfx.stopCharge(0.1)
         cb.current.onComplete()
         return
       }
       if (value.current > 0 || holding.current) raf.current = requestAnimationFrame(loop)
-      else {
-        last.current = 0
-        sfx.stopCharge()
-      }
+      else last.current = 0
     },
     [duration],
   )
 
   const start = useCallback(() => {
     if (disabled || finished.current) return
-    sfx.unlock()
-    sfx.startCharge()
     holding.current = true
     cancelAnimationFrame(raf.current)
     last.current = 0
@@ -93,7 +84,7 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if ((e.code === 'Space' || e.code === 'Enter') && !e.repeat) {
-        // Fast, sound and Close keep their own keyboard activation.
+        // Fast and Close keep their own keyboard activation.
         const t = e.target instanceof HTMLElement ? e.target : null
         if (t?.closest('button, a, input, select, textarea, label, [role="button"]') && !t.closest('[data-testid="hold-to-open"]')) return
         e.preventDefault()
@@ -109,7 +100,6 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
       window.removeEventListener('keydown', down)
       window.removeEventListener('keyup', up)
       cancelAnimationFrame(raf.current)
-      sfx.stopCharge()
     }
   }, [start, stop])
 

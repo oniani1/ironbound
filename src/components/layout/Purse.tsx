@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Coins, Plus } from '@phosphor-icons/react'
 import { actions, useStore } from '../../lib/store'
 import { money } from '../../lib/format'
-import { sfx } from '../../lib/audio'
 import { CountUp } from '../ui/CountUp'
 
 /** The purse as a ledger figure, not a pill. Changes roll to the new value and show a signed delta. */
@@ -28,7 +27,6 @@ export function Purse() {
       <button
         onClick={() => {
           actions.addFunds(500)
-          sfx.coins(6)
         }}
         className="group flex h-10 items-center gap-2 rounded-[6px] px-2.5 text-[14px] font-semibold text-bone-50 transition-colors hover:bg-bone-100/[0.05]"
         title="Add $500 demo credit"

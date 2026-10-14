@@ -7,7 +7,6 @@ import type { Item, Pull } from '../../types'
 import { CHEST_BY_ID } from '../../config/chests'
 import { actions, getState } from '../../lib/store'
 import { money, resaleLabel, RETAIL_CHECKED, sourceHost } from '../../lib/format'
-import { sfx } from '../../lib/audio'
 import { Button } from '../ui/Button'
 import { RarityTag, Tag } from '../ui/RarityTag'
 import { CountUp } from '../ui/CountUp'
@@ -47,9 +46,7 @@ export function ItemDetail({ pull, item }: { pull: Pull; item: Item }) {
     if (committed.current || offer === null) return
     if (getState().pulls.find((p) => p.uid === pull.uid)?.status !== 'vaulted') { setError('This item is no longer available for sell-back.'); return }
     committed.current = true
-    sfx.unlock()
     actions.sellBack(pull.uid, offer)
-    sfx.coins()
     setCelebrate(true)
     setFlow('idle')
   }

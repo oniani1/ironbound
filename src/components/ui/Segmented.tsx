@@ -1,6 +1,5 @@
 import { useId } from 'react'
 import { motion } from 'motion/react'
-import { sfx } from '../../lib/audio'
 
 /**
  * A quiet choice between a few values, set in a hairline frame. The chosen value is lit
@@ -28,7 +27,6 @@ export function Segmented<T extends string | number>({
     const i = options.indexOf(value)
     const next = options[(i + dir + options.length) % options.length]
     if (next !== undefined) {
-      sfx.click()
       onChange(next)
     }
   }
@@ -58,7 +56,6 @@ export function Segmented<T extends string | number>({
             tabIndex={on ? 0 : -1}
             onClick={() => {
               if (on) return
-              sfx.click()
               onChange(o)
             }}
             className={`relative rounded-[4px] font-semibold tabular transition-colors duration-200 ${size === 'lg' ? 'h-11 min-w-11 px-3 text-[14px]' : 'h-9 min-w-[48px] px-3 text-[13px]'} ${on ? 'text-bone-50' : 'text-bone-400 hover:text-bone-100'}`}

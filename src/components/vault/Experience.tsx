@@ -1,8 +1,5 @@
 import type { ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react'
-import { actions, useStore } from '../../lib/store'
-import { sfx } from '../../lib/audio'
 import './experience.css'
 
 export const EXPO = [0.16, 1, 0.3, 1] as const
@@ -11,14 +8,6 @@ export interface StepProps { onNext: () => void; onBack?: () => void }
 export function Reveal({ children, className = '', delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
   const reduced = useReducedMotion()
   return <motion.div className={className} initial={{ opacity: 0, y: reduced ? 0 : 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.05 }} transition={{ duration: reduced ? 0.15 : 0.45, delay: reduced ? 0 : delay, ease: EXPO }}>{children}</motion.div>
-}
-
-export function SoundToggle() {
-  const sound = useStore((s) => s.settings.sound)
-  return <button type="button" className="ib-sound" aria-pressed={sound} aria-label={sound ? 'Mute sound' : 'Enable sound'} onClick={() => { sfx.unlock(); actions.toggleSound() }}>
-    {sound ? <SpeakerHigh size={18} weight="light" aria-hidden="true" /> : <SpeakerSlash size={18} weight="light" aria-hidden="true" />}
-    <span className="caps">Sound {sound ? 'on' : 'off'}</span>
-  </button>
 }
 
 export function CoinBurst() {

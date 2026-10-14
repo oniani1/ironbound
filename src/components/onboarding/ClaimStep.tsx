@@ -4,11 +4,10 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { ArrowRight, ArrowUpRight, GoogleLogo, Wallet } from '@phosphor-icons/react'
 import { actions, getState, useStore } from '../../lib/store'
 import type { State } from '../../lib/store'
-import { sfx } from '../../lib/audio'
 import { Button } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
 import { Shield, DEFAULT_ARMS } from '../ui/Heraldry'
-import { CoinBurst, EXPO, Reveal, SoundToggle } from '../vault/Experience'
+import { CoinBurst, EXPO, Reveal } from '../vault/Experience'
 import type { StepProps } from '../vault/Experience'
 
 export default function ClaimStep({ onNext, onBack }: StepProps) {
@@ -23,14 +22,12 @@ export default function ClaimStep({ onNext, onBack }: StepProps) {
   function signIn(method: NonNullable<State['signInMethod']>) {
     if (signing.current || getState().signedIn) return
     signing.current = true
-    sfx.unlock()
     actions.signIn(method)
-    sfx.coins()
     setGranted(true)
   }
   function emailSignIn(event: FormEvent<HTMLFormElement>) { event.preventDefault(); signIn('email') }
 
-  return <section className="ib-step ib-claim" aria-labelledby="claim-title"><div className="ib-step-top"><p className="ib-kicker m-0">Make it yours · demo</p><SoundToggle /></div>
+  return <section className="ib-step ib-claim" aria-labelledby="claim-title"><div className="ib-step-top"><p className="ib-kicker m-0">Make it yours · demo</p></div>
     <AnimatePresence mode="wait">{signedIn ? <motion.div key="success" className="ib-claim-success" initial={{ opacity: 0, y: reduced ? 0 : 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduced ? 0.15 : 0.45, ease: EXPO }} role="status"><Shield arms={profile?.arms ?? DEFAULT_ARMS} size={92} /><h1 id="claim-title" tabIndex={-1} className="ib-title ib-step-title">{granted ? 'Your purse is ready.' : 'Your demo account is ready.'}</h1><div className="ib-credit-moment">{granted && <CoinBurst />}{granted ? <><span aria-hidden="true" className="ib-credit-number font-display tabular"><CountUp to={1000} format={(n) => `+$${Math.round(n).toLocaleString('en-US')}`} /></span><span aria-hidden="true" className="caps">demo credit</span><span className="sr-only">$1,000 demo credit added.</span></> : <span>Your demo credit has already been claimed.</span>}</div><p className="ib-copy">{granted ? 'Put it toward your next chest. Your collection stays in this browser.' : 'Continue with your current collection and balance.'} All items and payouts are simulated.</p><Button size="lg" onClick={onNext}>Enter the armory <ArrowRight size={18} weight="light" aria-hidden="true" /></Button></motion.div> : <Reveal key="signin"><h1 id="claim-title" tabIndex={-1} className="ib-title ib-step-title">Claim demo credit.</h1><p className="ib-copy tabular">Choose a demo sign-in and receive $1,000 in demo credit.</p><div className="ib-demo-notice"><span className="ib-kicker">Demo only</span><p>No real account is created. No wallet is connected. No payment is required.</p></div>
       <form onSubmit={emailSignIn} className="ib-email-form"><label className="ib-field">Email address<input className="ib-input" type="email" autoComplete="email" name="email" required maxLength={254} placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} /></label><Button type="submit" size="lg" className="w-full">Continue with email</Button></form>
       <div className="ib-signin-divider"><span>or</span></div>

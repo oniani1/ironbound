@@ -1,5 +1,4 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
-import { sfx } from '../../lib/audio'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md' | 'lg'
@@ -10,7 +9,6 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: ReactNode
   /** Secondary line under the label, e.g. a price. */
   sub?: ReactNode
-  silent?: boolean
 }
 
 const sizes: Record<Size, string> = {
@@ -42,22 +40,15 @@ export function buttonClass(variant: Variant = 'primary', size: Size = 'md') {
 }
 
 export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
-  { variant = 'primary', size = 'md', icon, sub, className = '', children, silent, onClick, onMouseEnter, ...rest },
+  { variant = 'primary', size = 'md', icon, sub, className = '', children, onClick, onMouseEnter, ...rest },
   ref,
 ) {
   return (
     <button
       ref={ref}
       className={`${base} active:translate-y-px disabled:pointer-events-none disabled:opacity-40 ${sizes[size]} ${variants[variant]} ${className}`}
-      onMouseEnter={(e) => {
-        if (!silent) sfx.hover()
-        onMouseEnter?.(e)
-      }}
-      onClick={(e) => {
-        sfx.unlock()
-        if (!silent) sfx.click()
-        onClick?.(e)
-      }}
+      onMouseEnter={onMouseEnter}
+      onClick={onClick}
       {...rest}
     >
       {variant === 'primary' && <span className="sheen" aria-hidden />}

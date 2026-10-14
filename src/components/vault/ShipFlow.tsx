@@ -3,7 +3,6 @@ import type { FormEvent } from 'react'
 import type { Pull } from '../../types'
 import { actions, getState, useStore } from '../../lib/store'
 import { money } from '../../lib/format'
-import { sfx } from '../../lib/audio'
 import { Button } from '../ui/Button'
 import { itemHash } from './valuation'
 
@@ -57,8 +56,6 @@ export function ShipFlow({ pull, onCancel }: { pull: Pull; onCancel: () => void 
     committed.current = true
     if (!actions.spend(service.price)) { committed.current = false; setError('Your demo balance changed. Choose a service and try again.'); return }
     actions.ship(pull.uid, { name: address.name, city: address.city, country: address.country, method, eta: service.days, tracking: `DEMO-${itemHash(pull.uid).toString(16).toUpperCase().padStart(8, '0')}` })
-    sfx.unlock()
-    sfx.stamp()
   }
 
   return <section className="ib-transaction" aria-labelledby="ship-heading">

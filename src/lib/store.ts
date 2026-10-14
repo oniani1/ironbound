@@ -14,7 +14,7 @@ export interface State {
   signInMethod: 'email' | 'google' | 'wallet' | null
   balance: number
   pulls: Pull[]
-  settings: { sound: boolean; fast: boolean; force: RarityId | null }
+  settings: { fast: boolean; force: RarityId | null }
   stats: { spent: number; opened: number; soldFor: number }
 }
 
@@ -28,7 +28,7 @@ const initial: State = {
   signInMethod: null,
   balance: 0,
   pulls: [],
-  settings: { sound: true, fast: false, force: null },
+  settings: { fast: false, force: null },
   stats: { spent: 0, opened: 0, soldFor: 0 },
 }
 
@@ -110,9 +110,6 @@ export const actions = {
   },
   ship(uid: string, shipment: NonNullable<Pull['shipment']>) {
     setState((s) => ({ pulls: s.pulls.map((p) => (p.uid === uid ? { ...p, status: 'shipping' as const, shipment } : p)) }))
-  },
-  toggleSound() {
-    setState((s) => ({ settings: { ...s.settings, sound: !s.settings.sound } }))
   },
   setFast(fast: boolean) {
     setState((s) => ({ settings: { ...s.settings, fast } }))

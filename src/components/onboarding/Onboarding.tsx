@@ -3,7 +3,6 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Check } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
 import { actions, useStore } from '../../lib/store'
-import { sfx } from '../../lib/audio'
 import { ITEM_BY_ID } from '../../data/items'
 import { money } from '../../lib/format'
 import { Emblem } from '../layout/Logo'
@@ -40,7 +39,6 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
   }, [])
 
   const go = (s: StepId) => {
-    sfx.whoosh(0.5)
     setStep(s)
   }
 

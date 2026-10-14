@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'motion/react'
 import { SlidersHorizontal } from '@phosphor-icons/react'
 import { actions, useStore } from '../../lib/store'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
-import { sfx } from '../../lib/audio'
 
 // Open state shared by the panel and its toggles (floating on desktop, in the header on phones).
 let isOpen = false
@@ -78,7 +77,6 @@ export function DemoPanel() {
                   key={r}
                   onClick={() => {
                     actions.setForce(r)
-                    sfx.click()
                   }}
                   className="rounded-[4px] px-2 py-1.5 text-[11px] font-semibold transition-colors"
                   style={
@@ -95,7 +93,6 @@ export function DemoPanel() {
               <button
                 onClick={() => {
                   actions.addFunds(1000)
-                  sfx.coins(6)
                 }}
                 className="rounded-[4px] bg-ink-800 px-2 py-1.5 text-[11px] font-semibold text-bone-200 hover:text-bone-50"
               >

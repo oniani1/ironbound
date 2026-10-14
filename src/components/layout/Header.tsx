@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react'
-import { actions, useStore } from '../../lib/store'
+import { useStore } from '../../lib/store'
 import { Logo } from './Logo'
 import { Purse } from './Purse'
 import { LiveTicker } from './LiveTicker'
 import { Shield } from '../ui/Heraldry'
 import { DemoToggle } from './DemoPanel'
-import { Button, IconButton } from '../ui/Button'
+import { Button } from '../ui/Button'
 import { useGuestCta, useOnboarding } from '../onboarding/OnboardingContext'
 
 const NAV = [
@@ -23,7 +22,6 @@ const NAV = [
 export function Header() {
   const signedIn = useStore((s) => s.signedIn)
   const profile = useStore((s) => s.profile)
-  const sound = useStore((s) => s.settings.sound)
   const vaultCount = useStore((s) => s.pulls.filter((p) => p.status === 'vaulted').length)
   const [scrolled, setScrolled] = useState(false)
   const { start } = useOnboarding()
@@ -64,9 +62,6 @@ export function Header() {
         </nav>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           {signedIn && <DemoToggle className="grid h-8 w-8 md:hidden" />}
-          <IconButton onClick={() => actions.toggleSound()} className="hidden sm:grid" aria-label={sound ? 'Mute sound' : 'Unmute sound'} title={sound ? 'Sound on' : 'Sound off'}>
-            {sound ? <SpeakerHigh size={18} weight="light" /> : <SpeakerSlash size={18} weight="light" />}
-          </IconButton>
           {signedIn ? (
             <>
               <Purse />
