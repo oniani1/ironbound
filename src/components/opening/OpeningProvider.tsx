@@ -47,6 +47,16 @@ export function OpeningProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<OpeningSession | null>(null)
   // Mirrors the session so close() can run its callback outside a state updater.
   const current = useRef<OpeningSession | null>(null)
+  // The control that started the opening, captured before the page behind turns inert.
+  const opener = useRef<HTMLElement | null>(null)
+
+  // Once the page is interactive again, focus returns to that control if it is still there.
+  useEffect(() => {
+    if (session || !opener.current) return
+    const el = opener.current
+    opener.current = null
+    if (el.isConnected) el.focus({ preventScroll: true })
+  }, [session])
 
   // Warm the overlay code while the browser is idle, so the first opening starts at once.
   useEffect(() => {
@@ -90,6 +100,10 @@ export function OpeningProvider({ children }: { children: ReactNode }) {
     results.forEach((r) => pushFeed({ name, itemId: r.item.id, chestId: chest.id, rarity: r.rarity, self: true }, 6500))
     results.forEach((r) => useTexture.preload(r.item.image))
     const next: OpeningSession = { key: uid(), chest, pulls, results, trial, onClose: opts.onClose }
+    if (!current.current) {
+      const active = document.activeElement
+      opener.current = active instanceof HTMLElement && active !== document.body ? active : null
+    }
     current.current = next
     setSession(next)
     return { ok: true }

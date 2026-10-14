@@ -174,13 +174,9 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   }, [phase, reduced, multi])
 
   // Keyboard focus: Close while the chest lands, the seal while it waits, Skip while it
-  // opens, the result card after. On exit it returns to the control that started it.
+  // opens, the result card after. The provider returns it to the launcher on exit.
   useEffect(() => {
-    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
     closeBtn.current?.focus({ preventScroll: true })
-    return () => {
-      if (opener?.isConnected) opener.focus({ preventScroll: true })
-    }
   }, [])
   useEffect(() => {
     if (phase === 'tell') skipBtn.current?.focus({ preventScroll: true })
