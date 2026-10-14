@@ -83,9 +83,10 @@ interface Props {
   frameloop?: 'always' | 'never' | 'demand'
   /** Transparent still for card art: no background, floor, plinth or post effects. */
   render?: boolean
+  itemGlow?: number
 }
 
-export function ChestScene({ theme, anim, item, rarityHex = '#ffc94d', parallax, plinth = true, fx = true, className, distance, frameloop = 'always', render = false }: Props) {
+export function ChestScene({ theme, anim, item, rarityHex = '#ffc94d', parallax, plinth = true, fx = true, className, distance, frameloop = 'always', render = false, itemGlow = 1 }: Props) {
   const bg = useMemo(() => cssColorToHex('--color-ink-950'), [])
   // Start sharp, drop resolution if the device cannot hold the frame rate.
   const [dpr, setDpr] = useState(() => Math.min(typeof window === 'undefined' ? 1 : window.devicePixelRatio, 1.75))
@@ -111,7 +112,7 @@ export function ChestScene({ theme, anim, item, rarityHex = '#ffc94d', parallax,
       </Suspense>
       {item && (
         <Suspense fallback={null}>
-          <ItemRise key={item.id} item={item} anim={anim} color={rarityHex} />
+          <ItemRise key={item.id} item={item} anim={anim} color={rarityHex} glow={itemGlow} />
         </Suspense>
       )}
       {!render && <CameraRig anim={anim} parallax={parallax} distance={distance} />}

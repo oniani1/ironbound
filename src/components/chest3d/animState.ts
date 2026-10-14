@@ -43,6 +43,10 @@ export class ChestAnim {
   drop = 1
   /** Camera framing: 0 chest, 1 item reveal (frames the item to the left on wide screens). */
   frame = 0
+  /** Final world-space center height and size of the revealed item, written by ItemRise. */
+  focusY = 1.6
+  focusH = 1.2
+  focusW = 0.5
 
   emit(count: number, color: Color | string, speed = 1) {
     this.bursts.push({ count, color: color instanceof Color ? color.clone() : new Color(color), speed })

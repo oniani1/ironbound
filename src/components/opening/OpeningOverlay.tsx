@@ -151,7 +151,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       data-testid="opening-overlay"
       data-phase={phase}
     >
-      <ChestScene theme={chest.theme} anim={anim} item={multi ? null : first.item} rarityHex={rarityHex} className="!absolute inset-0" />
+      <ChestScene theme={chest.theme} anim={anim} item={multi ? null : first.item} rarityHex={rarityHex} itemGlow={0.3 + RARITIES[best.rarity].tier * 0.12} className="!absolute inset-0" />
 
       {/* While waiting, a press anywhere on the scene charges the seal. */}
       {phase === 'await' && (

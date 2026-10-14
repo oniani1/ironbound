@@ -35,13 +35,24 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     }
     const baseDist = (portrait ? 4.15 : aspect < 1.25 ? 3.6 : 3.15) * distance
     const wide = !portrait && aspect >= 1.25
-    // Shot composition.
+    // Shot composition. On the reveal the item must fit: whole screen height on wide
+    // layouts (card on the right), the band above the bottom sheet on narrow ones.
     const dolly = anim.dolly
     const frame = anim.frame
-    const dist = baseDist - dolly * 0.55 + frame * (portrait ? -0.15 : 0.25)
-    const height = 1.05 - dolly * 0.12 + frame * (portrait ? 0.55 : 0.42)
-    const lookY = 0.45 + frame * (portrait ? 0.5 : 0.78) - dolly * 0.03
-    const offsetX = wide ? frame * 0.62 : 0
+    const sheet = size.width < 768
+    const tanHalf = Math.tan(((fov * Math.PI) / 180) / 2)
+    // Phones: free band between the top bar (about 11%) and the sheet (about 45%).
+    const needH = sheet ? (anim.focusH + 0.1) / (0.62 * tanHalf) : (anim.focusH * 0.78 + 0.16) / tanHalf
+    // Wide pieces must also fit across: the full width on phones, the left 55% beside the card.
+    const needW = (anim.focusW * 0.5 + 0.12) / (tanHalf * aspect * (sheet ? 0.92 : 0.55))
+    const need = Math.max(needH, needW)
+    const revealDist = Math.max(sheet ? 2.6 : 2.9, need)
+    const halfH = revealDist * tanHalf
+    const revealLook = sheet ? anim.focusY - halfH * 0.44 : anim.focusY
+    const dist = baseDist - dolly * 0.55 + frame * (revealDist - baseDist)
+    const lookY = 0.45 - dolly * 0.03 + frame * (revealLook - 0.45)
+    const height = 1.05 - dolly * 0.12 + frame * (revealLook + 0.25 - 1.05)
+    const offsetX = wide && !sheet ? frame * Math.min(0.75, halfH * aspect * 0.42) : 0
     const px = parallax ? pointer.x * 0.25 : 0
     const py = parallax ? pointer.y * 0.12 : 0
     const driftX = Math.sin(t * 0.37) * 0.025 + Math.sin(t * 0.91) * 0.01

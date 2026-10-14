@@ -9,17 +9,19 @@ interface Props {
   item: Item
   anim: ChestAnim
   color: string
+  /** Halo strength, scaled by rarity by the caller. */
+  glow?: number
 }
 
 /** Size of the item plane in world units, normalized by shape so a dagger and a pike both read well. */
 export function itemPlaneSize(aspect: number) {
-  const h = aspect < 0.35 ? 1.55 : aspect < 0.7 ? 1.25 : aspect < 1.4 ? 0.95 : 0.8
+  const h = aspect < 0.35 ? 1.45 : aspect < 0.7 ? 1.2 : aspect < 1.4 ? 0.95 : 0.8
   return { w: h * aspect, h, uprightH: h }
 }
 
 const VERT = /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`
 
-export function ItemRise({ item, anim, color }: Props) {
+export function ItemRise({ item, anim, color, glow = 1 }: Props) {
   const tex = useTexture(item.image)
   const group = useRef<THREE.Group>(null)
   const halo = useRef<THREE.Mesh>(null)
@@ -102,19 +104,23 @@ export function ItemRise({ item, anim, color }: Props) {
     g.visible = p > 0.001
     const eased = 1 - Math.pow(1 - p, 3)
     const floatY = Math.sin(t * 1.4) * 0.025 * p
-    g.position.y = 0.32 + eased * (0.62 + size.uprightH * 0.5) + floatY
+    const restY = 0.32 + 0.62 + size.uprightH * 0.5
+    g.position.y = 0.32 + eased * (restY - 0.32) + floatY
     g.rotation.y = Math.sin(t * 0.6) * 0.2 * p
-    // Phones: the reveal sheet covers the lower half, so the item stays a little smaller.
-    const portrait = state.size.width / Math.max(1, state.size.height) < 0.85
-    g.scale.setScalar((0.55 + eased * 0.45) * (portrait ? 0.78 : 1))
+    g.scale.setScalar(0.55 + eased * 0.45)
+    // Tell the camera where the item will rest so it can frame it whole.
+    anim.focusY = restY
+    anim.focusH = size.uprightH
+    anim.focusW = size.w
     itemMat.uniforms.uLit!.value = anim.itemLit
     itemMat.uniforms.uGlint!.value = anim.glint
     itemMat.uniforms.uOpacity!.value = Math.min(1, p * 3)
-    haloMat.uniforms.uA!.value = Math.min(1, p * 1.5) * (0.5 + anim.itemLit * 0.2) * (0.9 + Math.sin(t * 2.2) * 0.1)
+    haloMat.uniforms.uA!.value = Math.min(1, p * 1.5) * (0.5 + anim.itemLit * 0.2) * (0.9 + Math.sin(t * 2.2) * 0.1) * glow
     if (halo.current) halo.current.quaternion.copy(state.camera.quaternion)
   })
 
-  const haloSize = Math.max(size.w, size.h) * 1.7
+  // Keep the halo close to the item; wide pieces get a capped glow so it never floods the frame.
+  const haloSize = Math.min(2.2, Math.max(size.w, size.h) * 1.6)
   return (
     <group ref={group} position={[0, 0.32, 0.05]}>
       <mesh ref={halo} position={[0, 0, -0.06]} renderOrder={8} material={haloMat}>
