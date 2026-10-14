@@ -15,6 +15,15 @@ pnpm build
 
 Demo controls sit in the corner of every page: force the rarity of the next pull, add credit, or reset.
 
+## Build the shareable page
+
+A host-agnostic build (relative paths, hash routes, inlined fonts) for static hosts and claude.ai Artifacts:
+
+```
+VITE_BASE=./ VITE_HASH_ROUTER=1 node node_modules/vite/bin/vite.js build --outDir dist-artifact
+node scripts/artifact-page.mjs dist-artifact   # writes ironbound.html and lists publish batches
+```
+
 ## What is inside
 
 | Area | Where |

@@ -5,7 +5,7 @@ A polished, mobile-first web mock of a physical arms and armor gacha. Best-in-cl
 
 ## In scope
 1. **Landing** (`/`): live 3D chest hero, real item showcase, how it works, chest tiers, trust (vault, odds, buyback, shipping), big pulls feed, FAQ, footer with image credits.
-2. **Onboarding** (first visit): raise a banner (name and heraldic sigil), a 3-beat "how it works", a free trial chest opening with coach marks, a post-reveal choice tutorial, then a mock sign-in (email, Google, Solana wallet) that grants demo credit.
+2. **Onboarding** (first visit): "Open a free chest" opens the trial chest on the first click, with a guided hold-to-open and a sample Rare result. After the reveal: raise a banner (name and heraldic sigil), then a mock sign-in (email, Google, Solana wallet) that grants demo credit. Both steps can be skipped.
 3. **Armory** (`/chests`): chest tiers at $50, $100, $250 (limited event), $1,000 and $5,000. Each shows price, expected value, odds bar, top items, buyback rate and limited stock.
 4. **Chest detail** (`/chests/:id`): rotatable 3D chest, odds table with value bands, full item pool by rarity, recent pulls, open x1, x3 or x5, fast mode toggle, fairness note.
 5. **Opening ritual**: hold to break the seal, rarity tell by light color with possible upgrades, lid burst, loot beam, item rise from silhouette to full light, reveal card with value count-up and multiplier versus price. Rarity scales length and intensity. Skip and fast mode. Multi-open reveals face-down cards that flip.
