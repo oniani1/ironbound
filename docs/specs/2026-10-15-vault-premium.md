@@ -1,7 +1,7 @@
 # SPEC: Vault, onboarding and lower landing premium pass
 
 Source: Nika's scoped request on 2026-10-15.
-Status: approved
+Status: done
 Approval: The user authorized implementation and two or three local commits on `codex/vault-onboarding`.
 
 ## Goal
