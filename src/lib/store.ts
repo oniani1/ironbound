@@ -97,6 +97,10 @@ export const actions = {
   addPulls(pulls: Pull[]) {
     setState((s) => ({ pulls: [...pulls, ...s.pulls], stats: { ...s.stats, opened: s.stats.opened + pulls.length } }))
   },
+  /** Takes back pulls that were never revealed, such as a free chest closed before its seal broke. */
+  removePulls(uids: string[]) {
+    setState((s) => ({ pulls: s.pulls.filter((p) => !uids.includes(p.uid)), stats: { ...s.stats, opened: Math.max(0, s.stats.opened - uids.length) } }))
+  },
   sellBack(uid: string, amount: number) {
     setState((s) => ({
       balance: s.balance + amount,

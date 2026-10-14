@@ -57,8 +57,11 @@ export class ChestAnim {
   sheet = 0.5
   /** Wide screens: 1 while the result card sits on the right, 0 when it is tucked away. */
   cardSide = 1
+  /** Reduced motion: no drift, shake, float, sparks or camera easing. Light still changes. */
+  still = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   emit(count: number, color: Color | string, speed = 1) {
+    if (this.still) return
     this.bursts.push({ count, color: color instanceof Color ? color.clone() : new Color(color), speed })
   }
 

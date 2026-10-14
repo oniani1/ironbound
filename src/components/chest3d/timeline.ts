@@ -31,6 +31,7 @@ export function introTimeline(anim: ChestAnim, onDone: () => void, fast = false)
   anim.glow = 0.25
   anim.glowColor.set('#ffb35c')
   const tl = gsap.timeline({ onComplete: onDone })
+  if (anim.still) fast = true
   if (fast) anim.drop = 1
   else tl.to(anim, { drop: 1, duration: 0.62, ease: 'power3.in' })
   tl.call(() => {
@@ -47,8 +48,9 @@ export function introTimeline(anim: ChestAnim, onDone: () => void, fast = false)
 /** Applies hold progress (0..1) while the player charges the seal. */
 export function applyCharge(anim: ChestAnim, p: number) {
   anim.heat = p
-  anim.rattle = p < 0.05 ? 0 : 0.15 + p * 0.85
-  anim.dolly = p
+  // Reduced motion: the lock heats and glows, but nothing shakes and the camera holds.
+  anim.rattle = anim.still || p < 0.05 ? 0 : 0.15 + p * 0.85
+  anim.dolly = anim.still ? 0 : p
   anim.glow = 0.25 + p * 0.7
   anim.bloom = p * 0.35
 }

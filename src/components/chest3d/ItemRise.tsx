@@ -112,11 +112,11 @@ export function ItemRise({ item, anim, color, glow = 1, hero = false }: Props) {
     if (!g) return
     g.visible = p > 0.001
     const eased = 1 - Math.pow(1 - p, 3)
-    const floatY = Math.sin(t * 1.4) * 0.025 * p
+    const floatY = anim.still ? 0 : Math.sin(t * 1.4) * 0.025 * p
     const s = hero ? 0.62 : 1
     const restY = hero ? 0.62 + size.uprightH * s * 0.5 : 0.32 + 0.62 + size.uprightH * 0.5
     g.position.y = 0.32 + eased * (restY - 0.32) + floatY
-    g.rotation.y = Math.sin(t * 0.6) * 0.2 * p
+    g.rotation.y = anim.still ? 0 : Math.sin(t * 0.6) * 0.2 * p
     g.scale.setScalar((0.55 + eased * 0.45) * s)
     // Tell the camera where the item will rest so it can frame it whole.
     anim.focusY = restY

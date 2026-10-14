@@ -54,9 +54,11 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     const revealDist = Math.max(sheet ? 2.6 : 2.9, need)
     const halfH = revealDist * tanHalf
     const revealLook = sheet ? anim.focusY - (0.5 - bandCenter) * 2 * halfH : anim.focusY
+    // Phones: the waiting chest sits higher, nearer the seal control under it.
+    const lift = portrait ? 0.24 * (1 - frame) : 0
     let dist = baseDist - dolly * 0.55 + frame * (revealDist - baseDist)
-    let lookY = 0.45 - dolly * 0.03 + frame * (revealLook - 0.45)
-    let height = 1.05 - dolly * 0.12 + frame * (revealLook + 0.25 - 1.05)
+    let lookY = 0.45 - lift - dolly * 0.03 + frame * (revealLook - 0.45)
+    let height = 1.05 - lift - dolly * 0.12 + frame * (revealLook + 0.25 - 1.05)
     let offsetX = wide && !sheet ? frame * anim.cardSide * Math.min(0.75, halfH * aspect * 0.42) : 0
     // Macro: close on the upper third of the piece (hilt, visor, maker's mark), centered.
     const m = anim.macro * frame
@@ -74,16 +76,18 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
       dist = Math.max(baseDist, (top / 2 + 0.32) / tanHalf, (0.75 + 0.1) / (tanHalf * aspect))
       height = lookY + 0.42
     }
-    const px = parallax ? pointer.x * 0.25 : 0
-    const py = parallax ? pointer.y * 0.12 : 0
-    const driftX = Math.sin(t * 0.37) * 0.025 + Math.sin(t * 0.91) * 0.01
-    const driftY = Math.sin(t * 0.53) * 0.018
-    const shake = anim.shake
+    const still = anim.still
+    const px = parallax && !still ? pointer.x * 0.25 : 0
+    const py = parallax && !still ? pointer.y * 0.12 : 0
+    const driftX = still ? 0 : Math.sin(t * 0.37) * 0.025 + Math.sin(t * 0.91) * 0.01
+    const driftY = still ? 0 : Math.sin(t * 0.53) * 0.018
+    const shake = still ? 0 : anim.shake
     const sx = shake * (Math.sin(t * 71.3) * 0.6 + Math.sin(t * 113.7) * 0.4) * 0.05
     const sy = shake * (Math.sin(t * 89.1) * 0.6 + Math.sin(t * 127.3) * 0.4) * 0.05
     pos.set(offsetX + px + driftX + sx, height + py + driftY + sy, dist)
     look.set(offsetX + sx * 0.4, lookY + sy * 0.4, 0)
-    const k = 1 - Math.exp(-dt * 4.5)
+    // Reduced motion: cut to the framing instead of easing toward it.
+    const k = still ? 1 : 1 - Math.exp(-dt * 4.5)
     camera.position.lerp(pos, k)
     target.current.lerp(look, k)
     camera.lookAt(target.current)

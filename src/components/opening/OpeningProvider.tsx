@@ -31,7 +31,7 @@ type OpenResult = { ok: true } | { ok: false; reason: 'funds' | 'unknown-chest' 
 
 interface Ctx {
   open: (chestId: string, count?: number, opts?: OpenOptions) => OpenResult
-  close: () => void
+  close: (opts?: { skipCallback?: boolean }) => void
   active: boolean
 }
 
@@ -95,12 +95,12 @@ export function OpeningProvider({ children }: { children: ReactNode }) {
     return { ok: true }
   }, [])
 
-  const close = useCallback(() => {
+  const close = useCallback((opts?: { skipCallback?: boolean }) => {
     const s = current.current
     if (!s) return
     current.current = null
     setSession(null)
-    s.onClose?.(s.pulls)
+    if (!opts?.skipCallback) s.onClose?.(s.pulls)
   }, [])
 
   const value = useMemo(() => ({ open, close, active: !!session }), [open, close, session])

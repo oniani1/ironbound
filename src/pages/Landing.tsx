@@ -10,7 +10,7 @@ import { money, shortEra } from '../lib/format'
 import { sfx } from '../lib/audio'
 import { useStore } from '../lib/store'
 import { Button } from '../components/ui/Button'
-import { useOnboarding } from '../components/onboarding/OnboardingContext'
+import { useGuestCta, useOnboarding } from '../components/onboarding/OnboardingContext'
 import { LandingSections } from '../components/landing/sections'
 import { ItemImg } from '../components/ui/ItemImg'
 import type { Item } from '../types'
@@ -43,12 +43,14 @@ function Hero() {
   }, [])
   const featured = useMemo(() => ITEMS.find((i) => i.id === 'knightly-longsword-27458') ?? ITEMS.find((i) => i.category === 'sword' && i.value > 40000) ?? ITEMS[ITEMS.length - 1]!, [])
   const { start } = useOnboarding()
+  const guestCta = useGuestCta()
   const signedIn = useStore((s) => s.signedIn)
   const theme = CHEST_BY_ID.king!.theme
   const teaseTimer = useRef(0)
 
   // Every few seconds the chest strains against its lock, as if something inside wants out.
   useEffect(() => {
+    if (anim.still) return
     const tease = () => {
       // A slow glint runs down the steel, and the chest exhales a few embers.
       gsap.fromTo(anim, { glint: 0 }, { glint: 1, duration: 1.1, ease: 'power2.inOut', onComplete: () => void (anim.glint = -1) })
@@ -118,7 +120,7 @@ function Hero() {
               </Link>
             ) : (
               <Button size="lg" onClick={() => start()} data-testid="hero-cta">
-                Open a free chest
+                {guestCta}
               </Button>
             )}
             <Link to="/chests" className="whitespace-nowrap rounded-[14px] px-4 py-4 text-[15px] font-medium text-bone-200 transition-colors hover:bg-bone-100/[0.06] hover:text-bone-50 sm:px-5">

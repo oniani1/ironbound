@@ -6,7 +6,7 @@ import { Purse } from './Purse'
 import { LiveTicker } from './LiveTicker'
 import { Shield } from '../ui/Heraldry'
 import { Button } from '../ui/Button'
-import { useOnboarding } from '../onboarding/OnboardingContext'
+import { useGuestCta, useOnboarding } from '../onboarding/OnboardingContext'
 
 const NAV = [
   { to: '/chests', label: 'Chests' },
@@ -20,6 +20,7 @@ export function Header() {
   const vaultCount = useStore((s) => s.pulls.filter((p) => p.status === 'vaulted').length)
   const [scrolled, setScrolled] = useState(false)
   const { start } = useOnboarding()
+  const guestCta = useGuestCta()
   const { pathname } = useLocation()
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export function Header() {
             </>
           ) : (
             <Button size="sm" onClick={() => start()} data-testid="header-cta">
-              Open a free chest
+              {guestCta}
             </Button>
           )}
         </div>

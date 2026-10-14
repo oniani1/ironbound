@@ -86,6 +86,9 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if ((e.code === 'Space' || e.code === 'Enter') && !e.repeat) {
+        // Fast, sound and Close keep their own keyboard activation.
+        const t = e.target instanceof HTMLElement ? e.target : null
+        if (t?.closest('button, a, input, select, textarea, label, [role="button"]') && !t.closest('[data-testid="hold-to-open"]')) return
         e.preventDefault()
         start()
       }

@@ -12,6 +12,7 @@ import { ITEMS } from '../../data/items'
 import { ItemImg } from '../ui/ItemImg'
 import { actions, useStore } from '../../lib/store'
 import { sfx } from '../../lib/audio'
+import { toast } from '../../lib/toast'
 import { money, shortEra } from '../../lib/format'
 import { HoldToOpen, type HoldHandle } from './HoldToOpen'
 import { RevealCard } from './RevealCard'
@@ -142,14 +143,37 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     return () => window.clearTimeout(t)
   }, [phase, reduced, multi])
 
+  // Close works from the first frame. Before the seal breaks, a free chest stays unopened;
+  // a paid opening keeps its pieces in the vault.
+  const exit = useCallback(() => {
+    if (phase === 'reveal') return close()
+    tl.current?.kill()
+    if (trial && (phase === 'intro' || phase === 'await')) {
+      actions.removePulls(session.pulls.map((p) => p.uid))
+      return close({ skipCallback: true })
+    }
+    if (!trial) toast(results.length > 1 ? `Your ${results.length} ${chest.name} pulls are in your vault.` : `Your ${chest.name} pull is in your vault.`)
+    close()
+  }, [phase, trial, session.pulls, results.length, chest.name, close])
+
+  // Fast switched on while waiting: break the seal now.
+  useEffect(() => {
+    if (!fast || phase !== 'await') return
+    hold.current?.stop()
+    tl.current?.kill()
+    const o = { p: 0 }
+    tl.current = gsap.timeline()
+    tl.current.to(o, { p: 1, duration: 0.08, ease: 'power1.in', onUpdate: () => applyCharge(anim, o.p), onComplete: startReveal })
+  }, [fast, phase, anim, startReveal])
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && phase === 'reveal') close()
+      if (e.key === 'Escape') exit()
       if ((e.key === 's' || e.key === 'S') && (phase === 'tell' || phase === 'burst' || phase === 'rise')) skip()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [phase, close, skip])
+  }, [phase, exit, skip])
 
   const sell = (uids: string[]) => {
     const amounts = uids.map((u) => {
@@ -188,7 +212,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       className="fixed inset-0 z-50 overflow-hidden bg-ink-950"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.35 }}
+      transition={{ duration: reduced ? 0.2 : 0.35 }}
       data-testid="opening-overlay"
       data-phase={phase}
     >
@@ -229,7 +253,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         className={`absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 ${multi && phase === 'reveal' ? 'bg-[linear-gradient(180deg,var(--color-ink-950)_60%,transparent)] pb-5' : ''}`}
       >
         <div className="min-w-0">
-          <p className="eyebrow">{trial ? 'Your first chest' : chest.epithet}</p>
+          <p className="eyebrow truncate">{trial ? 'Your first chest' : chest.epithet}</p>
           <p className="font-display truncate text-xl font-semibold text-bone-50">
             {trial ? 'Trial Chest' : chest.name}
             {multi && <span className="ml-2 text-base font-normal text-bone-300">× {results.length}</span>}
@@ -256,11 +280,9 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
               Skip ›
             </button>
           )}
-          {phase === 'reveal' && (
-            <button onClick={close} className="grid h-11 w-11 place-items-center rounded-full bg-ink-900/70 text-bone-300 backdrop-blur hover:text-bone-50" aria-label="Close">
-              ✕
-            </button>
-          )}
+          <button onClick={exit} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink-900/70 text-bone-300 backdrop-blur hover:text-bone-50" aria-label="Close">
+            ✕
+          </button>
         </div>
       </div>
 
@@ -290,7 +312,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       </AnimatePresence>
 
       {/* Hold to open. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[max(2.5rem,env(safe-area-inset-bottom))] flex justify-center">
+      <div className="pointer-events-none absolute inset-x-0 bottom-[22%] flex justify-center sm:bottom-[max(2.5rem,env(safe-area-inset-bottom))]">
         <AnimatePresence>
           {phase === 'await' && (
             <div className="pointer-events-auto">
@@ -362,7 +384,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
               chest={chest}
               trial={trial}
               sold={soldUids.has(first.uid) ? Math.round(first.item.value * chest.buyback) : null}
-              onKeep={close}
+              onKeep={() => close()}
               onSell={() => sell([first.uid])}
               onShip={() => {
                 close()
@@ -378,7 +400,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
           <motion.div className="absolute inset-0 z-10 flex flex-col overflow-y-auto pb-6 pt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <div className="fixed inset-0 bg-ink-950/55 backdrop-blur-[2px]" />
             <div className="relative my-auto w-full">
-              <MultiReveal results={results} chest={chest} soldUids={soldUids} onSell={sell} onDone={close} onAgain={again} canAfford={canAfford} fast={fast} />
+              <MultiReveal results={results} chest={chest} soldUids={soldUids} onSell={sell} onDone={() => close()} onAgain={again} canAfford={canAfford} fast={fast} />
             </div>
           </motion.div>
         )}

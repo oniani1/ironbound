@@ -104,9 +104,9 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         ref={box}
         data-testid="reveal-card"
         className="pointer-events-auto relative flex w-full items-center gap-3 rounded-t-[18px] border border-bone-100/10 bg-ink-900/90 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:w-auto sm:rounded-full sm:py-2 sm:pl-5 sm:pr-2"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: reduced || fast ? 0 : 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease }}
+        transition={{ duration: reduced || fast ? 0.2 : 0.3, ease }}
       >
         <span className="font-gothic text-[22px] leading-none" style={{ color: r.cssVar }}>{r.stamp}</span>
         <span className="min-w-0 flex-1 truncate font-display text-[17px] text-bone-50 sm:flex-none">{item.name}</span>

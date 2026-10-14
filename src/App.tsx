@@ -6,6 +6,8 @@ import { BottomNav } from './components/layout/BottomNav'
 import { DemoPanel } from './components/layout/DemoPanel'
 import { OpeningProvider } from './components/opening/OpeningProvider'
 import { OnboardingProvider } from './components/onboarding/OnboardingContext'
+import { GuestInvite } from './components/onboarding/GuestInvite'
+import { Toasts } from './components/layout/Toasts'
 import { startFeed } from './lib/feed'
 import { sfx } from './lib/audio'
 import Landing from './pages/Landing'
@@ -40,6 +42,7 @@ function AppRoutes() {
     <div className="grain min-h-[100dvh]">
       <Header />
       <main>
+        <GuestInvite />
         <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo({ top: 0 })}>
           <motion.div
             key={pageKey(location.pathname)}
@@ -62,6 +65,7 @@ function AppRoutes() {
       </main>
       <BottomNav />
       <DemoPanel />
+      <Toasts />
     </div>
   )
 }

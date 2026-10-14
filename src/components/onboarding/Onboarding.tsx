@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { actions, useStore } from '../../lib/store'
 import { sfx } from '../../lib/audio'
 import { ITEM_BY_ID } from '../../data/items'
+import { money } from '../../lib/format'
 import { Emblem } from '../layout/Logo'
 import { ItemImg } from '../ui/ItemImg'
 import { Steps } from './steps'
@@ -92,7 +93,15 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
             <ItemImg item={trialItem} className="h-full w-full" />
           </div>
           <p className="text-[14px] leading-snug text-bone-200">
-            Your <b className="font-semibold text-bone-50">{trialItem.name}</b> is in your demo vault. Raise a banner for it, or skip.
+            {trialPull?.status === 'sold' ? (
+              <>
+                You sold your <b className="font-semibold text-bone-50">{trialItem.name}</b> for {money(trialPull.soldFor ?? 0)}. Raise a banner, or skip.
+              </>
+            ) : (
+              <>
+                Your <b className="font-semibold text-bone-50">{trialItem.name}</b> is in your demo vault. Raise a banner for it, or skip.
+              </>
+            )}
           </p>
         </motion.div>
       )}

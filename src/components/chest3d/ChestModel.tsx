@@ -198,7 +198,7 @@ export function ChestModel({ theme, anim }: Props) {
     const { hinge, lock, lockBase, lockMat } = rigged
     // Lid: opening plus a high-frequency rattle while the seal strains.
     const rattle = anim.rattle * (Math.sin(t * 61) * 0.6 + Math.sin(t * 97) * 0.4)
-    const idleCrack = anim.idle * (0.018 + Math.sin(t * 1.3) * 0.008)
+    const idleCrack = anim.idle * (0.018 + (anim.still ? 0 : Math.sin(t * 1.3) * 0.008))
     hinge.rotation.x = -(anim.lid * LID_OPEN + Math.max(0, rattle) * 0.06 + idleCrack)
     if (root.current) {
       root.current.rotation.z = anim.rattle * Math.sin(t * 43) * 0.014
