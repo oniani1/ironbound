@@ -1,14 +1,14 @@
 import { motion } from 'motion/react'
 
 /** Real length against a 180 cm person, so a dagger and a pike read at their true size. */
-export function ScaleBar({ length, color, delay = 0 }: { length?: string; color: string; delay?: number }) {
+export function ScaleBar({ length, color, delay = 0, label = 'Length' }: { length?: string; color: string; delay?: number; label?: string }) {
   const cm = length ? parseFloat(length) : NaN
   if (!Number.isFinite(cm) || cm <= 0) return null
   const max = Math.max(200, Math.ceil(cm / 50) * 50)
   const pct = Math.min(1, cm / max)
   const person = 180 / max
   return (
-    <div className="mt-3" aria-label={`Length ${Math.round(cm)} centimeters, shown against a 180 centimeter person`} role="img">
+    <div className="mt-3" aria-label={`${label} ${Math.round(cm)} centimeters, shown against a 180 centimeter person`} role="img">
       <div className="relative h-7">
         {/* Person for scale. */}
         <svg viewBox="0 0 10 24" className="absolute bottom-0 h-7 w-3 -translate-x-1/2 text-bone-400/70" style={{ left: `${person * 100}%` }} aria-hidden>

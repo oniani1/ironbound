@@ -132,13 +132,13 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
       </motion.div>
 
       <motion.div {...rise(0.48)} className="relative mt-3 hidden flex-wrap gap-x-4 gap-y-1 text-[12px] text-bone-400 sm:flex">
-        {item.length && <span>Length <b className="font-medium text-bone-200">{item.length}</b></span>}
+        {item.length && <span>{['helmet', 'armor', 'shield'].includes(item.category) ? 'Height' : 'Length'} <b className="font-medium text-bone-200">{item.length}</b></span>}
         {item.weight && <span>Weight <b className="font-medium text-bone-200">{item.weight}</b></span>}
         <span className="min-w-0 truncate">{item.materials}</span>
       </motion.div>
 
       <motion.div {...rise(0.5)} className="relative hidden sm:block">
-        <ScaleBar length={item.length} color={r.cssVar} delay={0.9} />
+        <ScaleBar length={item.length} color={r.cssVar} delay={0.9} label={['helmet', 'armor', 'shield'].includes(item.category) ? 'Height' : 'Length'} />
       </motion.div>
       <motion.p {...rise(0.56)} className="font-display relative mt-3 line-clamp-2 text-[15px] italic leading-snug text-bone-300 sm:line-clamp-3 sm:text-[16px]">
         {item.blurb}
