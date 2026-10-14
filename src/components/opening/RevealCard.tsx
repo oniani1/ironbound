@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES } from '../../config/rarity'
@@ -23,6 +23,12 @@ interface Props {
   onReplay: () => void
   canAfford: boolean
   trial?: boolean
+  /** Fast mode: everything lands at once. */
+  fast?: boolean
+  /** Reports the card's rendered height so the camera can frame the item above it. */
+  onHeight?: (px: number) => void
+  collapsed?: boolean
+  onToggle?: () => void
 }
 
 const CATEGORY_LABEL: Record<Item['category'], string> = {
@@ -36,7 +42,7 @@ const CATEGORY_LABEL: Record<Item['category'], string> = {
   fitting: 'Fitting',
 }
 
-export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, onShip, onAgain, onReplay, canAfford, trial }: Props) {
+export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, onShip, onAgain, onReplay, canAfford, trial, fast, onHeight, collapsed, onToggle }: Props) {
   const r = RARITIES[rarity]
   const offer = Math.round(item.value * chest.buyback)
   const delta = item.value - chest.price
@@ -54,26 +60,65 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
     onSell()
   }
 
+  const box = useRef<HTMLElement>(null)
+  const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  // After an Inspect, the card comes back as it was, without a second entrance.
+  const [revisit, setRevisit] = useState(false)
   useEffect(() => {
-    const t = window.setTimeout(() => sfx.stamp(), 200)
+    if (collapsed) setRevisit(true)
+  }, [collapsed])
+  // Fast and reduced motion: final values and actions at once, opacity only.
+  const instant = fast || reduced || revisit
+
+  useEffect(() => {
+    const t = window.setTimeout(() => sfx.stamp(), fast || reduced ? 0 : 200)
     return () => window.clearTimeout(t)
   }, [])
 
+  useEffect(() => {
+    const el = box.current
+    if (!el || !onHeight) return
+    const ro = new ResizeObserver(() => onHeight(el.getBoundingClientRect().height))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [onHeight, collapsed])
+
   const ease = [0.16, 1, 0.3, 1] as const
   const rise = (d: number) => ({
-    initial: { opacity: 0, y: 14 },
+    initial: { opacity: 0, y: instant ? 0 : 14 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.55, delay: d, ease },
+    transition: { duration: instant ? 0.2 : 0.55, delay: instant ? 0 : d, ease },
   })
+
+  if (collapsed) {
+    return (
+      <motion.aside
+        ref={box}
+        data-testid="reveal-card"
+        className="pointer-events-auto relative flex w-full items-center gap-3 rounded-t-[18px] border border-bone-100/10 bg-ink-900/90 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:w-auto sm:rounded-full sm:py-2 sm:pl-5 sm:pr-2"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease }}
+      >
+        <span className="font-gothic text-[22px] leading-none" style={{ color: r.cssVar }}>{r.stamp}</span>
+        <span className="min-w-0 flex-1 truncate font-display text-[17px] text-bone-50 sm:flex-none">{item.name}</span>
+        <span className="text-[15px] font-semibold text-bone-100 tabular">{money(item.value)}</span>
+        <Button size="sm" variant="secondary" className="!h-11" onClick={onToggle}>
+          Details
+        </Button>
+      </motion.aside>
+    )
+  }
 
   return (
     <motion.aside
+      ref={box}
       data-testid="reveal-card"
       className="pointer-events-auto relative w-full overflow-hidden rounded-t-[22px] border border-bone-100/10 bg-ink-900/88 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_-30px_80px_-20px_oklch(0%_0_0/.7)] backdrop-blur-md sm:rounded-[22px] sm:p-7 md:w-[440px]"
-      initial={{ opacity: 0, y: 60 }}
+      initial={{ opacity: 0, y: instant ? 0 : 60 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 30, transition: { duration: 0.25 } }}
-      transition={{ duration: 0.5, ease }}
+      exit={{ opacity: 0, y: instant ? 0 : 30, transition: { duration: instant ? 0.2 : 0.25 } }}
+      transition={{ duration: instant ? 0.2 : 0.5, ease }}
       style={{ boxShadow: `inset 0 1px 0 color-mix(in oklch, ${r.cssVar} 35%, transparent), 0 30px 90px -30px color-mix(in oklch, ${r.cssVar} 40%, transparent)` }}
     >
       {/* Rarity light along the top edge. */}
@@ -81,9 +126,9 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
 
       <div className="relative flex items-center justify-between gap-3">
         <motion.div
-          initial={{ opacity: 0, scale: 1.9, rotate: -10, filter: 'blur(6px)' }}
+          initial={instant ? { opacity: 0, rotate: -3 } : { opacity: 0, scale: 1.9, rotate: -10, filter: 'blur(6px)' }}
           animate={{ opacity: 1, scale: 1, rotate: -3, filter: 'blur(0px)' }}
-          transition={{ duration: 0.42, delay: 0.12, ease: [0.3, 1.4, 0.5, 1] }}
+          transition={instant ? { duration: 0.2 } : { duration: 0.42, delay: 0.12, ease: [0.3, 1.4, 0.5, 1] }}
           className="flex items-center gap-2.5"
         >
           <span className="font-gothic text-[34px] leading-none sm:text-[40px]" style={{ color: r.cssVar, textShadow: `0 0 24px color-mix(in oklch, ${r.cssVar} 55%, transparent)` }}>
@@ -91,13 +136,20 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
           </span>
           <Pips tier={r.tier} color={r.cssVar} />
         </motion.div>
-        <button onClick={onReplay} className="rounded-full px-2.5 py-1 text-xs text-bone-400 transition-colors hover:bg-bone-100/5 hover:text-bone-100" aria-label="Replay the reveal">
-          ↺ Replay
-        </button>
+        <div className="flex items-center">
+          {onToggle && (
+            <button onClick={onToggle} className="min-h-11 rounded-full px-3 text-[13px] text-bone-300 transition-colors hover:bg-bone-100/5 hover:text-bone-100" aria-label="Hide the card and inspect the piece">
+              Inspect
+            </button>
+          )}
+          <button onClick={onReplay} className="min-h-11 rounded-full px-3 text-[13px] text-bone-300 transition-colors hover:bg-bone-100/5 hover:text-bone-100" aria-label="Replay the reveal">
+            ↺ Replay
+          </button>
+        </div>
       </div>
 
       <motion.p {...rise(0.17)} className="eyebrow relative mt-3 sm:mt-4">
-        {trial ? 'Trial chest' : chest.name} · {CATEGORY_LABEL[item.category]}
+        {trial ? 'Guided demo · sample Rare result' : `${chest.name} · ${CATEGORY_LABEL[item.category]}`}
       </motion.p>
       <motion.h2 {...rise(0.24)} className="font-display relative mt-1 text-[34px] font-semibold leading-[1.02] text-bone-50 sm:text-[40px]">
         {item.name}
@@ -108,15 +160,15 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
 
       <motion.div {...rise(0.4)} className="relative mt-3 grid grid-cols-[1fr_auto] items-end gap-3 border-t border-bone-100/10 pt-3 sm:mt-5 sm:pt-4">
         <div>
-          <p className="eyebrow !text-[10px]">Estimated item value</p>
+          <p className="eyebrow !text-[11px]">Estimated item value</p>
           <p className="mt-1 text-[40px] font-semibold leading-none text-bone-50 sm:text-[46px]">
-            <CountUp to={item.value} duration={rarity === 'common' ? 0.7 : 1.4} delay={0.45} ticks onDone={() => setCounted(true)} />
+            <CountUp to={item.value} duration={instant ? 0.01 : rarity === 'common' ? 0.7 : 1.4} delay={instant ? 0 : 0.45} ticks={!instant} onDone={() => setCounted(true)} />
           </p>
         </div>
         <motion.div
-          initial={{ opacity: 0, scale: 0.6 }}
-          animate={counted ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.4, ease: [0.3, 1.5, 0.5, 1] }}
+          initial={{ opacity: 0, scale: instant ? 1 : 0.6 }}
+          animate={counted || instant ? { opacity: 1, scale: 1 } : {}}
+          transition={instant ? { duration: 0.2 } : { duration: 0.4, ease: [0.3, 1.5, 0.5, 1] }}
           className="mb-1 text-right"
         >
           {trial ? (
@@ -138,7 +190,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
       </motion.div>
 
       <motion.div {...rise(0.5)} className="relative hidden sm:block">
-        <ScaleBar length={item.length} color={r.cssVar} delay={0.9} label={['helmet', 'armor', 'shield'].includes(item.category) ? 'Height' : 'Length'} />
+        <ScaleBar length={item.length} color={r.cssVar} delay={0.9} instant={instant} label={['helmet', 'armor', 'shield'].includes(item.category) ? 'Height' : 'Length'} />
       </motion.div>
       <motion.p {...rise(0.56)} className="font-display relative mt-3 hidden text-[16px] italic leading-snug text-bone-300 sm:line-clamp-3">
         {item.blurb}
@@ -146,7 +198,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
 
       {trial && sold == null && (
         <motion.p {...rise(0.62)} className="relative mt-4 rounded-[12px] border border-brass-500/25 bg-brass-500/[0.07] px-3.5 py-2.5 text-[13px] leading-snug text-bone-200">
-          This piece is yours. Every pull ends with the same choice: keep it in your vault, sell it back instantly, or ship it home.
+          Added to your demo vault. Every pull ends with the same choice: keep it, sell it back instantly, or ship it home.
         </motion.p>
       )}
       <motion.div {...rise(0.67)} className="relative mt-4 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-2.5">
@@ -185,9 +237,9 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         )}
       </motion.div>
       {draw && (
-        <motion.p {...rise(0.77)} className="relative mt-3 flex items-center justify-center gap-1.5 text-[10px] text-bone-400" title={`Draw ${draw}`}>
+        <motion.p {...rise(0.77)} className="relative mt-3 flex items-center justify-center gap-1.5 text-[11px] text-bone-400" title={`Draw ${draw}`}>
           <span className="block h-1 w-1 rounded-full bg-moss-400" />
-          Draw receipt 0x{draw.slice(0, 6)}…{draw.slice(-4)} · simulated in this demo
+          Simulated draw 0x{draw.slice(0, 6)}…{draw.slice(-4)} · no on-chain transaction
         </motion.p>
       )}
       {coins && <CoinBurst from={coins.from} to={coins.to} onDone={() => setCoins(null)} />}

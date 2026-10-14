@@ -21,6 +21,9 @@ export function itemPlaneSize(aspect: number) {
   return { w: h * aspect, h, uprightH: h }
 }
 
+/** The detail a macro shot lands on: hilts and heads high, visors a little above center, boss and plates centered. */
+const MACRO_BIAS: Record<string, number> = { sword: 0.3, dagger: 0.28, polearm: 0.32, axe: 0.28, helmet: 0.06, shield: 0, armor: 0.12, fitting: 0 }
+
 const VERT = /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`
 
 export function ItemRise({ item, anim, color, glow = 1, hero = false }: Props) {
@@ -115,6 +118,7 @@ export function ItemRise({ item, anim, color, glow = 1, hero = false }: Props) {
     anim.focusY = restY
     anim.focusH = size.uprightH * s
     anim.focusW = size.w * s
+    anim.macroBias = MACRO_BIAS[item.category] ?? 0.2
     itemMat.uniforms.uLit!.value = anim.itemLit
     itemMat.uniforms.uGlint!.value = anim.glint
     itemMat.uniforms.uOpacity!.value = Math.min(1, p * 3)

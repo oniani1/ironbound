@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
-import { money } from '../../lib/format'
+import { money, shortEra } from '../../lib/format'
 import { sfx } from '../../lib/audio'
 import { Button } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
@@ -24,25 +24,41 @@ interface Props {
   onDone: () => void
   onAgain: () => void
   canAfford: boolean
+  /** Fast mode: cards land face up and the totals are final at once. */
+  fast?: boolean
 }
+
+const ease = [0.16, 1, 0.3, 1] as const
 
 /**
  * Hearthstone-style spread: every card lands face down, glowing with its rarity. The
- * player flips them in any order; the best one is saved for last by "Reveal all".
+ * player flips them in any order; the best one is saved for last by "Reveal all". Once
+ * face up, each card can be inspected and selected for sell-back on its own.
  */
-export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain, canAfford }: Props) {
-  const [flipped, setFlipped] = useState<Set<string>>(new Set())
+export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain, canAfford, fast }: Props) {
+  const reduced = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches, [])
+  const instant = fast || reduced
+  const [flipped, setFlipped] = useState<Set<string>>(() => new Set(instant ? results.map((r) => r.uid) : []))
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [inspect, setInspect] = useState<MultiResult | null>(null)
   const timers = useRef<number[]>([])
   const allFlipped = flipped.size === results.length
   const total = results.reduce((s, r) => s + r.item.value, 0)
   const cost = chest.price * results.length
-  const cash = Math.round(total * chest.buyback)
   const best = useMemo(
     () => results.reduce((a, b) => (RARITY_ORDER.indexOf(b.rarity) > RARITY_ORDER.indexOf(a.rarity) || (b.rarity === a.rarity && b.item.value > a.item.value) ? b : a)),
     [results],
   )
 
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), [])
+
+  const offerOf = (r: MultiResult) => Math.round(r.item.value * chest.buyback)
+  const unsold = results.filter((r) => !soldUids.has(r.uid))
+  const offersLeft = unsold.reduce((s, r) => s + offerOf(r), 0)
+  const credited = results.filter((r) => soldUids.has(r.uid)).reduce((s, r) => s + offerOf(r), 0)
+  const picked = unsold.filter((r) => selected.has(r.uid))
+  const pickedSum = picked.reduce((s, r) => s + offerOf(r), 0)
+  const belowPrice = unsold.filter((r) => r.item.value < chest.price)
 
   const flip = (r: MultiResult) => {
     if (flipped.has(r.uid)) return
@@ -59,8 +75,18 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
     if (!flipped.has(best.uid)) timers.current.push(window.setTimeout(() => flip(best), order.length * 260 + 700))
   }
 
-  const unsold = results.filter((r) => !soldUids.has(r.uid))
-  const belowPrice = unsold.filter((r) => r.item.value < chest.price)
+  const toggle = (uid: string) =>
+    setSelected((s) => {
+      const n = new Set(s)
+      if (n.has(uid)) n.delete(uid)
+      else n.add(uid)
+      return n
+    })
+
+  const sellPicked = () => {
+    onSell(picked.map((r) => r.uid))
+    setSelected(new Set())
+  }
 
   return (
     <div className="pointer-events-auto mx-auto flex w-full max-w-[1100px] flex-col items-center gap-6 px-4">
@@ -68,111 +94,281 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
         {results.map((r, i) => {
           const rr = RARITIES[r.rarity]
           const isUp = flipped.has(r.uid)
+          const isSold = soldUids.has(r.uid)
+          const isPicked = selected.has(r.uid) && !isSold
           return (
-            <motion.button
+            <motion.div
               key={r.uid}
               data-testid="multi-card"
-              type="button"
-              onClick={() => flip(r)}
-              className="group relative aspect-[3/4] w-[calc(33%-10px)] max-w-[190px] outline-none sm:w-[170px]"
-              initial={{ opacity: 0, y: 120, rotateZ: (i - results.length / 2) * 6, scale: 0.6 }}
+              className="group relative aspect-[4/5] w-[calc(50%-6px)] max-w-[190px] sm:aspect-[3/4] sm:w-[170px]"
+              initial={instant ? { opacity: 0 } : { opacity: 0, y: 120, rotateZ: (i - results.length / 2) * 6, scale: 0.6 }}
               animate={{ opacity: 1, y: 0, rotateZ: 0, scale: 1 }}
-              transition={{ duration: 0.7, delay: 0.1 + i * 0.09, ease: [0.16, 1, 0.3, 1] }}
-              whileHover={isUp ? {} : { y: -8 }}
-              aria-label={isUp ? `${r.item.name}, ${rr.label}, ${money(r.item.value)}` : `Face-down card, ${rr.label}`}
+              transition={instant ? { duration: 0.2 } : { duration: 0.7, delay: 0.1 + i * 0.09, ease }}
+              whileHover={isUp || instant ? {} : { y: -8 }}
             >
               <motion.div
                 className="absolute inset-0"
                 style={{ transformStyle: 'preserve-3d' }}
+                initial={false}
                 animate={{ rotateY: isUp ? 180 : 0 }}
-                transition={{ duration: 0.65, ease: [0.65, 0, 0.35, 1] }}
+                transition={instant ? { duration: 0 } : { duration: 0.65, ease: [0.65, 0, 0.35, 1] }}
               >
                 {/* Back: forged plate, glowing at the edges in the rarity color. */}
-                <div
-                  className="absolute inset-0 overflow-hidden rounded-[14px] border"
+                <button
+                  type="button"
+                  onClick={() => flip(r)}
+                  className="absolute inset-0 overflow-hidden rounded-[14px] border outline-none focus-visible:ring-2 focus-visible:ring-brass-300"
                   style={{
                     backfaceVisibility: 'hidden',
+                    pointerEvents: isUp ? 'none' : 'auto',
                     borderColor: `color-mix(in oklch, ${rr.cssVar} 55%, transparent)`,
                     background: 'radial-gradient(120% 90% at 50% 0%, oklch(24% 0.02 60), oklch(13% 0.012 55))',
                     boxShadow: `0 0 ${18 + rr.tier * 8}px color-mix(in oklch, ${rr.cssVar} ${20 + rr.tier * 8}%, transparent), inset 0 0 40px color-mix(in oklch, ${rr.cssVar} 18%, transparent)`,
                   }}
+                  tabIndex={isUp ? -1 : 0}
+                  aria-hidden={isUp}
+                  aria-label={`Flip face-down card, ${rr.label}`}
                 >
-                  <div className="absolute inset-3 rounded-[10px] border border-bone-100/10" />
-                  <div className="absolute inset-0 grid place-items-center">
-                    <svg viewBox="0 0 64 80" className="h-16 w-14 opacity-70 transition-transform duration-300 group-hover:scale-110">
+                  <span className="absolute inset-3 rounded-[10px] border border-bone-100/10" />
+                  <span className="absolute inset-0 grid place-items-center">
+                    <svg viewBox="0 0 64 80" className="h-16 w-14 opacity-70 transition-transform duration-300 group-hover:scale-110" aria-hidden>
                       <path d="M4 4 H60 V36 C60 56 46 70 32 76 C18 70 4 56 4 36 Z" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: rr.cssVar }} />
                       <path d="M32 14 L34 46 L32 52 L30 46 Z M24 46 H40 V49 H24 Z" fill="currentColor" style={{ color: rr.cssVar }} />
                     </svg>
-                  </div>
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 animate-pulse-soft" style={{ background: `linear-gradient(0deg, color-mix(in oklch, ${rr.cssVar} 30%, transparent), transparent)` }} />
-                </div>
-                {/* Front: the item. */}
+                  </span>
+                  <span className="absolute inset-x-0 bottom-0 h-1/2 animate-pulse-soft" style={{ background: `linear-gradient(0deg, color-mix(in oklch, ${rr.cssVar} 30%, transparent), transparent)` }} />
+                </button>
+
+                {/* Front: the item, an Inspect target and a select control. */}
                 <div
-                  className="absolute inset-0 flex flex-col overflow-hidden rounded-[14px] border bg-ink-900"
+                  className={`absolute inset-0 flex flex-col overflow-hidden rounded-[14px] border bg-ink-900 transition-shadow duration-200 ${isSold ? 'opacity-70' : ''}`}
                   style={{
                     backfaceVisibility: 'hidden',
                     transform: 'rotateY(180deg)',
-                    borderColor: `color-mix(in oklch, ${rr.cssVar} 45%, transparent)`,
-                    boxShadow: `0 20px 50px -20px color-mix(in oklch, ${rr.cssVar} 55%, transparent)`,
+                    pointerEvents: isUp ? 'auto' : 'none',
+                    borderColor: isPicked ? 'var(--color-brass-300)' : `color-mix(in oklch, ${rr.cssVar} 45%, transparent)`,
+                    boxShadow: isPicked
+                      ? '0 0 0 2px var(--color-brass-300), 0 20px 50px -20px oklch(70% 0.14 70 / .6)'
+                      : `0 20px 50px -20px color-mix(in oklch, ${rr.cssVar} 55%, transparent)`,
                   }}
+                  aria-hidden={!isUp}
                 >
-                  <div className="relative flex-1" style={{ background: `radial-gradient(70% 60% at 50% 70%, color-mix(in oklch, ${rr.cssVar} 28%, transparent), transparent)` }}>
+                  <button
+                    type="button"
+                    onClick={() => setInspect(r)}
+                    className="relative min-h-0 flex-1 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brass-300"
+                    style={{ background: `radial-gradient(70% 60% at 50% 70%, color-mix(in oklch, ${rr.cssVar} 28%, transparent), transparent)` }}
+                    tabIndex={isUp ? 0 : -1}
+                    aria-label={`Inspect ${r.item.name}, ${rr.label}, ${money(r.item.value)}`}
+                  >
                     <ItemImg item={r.item} eager className="absolute inset-2 h-[calc(100%-16px)] w-[calc(100%-16px)] drop-shadow-[0_10px_18px_oklch(0%_0_0/.6)]" />
-                    {soldUids.has(r.uid) && <span className="absolute right-2 top-2 rounded-full bg-moss-400/20 px-2 py-0.5 text-[10px] font-semibold text-moss-400">Sold</span>}
-                  </div>
+                  </button>
+                  {isSold ? (
+                    <span className="absolute right-2 top-2 rounded-full bg-moss-400/20 px-2 py-0.5 text-[12px] font-semibold text-moss-400 tabular">Sold +{money(offerOf(r))}</span>
+                  ) : (
+                    <button
+                      type="button"
+                      data-testid="multi-select"
+                      onClick={() => toggle(r.uid)}
+                      className="absolute right-0 top-0 grid h-11 w-11 place-items-center outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brass-300"
+                      tabIndex={isUp ? 0 : -1}
+                      aria-pressed={isPicked}
+                      aria-label={`${isPicked ? 'Unselect' : 'Select'} ${r.item.name} for sell-back at ${money(offerOf(r))}`}
+                    >
+                      <span
+                        className={`grid h-6 w-6 place-items-center rounded-full border text-[13px] font-bold transition-colors ${isPicked ? 'border-brass-300 bg-brass-300 text-ink-950' : 'border-bone-100/30 bg-ink-950/60 text-transparent'}`}
+                      >
+                        ✓
+                      </span>
+                    </button>
+                  )}
                   <div className="border-t border-bone-100/10 p-2.5 text-left">
-                    <RarityTag rarity={r.rarity} size="xs" />
-                    <p className="font-display mt-1 line-clamp-1 text-[15px] font-semibold leading-tight text-bone-50">{r.item.name}</p>
-                    <p className="text-[13px] font-semibold text-bone-200 tabular">{money(r.item.value)}</p>
+                    <RarityTag rarity={r.rarity} size="sm" />
+                    <p className="font-display mt-1 line-clamp-2 text-[15px] font-semibold leading-tight text-bone-50">{r.item.name}</p>
+                    <p className="mt-0.5 text-[13px] text-bone-300 tabular">
+                      <b className="font-semibold text-bone-100">{money(r.item.value)}</b>
+                      {!isSold && <span> · sell {money(offerOf(r))}</span>}
+                    </p>
                   </div>
                 </div>
               </motion.div>
-            </motion.button>
+            </motion.div>
           )
         })}
       </div>
 
-      <div className="flex min-h-[112px] w-full max-w-[560px] flex-col items-center gap-3">
+      <div className="flex min-h-[112px] w-full max-w-[560px] flex-col items-center gap-3 max-sm:sticky max-sm:bottom-[max(0.75rem,env(safe-area-inset-bottom))]">
         {!allFlipped ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="flex flex-col items-center gap-2">
             <Button data-testid="reveal-all" variant="primary" size="lg" onClick={revealAll}>
               Reveal all
             </Button>
-            <p className="text-xs text-bone-400">Or flip them one by one. The glow tells you the rarity.</p>
+            <p className="text-[13px] text-bone-300">Or flip them one by one. The glow tells you the rarity.</p>
           </motion.div>
         ) : (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="plate w-full rounded-[18px] p-4">
-            <div className="flex items-end justify-between gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: instant ? 0 : 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: instant ? 0.2 : 0.5, ease }}
+            className="plate w-full rounded-[18px] p-4"
+            data-testid="multi-summary"
+          >
+            <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
               <div>
-                <p className="eyebrow !text-[10px]">Spoils · item value</p>
-                <p className="mt-1 text-[30px] font-semibold leading-none text-bone-50">
-                  <CountUp to={total} duration={1} ticks />
-                </p>
+                <p className="eyebrow !text-[11px]">Spoils · item value</p>
+                <p className="mt-1 text-[30px] font-semibold leading-none text-bone-50">{instant ? <span className="tabular">{money(total)}</span> : <CountUp to={total} duration={1} ticks />}</p>
               </div>
               <dl className="grid grid-cols-3 gap-x-4 text-right text-[12px] tabular">
                 <dt className="text-bone-400">Cost</dt>
-                <dt className="text-bone-400">As cash</dt>
-                <dt className="text-bone-400">Net cash</dt>
+                <dt className="text-bone-400">Offers left</dt>
+                <dt className="text-bone-400">Credited</dt>
                 <dd className="font-semibold text-bone-100">{money(cost)}</dd>
-                <dd className="font-semibold text-bone-100">{money(cash)}</dd>
-                <dd className={`font-semibold ${cash >= cost ? 'text-moss-400' : 'text-bone-300'}`}>{cash >= cost ? '+' : ''}{money(cash - cost)}</dd>
+                <dd className="font-semibold text-bone-100">{money(offersLeft)}</dd>
+                <dd className={`font-semibold ${credited > 0 ? 'text-moss-400' : 'text-bone-300'}`}>
+                  {credited > 0 ? '+' : ''}
+                  {money(credited)}
+                </dd>
               </dl>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <Button variant="primary" onClick={onDone}>
-                Keep all
+                {unsold.length === 0 ? 'Done' : unsold.length < results.length ? 'Keep the rest' : 'Keep all'}
               </Button>
-              <Button variant="secondary" onClick={() => onSell(belowPrice.map((r) => r.uid))} disabled={belowPrice.length === 0} sub={`${belowPrice.length} below chest price`}>
-                Sell the small ones
+              <Button data-testid="sell-selected" variant="secondary" onClick={sellPicked} disabled={picked.length === 0}>
+                {picked.length ? `Sell selected · ${money(pickedSum)}` : 'Select to sell'}
               </Button>
-              <Button variant="ghost" className="col-span-2" onClick={onAgain} disabled={!canAfford}>
+            </div>
+            <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3">
+              {belowPrice.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setSelected(new Set(belowPrice.map((r) => r.uid)))}
+                  className="min-h-11 text-[13px] text-bone-300 underline-offset-4 hover:text-bone-100 hover:underline"
+                >
+                  Select the {belowPrice.length} below chest price
+                </button>
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                onClick={onAgain}
+                disabled={!canAfford}
+                className="min-h-11 text-[13px] font-semibold text-bone-100 underline-offset-4 hover:underline disabled:text-bone-400 disabled:no-underline"
+              >
                 {canAfford ? `Open ${results.length} more · ${money(cost)}` : 'Not enough in your purse'}
-              </Button>
+              </button>
             </div>
           </motion.div>
         )}
       </div>
+
+      <AnimatePresence>
+        {inspect && (
+          <InspectSheet
+            key={inspect.uid}
+            result={inspect}
+            chest={chest}
+            sold={soldUids.has(inspect.uid)}
+            instant={instant}
+            onSell={() => onSell([inspect.uid])}
+            onClose={() => setInspect(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
+/** One piece from a batch, large, with its own sell-back offer. */
+function InspectSheet({ result, chest, sold, instant, onSell, onClose }: { result: MultiResult; chest: Chest; sold: boolean; instant: boolean; onSell: () => void; onClose: () => void }) {
+  const { item } = result
+  const r = RARITIES[result.rarity]
+  const offer = Math.round(item.value * chest.buyback)
+  const closeRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    closeRef.current?.focus()
+    // Escape closes the sheet before it can close the whole opening.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      e.stopPropagation()
+      onClose()
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [onClose])
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-ink-950/75 backdrop-blur-sm sm:items-center sm:p-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={item.name}
+      data-testid="multi-inspect"
+    >
+      <motion.div
+        onClick={(e) => e.stopPropagation()}
+        className="plate relative w-full max-w-[480px] rounded-t-[22px] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-[22px]"
+        initial={{ y: instant ? 0 : 40 }}
+        animate={{ y: 0 }}
+        exit={{ y: instant ? 0 : 30 }}
+        transition={{ duration: instant ? 0.2 : 0.35, ease }}
+      >
+        <button ref={closeRef} type="button" onClick={onClose} className="absolute right-2 top-2 z-10 grid h-11 w-11 place-items-center rounded-full text-bone-300 hover:bg-bone-100/5 hover:text-bone-50" aria-label="Close">
+          ✕
+        </button>
+        <div className="h-[min(42vh,340px)] rounded-[14px]" style={{ background: `radial-gradient(70% 60% at 50% 65%, color-mix(in oklch, ${r.cssVar} 26%, transparent), transparent)` }}>
+          <ItemImg item={item} eager className="h-full w-full drop-shadow-[0_14px_24px_oklch(0%_0_0/.6)]" />
+        </div>
+        <div className="mt-4">
+          <RarityTag rarity={result.rarity} size="md" />
+          <h3 className="font-display mt-2 text-[28px] font-semibold leading-[1.05] text-bone-50">{item.name}</h3>
+          <p className="mt-1 text-[13px] text-bone-300">
+            {item.provenance === 'antique' ? `${shortEra(item.era)} · ${item.origin} · Antique, authenticated` : `${shortEra(item.era)} · Forged by ${item.maker ?? 'a master smith'}`}
+          </p>
+        </div>
+        <dl className="mt-4 grid grid-cols-2 items-end gap-3 border-t border-bone-100/10 pt-3 tabular">
+          <div>
+            <dt className="eyebrow !text-[11px]">Estimated value</dt>
+            <dd className="mt-1 text-[24px] font-semibold text-bone-50">{money(item.value)}</dd>
+          </div>
+          <div>
+            <dt className="eyebrow !text-[11px]">Sell-back offer</dt>
+            <dd className="mt-1 text-[24px] font-semibold text-bone-100">
+              {money(offer)} <span className="text-[13px] font-normal text-bone-300">{Math.round(chest.buyback * 100)}%</span>
+            </dd>
+          </div>
+        </dl>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          {sold ? (
+            <div className="col-span-2 flex items-center justify-between rounded-[12px] border border-moss-400/30 bg-moss-400/10 px-4 py-3">
+              <span className="text-[13px] text-bone-200">Sold back. Added to your purse.</span>
+              <span className="font-semibold text-moss-400 tabular">+{money(offer)}</span>
+            </div>
+          ) : (
+            <>
+              <Button variant="primary" onClick={onClose}>
+                Keep
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  onSell()
+                  onClose()
+                }}
+              >
+                Sell for {money(offer)}
+              </Button>
+            </>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}

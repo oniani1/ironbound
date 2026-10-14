@@ -77,7 +77,7 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   tl.to(anim, { lockOff: 1, duration: 0.7 * k, ease: 'power2.in' }, '<')
   tl.to(anim, { heat: 0, rattle: 0, duration: 0.5 * k, ease: 'power2.out' }, '<')
   tl.to(anim, { shake: 0.5 * shakeK, duration: 0.04 }, '<')
-  tl.to(anim, { shake: 0, duration: 0.35, ease: 'power2.out' }, '<0.04')
+  tl.to(anim, { shake: 0, duration: 0.35 * k, ease: 'power2.out' }, '<0.04')
 
   // Lid cracks, first tell color spills out.
   const first = RARITIES[steps[0] ?? final]
@@ -137,32 +137,35 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   }
 
   // Item rises as a silhouette inside the beam, then is lit and glinted.
-  const riseDur = (tier >= 5 ? 1.6 : 1.15) * k
-  const litAt = riseDur * 0.7
+  // Rare and above: a macro shot. The camera holds close on a telling detail (hilt, visor,
+  // boss) while grazing light runs down the steel, then pulls back to show the whole piece.
+  const macro = !fast && !reducedMotion && tier >= 3
+  const riseDur = macro ? 0.85 : (tier >= 5 ? 1.6 : 1.15) * k
+  const litAt = macro ? 0.2 : riseDur * 0.7
+  const litDur = macro ? 0.5 : 0.55 * k
   tl.addLabel('rise', `burst+=${fast ? 0.05 : (tier >= 5 ? 0.75 : 0.45) * k}`)
   tl.call(() => {
     onPhase('rise')
     sfx.whoosh(0.8 + tier * 0.1)
   }, [], 'rise')
-  // Rare and above: a macro shot. The camera holds close on the upper third while the
-  // light and a glint run down the steel, then pulls back to show the whole piece.
-  const macro = !fast && !reducedMotion && tier >= 3
   if (macro) tl.set(anim, { macro: 1 }, `rise-=${0.3 * k}`)
-  tl.to(anim, { frame: 1, duration: riseDur * 0.85, ease: 'power2.inOut' }, `rise-=${0.3 * k}`)
-  tl.to(anim, { item: 1, duration: riseDur, ease: 'power2.out' }, 'rise')
+  tl.to(anim, { frame: 1, duration: macro ? 0.6 : riseDur * 0.85, ease: 'power2.inOut' }, `rise-=${0.3 * k}`)
+  tl.to(anim, { item: 1, duration: riseDur, ease: macro ? 'power3.out' : 'power2.out' }, 'rise')
   tl.to(anim, { beam: tier >= 2 ? 0.38 : 0.22, glow: 1.0, duration: 1.4 }, 'rise+=0.3')
-  tl.to(anim, { itemLit: 1, duration: 0.55 * k, ease: 'power2.inOut' }, `rise+=${litAt}`)
+  tl.to(anim, { itemLit: 1, duration: litDur, ease: 'power2.inOut' }, `rise+=${litAt}`)
   tl.call(() => {
     if (tier >= 3) sfx.shimmer(0.7, tier)
   }, [], `rise+=${litAt}`)
-  tl.fromTo(anim, { glint: 0 }, { glint: 1, duration: 0.8 * k, ease: 'power2.inOut' }, `rise+=${litAt + 0.15}`)
-  tl.set(anim, { glint: -1 }, `rise+=${litAt + 0.15 + 0.8 * k}`)
-  const pullBack = litAt + 0.55
+  const glintAt = macro ? litAt + 0.05 : litAt + 0.15
+  const glintDur = macro ? 0.6 : 0.8 * k
+  tl.fromTo(anim, { glint: 0 }, { glint: 1, duration: glintDur, ease: 'power2.inOut' }, `rise+=${glintAt}`)
+  tl.set(anim, { glint: -1 }, `rise+=${glintAt + glintDur}`)
+  const pullBack = 0.75
   if (macro) {
-    tl.to(anim, { macro: 0, duration: 1.0, ease: 'power3.inOut' }, `rise+=${pullBack}`)
+    tl.to(anim, { macro: 0, duration: 0.75, ease: 'power3.inOut' }, `rise+=${pullBack}`)
     tl.call(() => sfx.whoosh(0.45), [], `rise+=${pullBack}`)
   }
-  tl.call(() => onPhase('reveal'), [], macro ? `rise+=${pullBack + 0.85}` : `rise+=${riseDur * (fast ? 0.4 : 0.8)}`)
+  tl.call(() => onPhase('reveal'), [], macro ? `rise+=${pullBack + 0.6}` : `rise+=${riseDur * (fast ? 0.4 : 0.8)}`)
   return tl
 }
 

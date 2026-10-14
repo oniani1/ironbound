@@ -3,27 +3,24 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { actions, useStore } from '../../lib/store'
 import { sfx } from '../../lib/audio'
-import { useOpening } from '../opening/OpeningProvider'
-import { TRIAL_ITEM_ID } from '../../config/chests'
 import { ITEM_BY_ID } from '../../data/items'
-import { Button } from '../ui/Button'
 import { Emblem } from '../layout/Logo'
+import { ItemImg } from '../ui/ItemImg'
 import { Steps } from './steps'
-import { asset } from '../../lib/asset'
 
-type StepId = 'arms' | 'how' | 'trial' | 'claim'
-const ORDER: StepId[] = ['arms', 'how', 'trial', 'claim']
-const LABELS: Record<StepId, string> = { arms: 'Banner', how: 'The rules', trial: 'First chest', claim: 'Purse' }
+type StepId = 'arms' | 'claim'
+const ORDER: StepId[] = ['arms', 'claim']
+const LABELS: Record<StepId, string> = { arms: 'Your banner', claim: 'Demo credit' }
 
 /**
- * First-run flow. Value first: the visitor raises a banner, learns the rules in three
- * beats and opens a free chest before any sign-in. The purse comes last.
+ * Runs after the free trial chest: name the vault the first piece went into, then claim
+ * demo credit. Both steps can be skipped; the chest came first.
  */
 export default function Onboarding({ onFinish }: { onFinish: () => void }) {
-  const signedIn = useStore((s) => s.signedIn)
-  const hasTrial = useStore((s) => s.pulls.some((p) => p.chestId === 'trial'))
-  const [step, setStep] = useState<StepId>(hasTrial ? (signedIn ? 'claim' : 'claim') : 'arms')
-  const { open } = useOpening()
+  const profile = useStore((s) => s.profile)
+  const trialPull = useStore((s) => s.pulls.find((p) => p.chestId === 'trial'))
+  const trialItem = trialPull ? ITEM_BY_ID[trialPull.itemId] : undefined
+  const [step, setStep] = useState<StepId>(profile ? 'claim' : 'arms')
   const navigate = useNavigate()
   const idx = ORDER.indexOf(step)
 
@@ -45,29 +42,9 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
     navigate('/chests')
   }
 
-  const openTrial = () => {
-    open('trial', 1, {
-      trial: true,
-      fixedItemId: ITEM_BY_ID[TRIAL_ITEM_ID] ? TRIAL_ITEM_ID : undefined,
-      onClose: () => go('claim'),
-    })
-  }
-
   let body: ReactNode
-  if (step === 'arms') body = <Steps.Arms onNext={() => go('how')} />
-  else if (step === 'how')
-    body = (
-      <Steps.How
-        onNext={() => {
-          // The last story's button reads "Open my free chest": open it straight away.
-          setStep('trial')
-          openTrial()
-        }}
-        onBack={() => go('arms')}
-      />
-    )
-  else if (step === 'trial') body = <TrialIntro onOpen={openTrial} />
-  else body = <Steps.Claim onNext={finish} />
+  if (step === 'arms') body = <Steps.Arms onNext={() => go('claim')} />
+  else body = <Steps.Claim onNext={finish} onBack={() => go('arms')} />
 
   return (
     <motion.div
@@ -82,7 +59,7 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_100%,oklch(30%_0.08_50/.35),transparent_70%)]" />
       <div className="relative z-10 flex items-center justify-between px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-8">
         <Emblem size={30} />
-        <ol className="flex items-center gap-2 sm:gap-3" aria-label="Onboarding progress">
+        <ol className="flex items-center gap-2 sm:gap-3" aria-label="Setup progress">
           {ORDER.map((s, i) => (
             <li key={s} className="flex items-center gap-2">
               <span
@@ -97,12 +74,30 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
         </ol>
         <button
           onClick={() => (step === 'claim' ? finish() : go('claim'))}
-          className="text-[12px] text-bone-400 underline-offset-4 hover:text-bone-100 hover:underline"
+          className="min-h-11 px-2 text-[13px] text-bone-400 underline-offset-4 hover:text-bone-100 hover:underline"
         >
-          {step === 'claim' ? 'Later' : 'Skip intro'}
+          {step === 'claim' ? 'Later' : 'Skip'}
         </button>
       </div>
-      <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-8 sm:px-8">
+
+      {/* Continuity with the chest just opened. */}
+      {trialItem && step === 'arms' && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="relative z-10 mx-auto mt-5 flex w-[min(100%-2rem,560px)] items-center gap-3 rounded-[16px] border border-brass-500/25 bg-brass-500/[0.07] p-3"
+        >
+          <div className="h-12 w-12 shrink-0 rounded-xl bg-ink-950/60 p-1">
+            <ItemImg item={trialItem} className="h-full w-full" />
+          </div>
+          <p className="text-[14px] leading-snug text-bone-200">
+            Your <b className="font-semibold text-bone-50">{trialItem.name}</b> is in your demo vault. Raise a banner for it, or skip.
+          </p>
+        </motion.div>
+      )}
+
+      <div className="relative z-10 flex flex-1 items-start justify-center px-0 pb-8 sm:items-center sm:px-8">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -120,31 +115,7 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
   )
 }
 
-function TrialIntro({ onOpen }: { onOpen: () => void }) {
-  return (
-    <div className="mx-auto flex max-w-[560px] flex-col items-center text-center">
-      <motion.img
-        src={asset("/chests/trial.webp")}
-        alt=""
-        className="w-[min(340px,80vw)] drop-shadow-[0_30px_50px_oklch(0%_0_0/.7)]"
-        initial={{ y: -40, opacity: 0, rotate: -3 }}
-        animate={{ y: 0, opacity: 1, rotate: 0 }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}
-      />
-      <p className="eyebrow mt-6">On the house</p>
-      <h2 className="font-display mt-2 text-[40px] font-semibold leading-[1.05] text-bone-50 sm:text-[52px]">Your first chest is free</h2>
-      <p className="mt-3 max-w-[44ch] text-[15px] text-bone-300">
-        It holds one real item worth $150 to $900. Break the seal, watch the light, and see what the armory gives you.
-      </p>
-      <Button size="lg" className="mt-7" onClick={onOpen} data-testid="open-trial">
-        Break the seal
-      </Button>
-    </div>
-  )
-}
-
-/** Cheap CSS embers drifting up behind the onboarding steps. */
+/** Cheap CSS embers drifting up behind the steps. */
 function Embers() {
   const [embers] = useState(() =>
     Array.from({ length: 26 }, (_, i) => ({

@@ -23,12 +23,13 @@ export default function Chests() {
   const limited = VISIBLE_CHESTS.find((c) => c.limited)
   const core = VISIBLE_CHESTS.filter((c) => !c.limited)
   return (
-    <div className="mx-auto max-w-[1400px] px-4 pb-28 pt-10 sm:px-6 md:pb-20">
+    <div className="mx-auto max-w-[1400px] px-4 pb-28 pt-6 sm:px-6 sm:pt-10 md:pb-20">
       <motion.header initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease }} className="max-w-[720px]">
         <p className="eyebrow">The armory</p>
-        <h1 className="font-display mt-2 text-[44px] font-semibold leading-[0.98] text-bone-50 sm:text-[64px]">Choose your chest</h1>
-        <p className="mt-4 max-w-[58ch] text-[15px] text-bone-300">
-          Every chest holds one real piece of arms or armor. The odds, the expected value and the instant sell-back rate are printed on each one.
+        <h1 className="font-display mt-2 text-[38px] font-semibold leading-[0.98] text-bone-50 sm:text-[64px]">Choose your chest</h1>
+        <p className="mt-3 max-w-[58ch] text-[15px] text-bone-300 sm:mt-4">
+          Every chest holds one real piece of arms or armor. <span className="hidden sm:inline">The odds, the expected value and the instant sell-back rate are printed on each one.</span>
+          <span className="sm:hidden">Odds and sell-back are printed on each.</span>
         </p>
       </motion.header>
 
@@ -39,7 +40,7 @@ export default function Chests() {
             <LimitedBanner chest={limited} />
           </div>
         )}
-        <div className="order-1 mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:order-2 md:mt-10 lg:grid-cols-4 lg:items-end">
+        <div className="order-1 mt-6 grid grid-cols-1 gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4 md:order-2 md:mt-10 lg:grid-cols-4 lg:items-end">
           {core.map((c, i) => (
             <ChestCard key={c.id} chest={c} index={i} />
           ))}
@@ -59,22 +60,60 @@ function ChestCard({ chest, index }: { chest: Chest; index: number }) {
       <Link
         to={`/chests/${chest.id}`}
         data-testid={`chest-card-${chest.id}`}
-        className="plate group relative flex flex-col overflow-hidden rounded-[22px] p-5 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1.5 hover:border-brass-500/35 sm:min-h-[var(--mh)]"
+        className="plate group relative flex flex-col overflow-hidden rounded-[22px] p-4 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1.5 hover:border-brass-500/35 sm:min-h-[var(--mh)] sm:p-5"
         style={{ ['--mh' as string]: `calc(420px + ${lift}px)` }}
       >
         <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: `radial-gradient(70% 45% at 50% 32%, color-mix(in oklch, ${chest.theme.glow} 16%, transparent), transparent)` }} />
+
+        {/* Phones: name and price first, the chest beside its numbers, the action in reach. */}
+        <div className="relative sm:hidden">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <p className="eyebrow">{chest.epithet}</p>
+              <h2 className="font-display mt-0.5 truncate text-[26px] font-semibold leading-tight text-bone-50">{chest.name}</h2>
+            </div>
+            <span className="shrink-0 pb-0.5 text-[24px] font-bold leading-none text-brass-300 tabular">{money(chest.price)}</span>
+          </div>
+          <div className="mt-3 grid grid-cols-[108px_1fr] items-center gap-4">
+            <ChestArt chest={chest} className="h-[96px] w-full" />
+            <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-[12px]">
+              <div>
+                <dt className="text-bone-400">Item value</dt>
+                <dd className="mt-0.5 text-[14px] font-semibold text-bone-100 tabular">{money(ev)}</dd>
+              </div>
+              <div>
+                <dt className="text-bone-400">As cash</dt>
+                <dd className="mt-0.5 text-[14px] font-semibold text-bone-100 tabular">{money(ev * chest.buyback)}</dd>
+              </div>
+              <div>
+                <dt className="text-bone-400">Beats price</dt>
+                <dd className="mt-0.5 text-[14px] font-semibold text-bone-100 tabular">{pct(beat, 0)}</dd>
+              </div>
+              <div>
+                <dt className="text-bone-400">Sell back</dt>
+                <dd className="mt-0.5 text-[14px] font-semibold text-bone-100 tabular">{Math.round(chest.buyback * 100)}%</dd>
+              </div>
+            </dl>
+          </div>
+          <div className="mt-3">
+            <OddsBar chest={chest} />
+          </div>
+          <div className="mt-3 flex h-12 items-center justify-between rounded-[14px] bg-[linear-gradient(180deg,var(--color-brass-300),var(--color-brass-500)_55%,var(--color-brass-600))] px-4 text-ink-950 shadow-[inset_0_1px_0_oklch(98%_0.04_90/.7),inset_0_-2px_0_oklch(40%_0.08_60/.55)]">
+            <span className="text-[15px] font-semibold">Open</span>
+            <span className="text-[17px] font-bold tabular">{money(chest.price)}</span>
+          </div>
+        </div>
+
+        <div className="hidden flex-1 flex-col sm:flex">
         <div className="flex items-start justify-between">
           <p className="eyebrow">{chest.epithet}</p>
           <p className="text-[12px] text-bone-400">
             Sell back <span className="text-bone-200">{Math.round(chest.buyback * 100)}%</span>
           </p>
         </div>
-        <ChestArt chest={chest} className="mx-auto mt-2 h-[130px] w-full transition-transform duration-500 ease-out group-hover:-translate-y-2 group-hover:scale-[1.04] sm:h-[170px]" />
+        <ChestArt chest={chest} className="mx-auto mt-2 h-[170px] w-full transition-transform duration-500 ease-out group-hover:-translate-y-2 group-hover:scale-[1.04]" />
         <div className="mt-auto">
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-display text-[30px] font-semibold leading-tight text-bone-50">{chest.name}</h2>
-            <span className="text-[22px] font-bold text-brass-300 tabular sm:hidden">{money(chest.price)}</span>
-          </div>
+          <h2 className="font-display text-[30px] font-semibold leading-tight text-bone-50">{chest.name}</h2>
           <p className="mt-1 line-clamp-2 text-[13px] text-bone-300">{chest.tagline}</p>
           <div className="mt-4">
             <OddsBar chest={chest} />
@@ -110,6 +149,7 @@ function ChestCard({ chest, index }: { chest: Chest; index: number }) {
             <span className="text-[18px] font-bold tabular">{money(chest.price)}</span>
           </div>
         </div>
+        </div>
       </Link>
     </motion.div>
   )
@@ -133,7 +173,7 @@ function LimitedBanner({ chest }: { chest: Chest }) {
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-[#ff6a3d]/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#ff9a73]">Limited event</span>
             <span className="text-[12px] text-bone-300">Ends in {lim.endsInHours}h</span>
-            <span className="rounded bg-bone-100/[0.06] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-bone-400">Demo stock</span>
+            <span className="rounded bg-bone-100/[0.06] px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-bone-300">Demo stock</span>
           </div>
           <h2 className="font-display mt-3 text-[36px] font-semibold leading-[1] text-bone-50 sm:text-[48px]">{chest.name}</h2>
           <p className="mt-2 max-w-[52ch] text-[14px] text-bone-300">{chest.tagline}</p>

@@ -134,7 +134,7 @@ export default function ChestDetail() {
                   <span className="text-[20px] font-bold tabular">{money(total)}</span>
                 </span>
               ) : (
-                'Claim your free chest first'
+                'Open a free chest first'
               )}
             </Button>
             <div className="mt-3 flex items-center justify-between text-[12px] text-bone-400">
@@ -194,7 +194,7 @@ export default function ChestDetail() {
                 <span className="text-[17px] font-bold tabular">{money(total)}</span>
               </span>
             ) : (
-              'Try it free'
+              'Open a free chest'
             )}
           </Button>
         </div>

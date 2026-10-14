@@ -56,7 +56,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
       {sub ? (
         <span className="flex flex-col items-start leading-tight">
           <span>{children}</span>
-          <span className="text-[11px] font-medium opacity-70">{sub}</span>
+          <span className="text-[13px] font-medium opacity-80 sm:text-[14px]">{sub}</span>
         </span>
       ) : (
         children

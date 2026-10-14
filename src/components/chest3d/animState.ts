@@ -49,8 +49,14 @@ export class ChestAnim {
   focusW = 0.5
   /** Landing composition: chest and a displayed piece framed together. */
   hero = false
-  /** Macro shot 0..1: camera close on the upper third of the item, then pulls back. */
+  /** Macro shot 0..1: camera close on a telling detail of the item, then pulls back. */
   macro = 0
+  /** Where the macro looks, as a fraction of item height above its center. */
+  macroBias = 0.26
+  /** Phones: fraction of the screen height covered by the result sheet. */
+  sheet = 0.5
+  /** Wide screens: 1 while the result card sits on the right, 0 when it is tucked away. */
+  cardSide = 1
 
   emit(count: number, color: Color | string, speed = 1) {
     this.bursts.push({ count, color: color instanceof Color ? color.clone() : new Color(color), speed })

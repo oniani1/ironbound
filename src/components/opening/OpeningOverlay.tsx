@@ -43,6 +43,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   const [soldUids, setSoldUids] = useState<Set<string>>(new Set())
   const [tellStep, setTellStep] = useState<RarityId | null>(null)
   const [cardReady, setCardReady] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const fast = useStore((s) => s.settings.fast)
   const sound = useStore((s) => s.settings.sound)
   const balance = useStore((s) => s.balance)
@@ -103,6 +104,12 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
 
   const replay = useCallback(() => {
     tl.current?.kill()
+    if (reduced) {
+      // Reduced motion: no second flight. The card fades out and back in.
+      setPhase('tell')
+      window.setTimeout(() => setPhase('reveal'), 200)
+      return
+    }
     anim.reset()
     anim.idle = 0
     setPhase('tell')
@@ -111,10 +118,24 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     }, 250)
   }, [anim, tell, multi, reduced])
 
+  // Phones: frame the piece in the band above the result sheet, whatever its height.
+  const onCardHeight = useCallback(
+    (px: number) => {
+      if (window.innerWidth < 768) anim.sheet = Math.min(0.72, px / window.innerHeight)
+    },
+    [anim],
+  )
+
+  // Inspect: the card steps aside and the camera centers the piece.
+  useEffect(() => {
+    anim.cardSide = collapsed ? 0 : 1
+  }, [collapsed, anim])
+
   // Let the player look at the piece before the receipt slides in.
   useEffect(() => {
     if (phase !== 'reveal') {
       setCardReady(false)
+      setCollapsed(false)
       return
     }
     const t = window.setTimeout(() => setCardReady(true), fastRef.current || reduced || multi ? 0 : 500)
@@ -204,7 +225,9 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       </AnimatePresence>
 
       {/* Top bar. */}
-      <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6">
+      <div
+        className={`absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 ${multi && phase === 'reveal' ? 'bg-[linear-gradient(180deg,var(--color-ink-950)_60%,transparent)] pb-5' : ''}`}
+      >
         <div className="min-w-0">
           <p className="eyebrow">{trial ? 'Your first chest' : chest.epithet}</p>
           <p className="font-display truncate text-xl font-semibold text-bone-50">
@@ -213,20 +236,28 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
           </p>
         </div>
         <div className="flex items-center gap-1.5">
-          <label className="flex cursor-pointer items-center gap-2 rounded-full bg-ink-900/70 px-3 py-1.5 text-xs text-bone-300 backdrop-blur hover:text-bone-100">
+          <label className="flex min-h-11 cursor-pointer items-center gap-2 whitespace-nowrap rounded-full bg-ink-900/70 px-3.5 text-[13px] text-bone-300 backdrop-blur hover:text-bone-100">
             <input type="checkbox" className="accent-[var(--color-brass-500)]" checked={fast} onChange={(e) => actions.setFast(e.target.checked)} />
             Fast
           </label>
-          <button onClick={() => actions.toggleSound()} className="rounded-full bg-ink-900/70 px-3 py-1.5 text-xs text-bone-300 backdrop-blur hover:text-bone-100" aria-label={sound ? 'Mute sound' : 'Unmute sound'}>
-            {sound ? 'Sound on' : 'Muted'}
+          <button
+            onClick={() => actions.toggleSound()}
+            className="flex h-11 min-w-11 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-ink-900/70 px-3 text-[13px] text-bone-300 backdrop-blur hover:text-bone-100"
+            aria-label={sound ? 'Mute sound' : 'Unmute sound'}
+          >
+            <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
+              <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" stroke="none" />
+              {sound ? <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" /> : <path d="M16 9.5l5 5M21 9.5l-5 5" />}
+            </svg>
+            <span className="hidden sm:inline">{sound ? 'Sound on' : 'Muted'}</span>
           </button>
           {(phase === 'tell' || phase === 'burst' || phase === 'rise') && (
-            <button data-testid="skip" onClick={skip} className="rounded-full bg-bone-100/10 px-3.5 py-1.5 text-xs font-semibold text-bone-100 backdrop-blur hover:bg-bone-100/20">
+            <button data-testid="skip" onClick={skip} className="min-h-11 rounded-full bg-bone-100/10 px-4 text-[13px] font-semibold text-bone-100 backdrop-blur hover:bg-bone-100/20">
               Skip ›
             </button>
           )}
           {phase === 'reveal' && (
-            <button onClick={close} className="grid h-8 w-8 place-items-center rounded-full bg-ink-900/70 text-bone-300 backdrop-blur hover:text-bone-50" aria-label="Close">
+            <button onClick={close} className="grid h-11 w-11 place-items-center rounded-full bg-ink-900/70 text-bone-300 backdrop-blur hover:text-bone-50" aria-label="Close">
               ✕
             </button>
           )}
@@ -317,8 +348,14 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       {/* Reveal. */}
       <AnimatePresence>
         {phase === 'reveal' && cardReady && !multi && (
-          <div className="pointer-events-none absolute inset-0 flex items-end justify-center md:items-center md:justify-end md:pr-[max(2rem,6vw)]">
+          <div
+            className={`pointer-events-none absolute inset-0 flex items-end justify-center ${collapsed ? 'sm:pb-8' : 'md:items-center md:justify-end md:pr-[max(2rem,6vw)]'}`}
+          >
             <RevealCard
+              fast={fast}
+              onHeight={onCardHeight}
+              collapsed={collapsed}
+              onToggle={() => setCollapsed((c) => !c)}
               draw={first.draw}
               item={first.item}
               rarity={first.rarity}
@@ -338,10 +375,10 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
           </div>
         )}
         {phase === 'reveal' && multi && (
-          <motion.div className="absolute inset-0 flex items-center justify-center overflow-y-auto pb-6 pt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <div className="absolute inset-0 bg-ink-950/55 backdrop-blur-[2px]" />
-            <div className="relative w-full">
-              <MultiReveal results={results} chest={chest} soldUids={soldUids} onSell={sell} onDone={close} onAgain={again} canAfford={canAfford} />
+          <motion.div className="absolute inset-0 z-10 flex flex-col overflow-y-auto pb-6 pt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="fixed inset-0 bg-ink-950/55 backdrop-blur-[2px]" />
+            <div className="relative my-auto w-full">
+              <MultiReveal results={results} chest={chest} soldUids={soldUids} onSell={sell} onDone={close} onAgain={again} canAfford={canAfford} fast={fast} />
             </div>
           </motion.div>
         )}
@@ -352,7 +389,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         <motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute right-4 top-[calc(max(1rem,env(safe-area-inset-top))+44px)] rounded-full bg-ink-900/70 px-3 py-1.5 text-xs text-bone-300 backdrop-blur sm:right-6"
+          className="absolute right-4 top-[calc(max(1rem,env(safe-area-inset-top))+52px)] z-20 rounded-full bg-ink-900/70 px-3 py-1.5 text-xs text-bone-300 backdrop-blur sm:right-6"
           data-coin-target
         >
           Purse <span className="font-semibold text-bone-100 tabular">{money(balance, { cents: !Number.isInteger(balance) })}</span>

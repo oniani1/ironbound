@@ -41,22 +41,27 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     const frame = anim.frame
     const sheet = size.width < 768
     const tanHalf = Math.tan(((fov * Math.PI) / 180) / 2)
-    // Phones: free band between the top bar (about 11%) and the sheet (about 45%).
-    const needH = sheet ? (anim.focusH + 0.1) / (0.56 * tanHalf) : (anim.focusH * 0.78 + 0.16) / tanHalf
+    // Phones: fit the item in the measured band between the top bar and the result sheet,
+    // with 24 px of clearance from the sheet.
+    const bandTop = Math.min(0.2, 92 / size.height)
+    const bandBottom = Math.max(bandTop + 0.2, 1 - anim.sheet - 24 / size.height)
+    const bandFrac = bandBottom - bandTop
+    const bandCenter = (bandTop + bandBottom) / 2
+    const needH = sheet ? (anim.focusH + 0.1) / (2 * bandFrac * tanHalf) : (anim.focusH * 0.78 + 0.16) / tanHalf
     // Wide pieces must also fit across: the full width on phones, the left 55% beside the card.
     const needW = (anim.focusW * 0.5 + 0.12) / (tanHalf * aspect * (sheet ? 0.92 : 0.55))
     const need = Math.max(needH, needW)
     const revealDist = Math.max(sheet ? 2.6 : 2.9, need)
     const halfH = revealDist * tanHalf
-    const revealLook = sheet ? anim.focusY - halfH * 0.49 : anim.focusY
+    const revealLook = sheet ? anim.focusY - (0.5 - bandCenter) * 2 * halfH : anim.focusY
     let dist = baseDist - dolly * 0.55 + frame * (revealDist - baseDist)
     let lookY = 0.45 - dolly * 0.03 + frame * (revealLook - 0.45)
     let height = 1.05 - dolly * 0.12 + frame * (revealLook + 0.25 - 1.05)
-    let offsetX = wide && !sheet ? frame * Math.min(0.75, halfH * aspect * 0.42) : 0
+    let offsetX = wide && !sheet ? frame * anim.cardSide * Math.min(0.75, halfH * aspect * 0.42) : 0
     // Macro: close on the upper third of the piece (hilt, visor, maker's mark), centered.
     const m = anim.macro * frame
     if (m > 0) {
-      const macroLook = anim.focusY + anim.focusH * 0.26
+      const macroLook = anim.focusY + anim.focusH * anim.macroBias
       dist += (Math.max(1.1, revealDist * 0.46) - dist) * m
       lookY += (macroLook - lookY) * m
       height += (macroLook + 0.04 - height) * m

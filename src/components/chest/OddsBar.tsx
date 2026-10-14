@@ -18,7 +18,7 @@ export function OddsBar({ chest, height = 8, labels = false }: { chest: Chest; h
         ))}
       </div>
       {labels && (
-        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-bone-400">
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-bone-300">
           {chest.bands.map((b) => (
             <span key={b.rarity} className="inline-flex items-center gap-1.5">
               <span className="block h-[6px] w-[6px] rotate-45" style={{ background: RARITIES[b.rarity].cssVar }} />

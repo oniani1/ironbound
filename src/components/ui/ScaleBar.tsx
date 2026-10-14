@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 
 /** Real length against a 180 cm person, so a dagger and a pike read at their true size. */
-export function ScaleBar({ length, color, delay = 0, label = 'Length' }: { length?: string; color: string; delay?: number; label?: string }) {
+export function ScaleBar({ length, color, delay = 0, label = 'Length', instant = false }: { length?: string; color: string; delay?: number; label?: string; instant?: boolean }) {
   const cm = length ? parseFloat(length) : NaN
   if (!Number.isFinite(cm) || cm <= 0) return null
   const max = Math.max(200, Math.ceil(cm / 50) * 50)
@@ -19,12 +19,12 @@ export function ScaleBar({ length, color, delay = 0, label = 'Length' }: { lengt
         <motion.div
           className="absolute bottom-0 left-0 h-[3px] rounded-full"
           style={{ background: color, boxShadow: `0 0 10px ${color}` }}
-          initial={{ width: 0 }}
+          initial={{ width: instant ? `${pct * 100}%` : 0 }}
           animate={{ width: `${pct * 100}%` }}
           transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
         />
       </div>
-      <div className="mt-1 flex justify-between text-[10px] text-bone-400 tabular">
+      <div className="mt-1 flex justify-between text-[11px] text-bone-400 tabular">
         <span>0</span>
         <span className="text-bone-200">{Math.round(cm)} cm</span>
         <span>{max} cm</span>
