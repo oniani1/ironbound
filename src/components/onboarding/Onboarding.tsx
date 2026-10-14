@@ -49,6 +49,7 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
 
   return (
     <motion.div
+      data-lenis-prevent
       className="fixed inset-0 z-40 flex flex-col overflow-y-auto bg-ink-950"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}

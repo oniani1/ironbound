@@ -14,23 +14,23 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const sizes: Record<Size, string> = {
-  sm: 'h-9 px-3.5 text-[13px] gap-1.5 rounded-[10px]',
-  md: 'h-11 px-5 text-[14px] gap-2 rounded-[12px]',
-  lg: 'h-14 px-7 text-[15px] gap-2.5 rounded-[14px]',
+  sm: 'h-9 px-4 text-[11.5px] gap-2',
+  md: 'h-11 px-5 text-[12.5px] gap-2',
+  lg: 'h-14 px-7 text-[13.5px] gap-2.5',
 }
 
+// One button language. Gilt for the single most important action on a view, a bone
+// hairline for everything secondary, quiet text for the rest. No glows.
 const variants: Record<Variant, string> = {
-  // Forged brass: warm gradient, top highlight, inner shadow at the bottom edge.
   primary:
-    'text-ink-950 font-semibold bg-[linear-gradient(180deg,var(--color-brass-300),var(--color-brass-500)_55%,var(--color-brass-600))] ' +
-    'shadow-[inset_0_1px_0_oklch(98%_0.04_90/.7),inset_0_-2px_0_oklch(40%_0.08_60/.55),0_10px_30px_-12px_oklch(70%_0.14_70/.7)] ' +
-    'hover:brightness-[1.08] active:translate-y-px active:brightness-95',
+    'text-ink-950 bg-[linear-gradient(180deg,var(--color-brass-300)_0%,var(--color-brass-400)_38%,var(--color-brass-500)_68%,var(--color-brass-600)_100%)] ' +
+    'shadow-[inset_0_1px_0_oklch(98%_0.04_90/.65),inset_0_-1px_0_oklch(38%_0.08_60/.6),inset_0_0_0_1px_oklch(45%_0.09_62/.35),0_1px_2px_oklch(0%_0_0/.45)] ' +
+    'hover:brightness-[1.06]',
   secondary:
-    'text-bone-100 font-medium bg-ink-800/90 border border-bone-100/12 ' +
-    'shadow-[inset_0_1px_0_oklch(100%_0_0/.06)] hover:bg-ink-700 hover:border-bone-100/20 active:translate-y-px',
-  ghost: 'text-bone-200 font-medium hover:text-bone-50 hover:bg-bone-100/[0.06] active:translate-y-px',
-  danger:
-    'text-bone-50 font-semibold bg-blood-500/90 hover:bg-blood-500 shadow-[inset_0_1px_0_oklch(100%_0_0/.15)] active:translate-y-px',
+    'text-bone-100 bg-transparent shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_22%,transparent)] ' +
+    'hover:bg-bone-100/[0.04] hover:shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_45%,transparent)]',
+  ghost: 'text-bone-200 hover:text-bone-50 hover:bg-bone-100/[0.05]',
+  danger: 'text-bone-50 bg-blood-500/90 hover:bg-blood-500 shadow-[inset_0_1px_0_oklch(100%_0_0/.15)]',
 }
 
 export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
@@ -40,7 +40,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
   return (
     <button
       ref={ref}
-      className={`relative inline-flex select-none items-center justify-center whitespace-nowrap transition-[transform,filter,background-color,border-color,color] duration-150 ease-out disabled:pointer-events-none disabled:opacity-45 ${sizes[size]} ${variants[variant]} ${className}`}
+      className={`relative isolate inline-flex select-none items-center justify-center whitespace-nowrap rounded-[6px] font-semibold uppercase tracking-[0.14em] transition-[transform,filter,background-color,box-shadow,color] duration-200 ease-out active:translate-y-px disabled:pointer-events-none disabled:opacity-40 ${sizes[size]} ${variants[variant]} ${className}`}
       onMouseEnter={(e) => {
         if (!silent) sfx.hover()
         onMouseEnter?.(e)
@@ -52,15 +52,32 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
       }}
       {...rest}
     >
+      {variant === 'primary' && <span className="sheen" aria-hidden />}
       {icon}
       {sub ? (
         <span className="flex flex-col items-start leading-tight">
           <span>{children}</span>
-          <span className="text-[13px] font-medium opacity-80 sm:text-[14px]">{sub}</span>
+          <span className="mt-0.5 text-[12px] font-medium normal-case tracking-normal opacity-75 sm:text-[13px]">{sub}</span>
         </span>
       ) : (
         children
       )}
+    </button>
+  )
+})
+
+/** Round icon control with a hairline, for sound, close and other single-glyph actions. */
+export const IconButton = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & { size?: 'md' | 'lg' }>(function IconButton(
+  { className = '', size = 'md', children, ...rest },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      className={`grid shrink-0 place-items-center rounded-full text-bone-300 shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_14%,transparent)] transition-[color,background-color,box-shadow] duration-200 hover:bg-bone-100/[0.05] hover:text-bone-50 hover:shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_32%,transparent)] ${size === 'lg' ? 'h-11 w-11' : 'h-10 w-10'} ${className}`}
+      {...rest}
+    >
+      {children}
     </button>
   )
 })

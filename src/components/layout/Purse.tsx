@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import { Coins, Plus } from '@phosphor-icons/react'
 import { actions, useStore } from '../../lib/store'
 import { money } from '../../lib/format'
 import { sfx } from '../../lib/audio'
 import { CountUp } from '../ui/CountUp'
 
-/** Balance pill. Changes roll to the new value and flash a signed delta. */
+/** The purse as a ledger figure, not a pill. Changes roll to the new value and show a signed delta. */
 export function Purse() {
   const balance = useStore((s) => s.balance)
   const prev = useRef(balance)
@@ -29,15 +30,14 @@ export function Purse() {
           actions.addFunds(500)
           sfx.coins(6)
         }}
-        className="group flex h-9 items-center gap-2 rounded-full border border-brass-500/30 bg-ink-900/80 pl-2 pr-3 text-[13px] font-semibold text-bone-50 transition-colors hover:border-brass-400/60"
+        className="group flex h-10 items-center gap-2 rounded-[6px] px-2.5 text-[14px] font-semibold text-bone-50 transition-colors hover:bg-bone-100/[0.05]"
         title="Add $500 demo credit"
+        aria-label="Purse. Add $500 demo credit"
         data-testid="purse"
       >
-        <span className="grid h-5 w-5 place-items-center rounded-full bg-[radial-gradient(circle_at_35%_30%,#f6dc95,#b98734)] text-[10px] font-bold text-ink-950 shadow-[inset_0_-1px_0_#7a5420]">
-          $
-        </span>
+        <Coins size={18} weight="light" className="text-brass-400" aria-hidden />
         <CountUp key={balance} from={from} to={balance} duration={0.9} format={(n) => money(n, { cents: !Number.isInteger(balance) })} />
-        <span className="ml-0.5 text-brass-400 opacity-60 transition-opacity group-hover:opacity-100">+</span>
+        <Plus size={12} weight="bold" className="text-brass-400 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
       </button>
       <AnimatePresence>
         {delta && (

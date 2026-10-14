@@ -81,7 +81,7 @@
   --r-legendary: var(--color-r-legendary);
   --r-relic: var(--color-r-relic);
   --header-h: 64px;
-  --ticker-h: 34px;
+  --ticker-h: 30px;
 }
 
 html {
@@ -139,14 +139,54 @@ img {
   letter-spacing: 0.01em;
 }
 
-/* Small caps label used for eyebrows and metadata. */
+/* Small caps label used for eyebrows and metadata. One size across the product. */
 .eyebrow {
   font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--color-bone-400);
+}
+.caps {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* A museum vitrine: the object stands in a pool of light on a dark floor, no box. */
+.vitrine {
+  background:
+    radial-gradient(58% 52% at 50% 60%, color-mix(in oklch, var(--light, var(--color-brass-500)) 15%, transparent), transparent 72%),
+    radial-gradient(70% 24% at 50% 100%, oklch(0% 0 0 / 0.5), transparent 72%);
+}
+
+/* Gilt sheen: a slow highlight crosses the metal on hover. */
+.sheen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.sheen::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 42%;
+  transform: translateX(-150%) skewX(-18deg);
+  background: linear-gradient(90deg, transparent, oklch(99% 0.03 90 / 0.5), transparent);
+  transition: transform 0.9s var(--ease-out-expo);
+}
+*:hover > .sheen::before {
+  transform: translateX(330%) skewX(-18deg);
+}
+
+/* Hairline color for dividers and outlines. */
+.hair {
+  border-color: color-mix(in oklch, var(--color-bone-100) 10%, transparent);
 }
 
 /* Film grain over the whole app; static, cheap. */
@@ -167,15 +207,12 @@ img {
   background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--color-brass-500) 45%, transparent), transparent);
 }
 
-/* Forged plate surface: dark iron with a faint top highlight. */
+/* Quiet surface: dark iron, a hairline edge, no drop shadow theatre. */
 .plate {
-  background:
-    linear-gradient(180deg, color-mix(in oklch, var(--color-bone-100) 4%, transparent), transparent 40%),
-    var(--color-ink-900);
-  border: 1px solid color-mix(in oklch, var(--color-bone-100) 9%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklch, var(--color-bone-100) 6%, transparent),
-    0 24px 60px -30px oklch(0% 0 0 / 0.8);
+  background: color-mix(in oklch, var(--color-ink-900) 94%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-bone-100) 8%, transparent);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--color-bone-100) 4%, transparent);
 }
 
 .text-balance {

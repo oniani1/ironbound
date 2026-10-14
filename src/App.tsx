@@ -10,6 +10,8 @@ import { GuestInvite } from './components/onboarding/GuestInvite'
 import { Toasts } from './components/layout/Toasts'
 import { startFeed } from './lib/feed'
 import { sfx } from './lib/audio'
+import { scrollToTop, startSmoothScroll } from './lib/smoothScroll'
+import 'lenis/dist/lenis.css'
 import Landing from './pages/Landing'
 
 const Chests = lazy(() => import('./pages/Chests'))
@@ -43,7 +45,7 @@ function AppRoutes() {
       <Header />
       <main>
         <GuestInvite />
-        <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo({ top: 0 })}>
+        <AnimatePresence mode="wait" initial={false} onExitComplete={scrollToTop}>
           <motion.div
             key={pageKey(location.pathname)}
             initial={{ opacity: 0, y: 12 }}
@@ -71,6 +73,8 @@ function AppRoutes() {
 }
 
 export default function App() {
+  useEffect(() => startSmoothScroll(), [])
+
   useEffect(() => {
     startFeed()
     // Browsers only allow audio after a gesture; the first tap anywhere arms the sound engine.

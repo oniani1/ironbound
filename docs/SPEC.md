@@ -27,3 +27,15 @@ Smart contracts, real payments, real authentication, a backend or database, a re
 - Playwright run through the full flow on desktop (1440x900) and phone (390x844): landing, onboarding, free chest, armory, open each rarity, vault, sell back, ship.
 - Frame cost of the opening scene measured inside the render loop on desktop.
 - Codex (gpt-6.1-sol, max) rates screenshots and the opening sequence each round. Iterate until both reviewers have no must-fix items.
+
+## Round 2: premium pass (2026-10-14)
+Founder feedback: the UI reads default, the opening is too fast with too little tease, the inventory needs real modern pieces from working makers with real photos. Direction in `research/critique-premium.md`.
+
+1. **Design system.** One button language (gilt primary, hairline secondary, text, icon), labels instead of pills, vitrine presentation instead of bordered cards, a quiet header and a single ledger-line ticker, radii 2/6/10 px, a fixed type scale, one icon set, smooth inertial scroll and reveal-on-scroll. Applied to landing, armory, chest detail, reveal card, vault, onboarding.
+2. **Opening v2.** Arrival (candles ignite, the chest lands), seal (hold, with heartbeat and heat), tease (the lid breathes and spills light in beats that climb through rarities, light rays through the gap, dust in the beam, the room darkens for high tiers), lift (the player drags or holds to throw the lid open), rise (silhouette, then lit from the top, macro for Rare and up), reveal. About 9 s for a Common and up to about 16 s for a Relic. Skip, Fast and reduced motion keep their current behavior. Recorded foley where licensed audio is available, procedural sound otherwise.
+3. **Inventory v2.** Add real modern pieces from real makers alongside the antiques: about 70 to 90 items from $40 to $40,000 across swords, daggers, polearms, axes, helmets, shields, armour and crossbows, with maker profiles and resale notes. Photos only under free licenses (public domain, CC0, CC BY, CC BY-SA), credited per item. Chest pools rebalanced so commons are display-worthy pieces, keeping expected value at 85 to 95 percent of price. Makers are named for illustration; the demo states it has no affiliation with them.
+4. **Light social.** A share card for a pull and a wall of notable recent pulls. No accounts, feeds or chat.
+
+New dependencies: `lenis` (smooth scroll), `@phosphor-icons/react` (icons). Audio files only under CC0 or similar licenses, bundled locally.
+
+Verification adds: the opening's phase timings measured per rarity, every new image's license recorded in `items.json`, expected value tests updated for the new pools, Codex reviews until no must-fix items remain.

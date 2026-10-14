@@ -1,0 +1,20 @@
+You are the inventory researcher for Ironbound, a mock gacha web app for real arms and armor (see `AGENTS.md`). Today the catalog is 187 antique museum pieces from The Met (`src/data/items.json`). The founder wants the inventory to also carry real, new pieces from working blacksmiths and armourers: cheap display swords people buy online for $50 to $150, mid-range pieces for a few hundred dollars, and high-end work from respected makers for a few thousand dollars and up. Swords, daggers, spears and polearms, axes, helmets, shields, armour pieces, crossbows, and a few display artifacts that look great on a wall. Some of it should hold value well on the resale market.
+
+Research with web search and produce two files in `research/` (create nothing else, edit no source files):
+
+1. `research/modern-makers.json`, an object with two arrays:
+   - `makers`: 10 to 14 real makers or workshops. Fields: `id` (kebab-case), `name`, `country`, `city` (if known), `founded` (year or null), `specialty` (one short line), `priceRange` (for example "$90 to $400"), `reputation` (one short factual line, for example who uses them or what they are known for), `resale` ("strong" | "medium" | "low"), `website`.
+   - `items`: 70 to 90 real current or recent products from those makers. Fields: `id` (kebab-case, unique), `makerId`, `name` (the real model name where you can verify it, otherwise a plain descriptive name), `category` (one of `sword`, `dagger`, `polearm`, `axe`, `helmet`, `shield`, `armor`, `crossbow`, `fitting`), `priceUsd` (typical retail price as a number), `priceSource` (URL where you saw that price or price range), `length` (like "112 cm", or null), `weight` (like "1.4 kg", or null), `materials` (short, like "1075 carbon steel, walnut grip"), `blurb` (one plain sentence, no hype, no em dashes), and an `image` object.
+   - Price spread across items: about 25% at $40 to $150 (budget makers such as Windlass Steelcrafts, Cold Steel, Deepeeka, Marto, Condor), about 30% at $150 to $900 (such as Hanwei, Darksword Armory, Lutel, Regenyei, Valiant Armoury, Get Dressed For Battle), about 30% at $900 to $5,000 (such as Albion Swords, Arms & Armor, Tod's Workshop, Castle Keep), about 15% at $5,000 to $40,000 (master smiths, Japanese shinsakuto by recognized smiths, custom plate armour). Use these as examples, not a closed list; replace any maker you cannot verify.
+   - Category spread: at least 30 swords, 6 daggers, 6 polearms or spears, 5 axes, 8 helmets, 6 shields, 5 armour pieces, 4 crossbows.
+
+2. `research/modern-makers.md`: a short summary (under 400 words): makers by tier, price bands, which categories hold value, and any caveats.
+
+## Image rules (most important)
+- Every `image` must be freely licensed: public domain, CC0, CC BY or CC BY-SA. Use Wikimedia Commons first (search Commons categories such as replica swords, longswords, historical European martial arts equipment, reenactment armour, crossbows, bladesmithing, Japanese swords by modern smiths, shields). Never use retailer or maker product photos unless the page states a free license.
+- `image` fields: `url` (the direct original file URL on upload.wikimedia.org or equivalent), `page` (the file description page), `author`, `license` (short name like "CC BY-SA 4.0"), `exact` (true only if the photo shows that exact product or that maker's piece of that model; false if it is a close representative example of the same type).
+- Prefer a single object on a plain or simple background, at least 1200 px on the long side. Avoid photos where people hold or wear the piece, unless the piece is a helmet or armour on a stand.
+- Check every `url` returns HTTP 200 with curl before you include it. Do not reuse the same image for two items.
+- Fewer items with real, clean, licensed images beat more items with weak ones. If you cannot find a licensed image for an item, drop the item.
+
+Write the JSON valid and pretty-printed. Final message: counts by category and price band, number of `exact: true` images, and anything you could not verify.
