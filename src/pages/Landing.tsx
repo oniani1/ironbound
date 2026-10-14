@@ -15,6 +15,7 @@ import { useStore } from '../lib/store'
 import { Button } from '../components/ui/Button'
 import { useGuestCta, useOnboarding } from '../components/onboarding/OnboardingContext'
 import { LandingSections } from '../components/landing/sections'
+import { MakersSection } from '../components/landing/MakersSection'
 import type { Item } from '../types'
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -24,6 +25,7 @@ export default function Landing() {
     <>
       <Hero />
       <Showcase />
+      <MakersSection />
       <LandingSections />
     </>
   )
@@ -111,9 +113,9 @@ function Hero() {
             ))}
           </h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.65, ease }} className="mt-4 max-w-[50ch] text-[15px] leading-relaxed text-bone-300 sm:text-[17px] md:mt-6">
-            <span className="sm:hidden">One real piece of history in every chest. Keep it, ship it or sell it back.</span>
+            <span className="sm:hidden">One real piece in every chest, antique or new. Keep it, ship it or sell it back.</span>
             <span className="hidden sm:inline">
-              Every chest holds one real piece of history, from a $20 crossbow bolt to a Gothic armor worth over a million. Authenticated, vaulted and insured. Keep it, ship it home, or sell it back in one tap.
+              Every chest holds one real piece: an antique from the armory or new work from a named maker, from a $22 arrowhead to a Gothic armor worth over a million. Keep it, ship it home, or sell it back in one tap.
             </span>
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8, ease }} className="mt-5 flex flex-wrap items-center gap-1 sm:gap-3 md:mt-8">

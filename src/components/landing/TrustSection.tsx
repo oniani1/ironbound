@@ -4,7 +4,7 @@ import './sections.css'
 
 const ENTRIES = [
   { label: 'Vault & insurance', title: 'Steel deserves a keeper.', copy: 'Your collection stays in the vault until you choose to ship or sell. Storage and insurance are simulated in this demo.' },
-  { label: 'Authentication', title: 'Know the object.', copy: 'Era, origin, maker and materials sit beside every piece. Antique and forged reproduction are stated separately. Certificates are mock records.' },
+  { label: 'Authentication', title: 'Know the object.', copy: 'Era, origin, maker and materials sit beside every piece. Antiques and new work from named makers are stated separately. Certificates are mock records.' },
   { label: 'Odds & fairness', title: 'Read before you open.', copy: 'Every chest prints its rarity odds and value bands. Past pulls do not change the odds. No invented near misses or claims of an audited draw.' },
   { label: 'Instant buyback', title: 'An offer you can count.', copy: 'The exact sell-back offer appears beside estimated value. Confirm once and receive demo credit at the original chest’s buyback rate.' },
   { label: 'Insured shipping', title: 'From vault to doorstep.', copy: 'Choose standard or express. See the cost and insured value before confirming. A request and courier acceptance are separate steps in the demo timeline.' },
