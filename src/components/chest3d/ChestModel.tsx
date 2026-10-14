@@ -98,6 +98,106 @@ function rig(scene: THREE.Object3D, theme: ChestTheme) {
 }
 
 /**
+ * Construction by tier, in chest space (body about 0.9 wide, 0.53 deep, lid hinge at 0.42).
+ * scale reshapes the whole chest; lift raises it onto what it stands on.
+ */
+const FORMS: Record<NonNullable<ChestTheme['form']>, { scale: [number, number, number]; lift: number }> = {
+  coffer: { scale: [0.84, 0.82, 0.84], lift: 0 },
+  strongbox: { scale: [1, 1, 1], lift: 0.036 },
+  lacquer: { scale: [1.06, 0.84, 0.92], lift: 0.06 },
+  hoard: { scale: [1.14, 1.02, 1.1], lift: 0 },
+  reliquary: { scale: [0.94, 1.1, 0.94], lift: 0.085 },
+}
+
+/** What the chest stands on and carries by: built in root space, under the scaled body. */
+function buildBase(theme: ChestTheme): THREE.Object3D | null {
+  const form = theme.form
+  if (!form) return null
+  const f = FORMS[form]
+  const [sx, sy, sz] = f.scale
+  const halfW = 0.45 * sx
+  const halfD = 0.265 * sz
+  const g = new THREE.Group()
+  const metal = new THREE.MeshStandardMaterial({ color: theme.metal, metalness: 1, roughness: 0.38 })
+  const iron = new THREE.MeshStandardMaterial({ color: '#2b2622', metalness: 0.85, roughness: 0.5 })
+  if (form === 'coffer') {
+    // Rope carry loops on both ends: a field chest, not a treasury.
+    const rope = new THREE.MeshStandardMaterial({ color: '#8a6a43', roughness: 1, metalness: 0 })
+    for (const s of [-1, 1]) {
+      const loop = new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.011, 10, 28), rope)
+      loop.rotation.y = Math.PI / 2
+      loop.position.set(s * (halfW + 0.004), 0.25 * sy, 0)
+      g.add(loop)
+    }
+  } else if (form === 'strongbox') {
+    // Iron-shod runners under the base and drop handles on the ends.
+    const wood = new THREE.MeshStandardMaterial({ color: '#3a2a1e', roughness: 0.9 })
+    for (const x of [-0.3, 0.3]) {
+      const runner = new THREE.Mesh(new THREE.BoxGeometry(0.07, f.lift, halfD * 2 + 0.06), wood)
+      runner.position.set(x, f.lift / 2, 0)
+      g.add(runner)
+      const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.074, 0.008, halfD * 2 + 0.064), iron)
+      shoe.position.set(x, 0.004, 0)
+      g.add(shoe)
+    }
+    for (const s of [-1, 1]) {
+      const handle = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.008, 10, 24, Math.PI), metal)
+      handle.rotation.set(0, Math.PI / 2, Math.PI)
+      handle.position.set(s * (halfW + 0.012), f.lift + 0.3 * sy, 0)
+      g.add(handle)
+    }
+  } else if (form === 'lacquer') {
+    // A low black-lacquer stand with a gilt edge.
+    const lacquer = new THREE.MeshStandardMaterial({ color: '#120c0a', roughness: 0.18, metalness: 0.1 })
+    const stand = new THREE.Mesh(new THREE.BoxGeometry(halfW * 2 + 0.1, f.lift - 0.012, halfD * 2 + 0.1), lacquer)
+    stand.position.y = (f.lift - 0.012) / 2 + 0.012
+    g.add(stand)
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(halfW * 2 + 0.104, 0.008, halfD * 2 + 0.104), metal)
+    edge.position.y = f.lift - 0.004
+    g.add(edge)
+    for (const x of [-1, 1]) {
+      for (const z of [-1, 1]) {
+        const foot = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.012, 0.06), lacquer)
+        foot.position.set(x * (halfW + 0.02), 0.006, z * (halfD + 0.02))
+        g.add(foot)
+      }
+    }
+  } else if (form === 'hoard') {
+    // Heavy iron ring handles: a chest built to be dragged off a field.
+    for (const s of [-1, 1]) {
+      const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.01, 18), iron)
+      plate.rotation.z = Math.PI / 2
+      plate.position.set(s * (halfW + 0.004), 0.33 * sy, 0)
+      g.add(plate)
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.012, 10, 28), iron)
+      ring.rotation.y = Math.PI / 2
+      ring.position.set(s * (halfW + 0.014), 0.27 * sy, 0)
+      g.add(ring)
+    }
+  } else if (form === 'reliquary') {
+    // Raised on four gilt ball feet, like a church reliquary.
+    for (const x of [-1, 1]) {
+      for (const z of [-1, 1]) {
+        const ball = new THREE.Mesh(new THREE.SphereGeometry(0.042, 18, 14), metal)
+        ball.position.set(x * (halfW - 0.05), 0.042, z * (halfD - 0.04))
+        g.add(ball)
+        const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.036, 0.02, 18), metal)
+        collar.position.set(x * (halfW - 0.05), f.lift - 0.01, z * (halfD - 0.04))
+        g.add(collar)
+      }
+    }
+  }
+  g.traverse((o) => {
+    const mesh = o as THREE.Mesh
+    if (mesh.isMesh) {
+      mesh.castShadow = true
+      mesh.receiveShadow = true
+    }
+  })
+  return g
+}
+
+/**
  * Tier ornaments, in hinge-local space (origin on the hinge line; the lid's crown sits
  * around y 0.2, z 0.26; its front edge around z 0.52).
  */
@@ -167,6 +267,8 @@ export function ChestModel({ theme, anim }: Props) {
   const light = useRef<THREE.PointLight>(null)
   const root = useRef<THREE.Group>(null)
   const rigged = useMemo(() => rig(scene, theme), [scene, theme])
+  const form = theme.form ? FORMS[theme.form] : null
+  const base = useMemo(() => buildBase(theme), [theme])
   const heatColor = useMemo(() => new THREE.Color(), [])
   const tmp = useMemo(() => new THREE.Color(), [])
   // Pool of light inside the chest: radial falloff with a slow shimmer, not a flat card.
@@ -203,7 +305,7 @@ export function ChestModel({ theme, anim }: Props) {
     if (root.current) {
       root.current.rotation.z = anim.rattle * Math.sin(t * 43) * 0.014
       root.current.position.x = anim.rattle * Math.sin(t * 57) * 0.007
-      root.current.position.y = (1 - anim.drop) * 1.8
+      root.current.position.y = (1 - anim.drop) * 1.8 + (form?.lift ?? 0)
     }
     if (lock) {
       const off = anim.lockOff
@@ -236,6 +338,8 @@ export function ChestModel({ theme, anim }: Props) {
 
   return (
     <group ref={root} dispose={null}>
+      {base && <primitive object={base} position={[0, -(form?.lift ?? 0), 0]} />}
+      <group scale={form?.scale ?? [1, 1, 1]}>
       <primitive object={rigged.clone} />
       <primitive object={rigged.hinge} />
       {/* Thin glowing seam just under the lid edge. */}
@@ -248,6 +352,7 @@ export function ChestModel({ theme, anim }: Props) {
         <planeGeometry args={[0.86, 0.46]} />
       </mesh>
       <pointLight ref={light} position={[0, 0.52, 0.05]} decay={2} />
+      </group>
     </group>
   )
 }

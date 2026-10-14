@@ -50,6 +50,8 @@ export interface ChestTheme {
   glow: string
   /** Tier ornament fixed to the lid. */
   ornament?: 'crown' | 'tassel' | 'spikes'
+  /** Construction: proportions and what the chest stands on, so tiers differ in silhouette. */
+  form?: 'coffer' | 'strongbox' | 'lacquer' | 'hoard' | 'reliquary'
 }
 
 export interface Chest {
