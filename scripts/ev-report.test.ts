@@ -1,5 +1,5 @@
 // Prints expected value, band coverage and chance to beat the price for every chest.
-// Run: node node_modules/vitest/vitest.mjs run scripts/ev-report.ts (or via the test runner's TS support).
+// Run: node node_modules/vitest/vitest.mjs run scripts/ev-report.test.ts (or via the test runner's TS support).
 import { test } from 'vitest'
 import { VISIBLE_CHESTS } from '../src/config/chests'
 import { ITEMS } from '../src/data/items'

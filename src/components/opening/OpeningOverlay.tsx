@@ -9,8 +9,8 @@ import { RARITIES, RARITY_ORDER } from '../../config/rarity'
 import { tellSequence } from '../../lib/gacha'
 import { actions, useStore } from '../../lib/store'
 import { sfx } from '../../lib/audio'
-import { money } from '../../lib/format'
-import { HoldToOpen } from './HoldToOpen'
+import { money, shortEra } from '../../lib/format'
+import { HoldToOpen, type HoldHandle } from './HoldToOpen'
 import { RevealCard } from './RevealCard'
 import { MultiReveal } from './MultiReveal'
 import { useOpening, type OpeningSession } from './OpeningProvider'
@@ -35,6 +35,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   const multi = results.length > 1
   const anim = useMemo(() => new ChestAnim(), [])
   const tl = useRef<gsap.core.Timeline | null>(null)
+  const hold = useRef<HoldHandle>(null)
   const [phase, setPhase] = useState<Phase>('intro')
   const [soldUids, setSoldUids] = useState<Set<string>>(new Set())
   const fast = useStore((s) => s.settings.fast)
@@ -142,6 +143,21 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     >
       <ChestScene theme={chest.theme} anim={anim} item={multi ? null : first.item} rarityHex={rarityHex} className="!absolute inset-0" />
 
+      {/* While waiting, a press anywhere on the scene charges the seal. */}
+      {phase === 'await' && (
+        <div
+          className="absolute inset-0 touch-none select-none"
+          onPointerDown={(e) => {
+            ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
+            hold.current?.start()
+          }}
+          onPointerUp={() => hold.current?.stop()}
+          onPointerCancel={() => hold.current?.stop()}
+          onContextMenu={(e) => e.preventDefault()}
+          aria-hidden
+        />
+      )}
+
       {/* Rarity wash at the screen edges for the biggest pulls. */}
       <AnimatePresence>
         {(phase === 'burst' || phase === 'rise') && RARITIES[best.rarity].tier >= 5 && !reduced && (
@@ -193,6 +209,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
           {phase === 'await' && (
             <div className="pointer-events-auto">
               <HoldToOpen
+                ref={hold}
                 onProgress={(p) => applyCharge(anim, p)}
                 onComplete={startReveal}
                 hint={trial ? 'Press and hold anywhere on the seal. Release and it cools.' : undefined}
@@ -207,7 +224,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         <AnimatePresence>
           {showClues && (
             <motion.div key="clues" className="flex flex-wrap justify-center gap-2" exit={{ opacity: 0, transition: { duration: 0.2 } }}>
-              {[CATEGORY_CLUE[first.item.category] ?? 'An object', first.item.era, first.item.origin].map((c, i) => (
+              {[CATEGORY_CLUE[first.item.category] ?? 'An object', first.item.provenance === 'forged' ? 'Master-forged' : shortEra(first.item.era), first.item.origin].map((c, i) => (
                 <motion.span
                   key={c + i}
                   initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}

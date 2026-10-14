@@ -104,7 +104,9 @@ export function ItemRise({ item, anim, color }: Props) {
     const floatY = Math.sin(t * 1.4) * 0.025 * p
     g.position.y = 0.32 + eased * (0.62 + size.uprightH * 0.5) + floatY
     g.rotation.y = Math.sin(t * 0.6) * 0.2 * p
-    g.scale.setScalar(0.55 + eased * 0.45)
+    // Phones: the reveal sheet covers the lower half, so the item stays a little smaller.
+    const portrait = state.size.width / Math.max(1, state.size.height) < 0.85
+    g.scale.setScalar((0.55 + eased * 0.45) * (portrait ? 0.78 : 1))
     itemMat.uniforms.uLit!.value = anim.itemLit
     itemMat.uniforms.uGlint!.value = anim.glint
     itemMat.uniforms.uOpacity!.value = Math.min(1, p * 3)

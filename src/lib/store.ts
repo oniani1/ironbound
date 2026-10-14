@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import type { Arms, Pull } from '../types'
+import type { Arms, Pull, RarityId } from '../types'
 
 export interface Profile {
   name: string
@@ -14,7 +14,7 @@ export interface State {
   signInMethod: 'email' | 'google' | 'wallet' | null
   balance: number
   pulls: Pull[]
-  settings: { sound: boolean; fast: boolean }
+  settings: { sound: boolean; fast: boolean; force: RarityId | null }
   stats: { spent: number; opened: number; soldFor: number }
 }
 
@@ -28,7 +28,7 @@ const initial: State = {
   signInMethod: null,
   balance: 0,
   pulls: [],
-  settings: { sound: true, fast: false },
+  settings: { sound: true, fast: false, force: null },
   stats: { spent: 0, opened: 0, soldFor: 0 },
 }
 
@@ -112,6 +112,10 @@ export const actions = {
   },
   setFast(fast: boolean) {
     setState((s) => ({ settings: { ...s.settings, fast } }))
+  },
+  /** Demo control: the next pull lands in this rarity, then it clears. */
+  setForce(force: RarityId | null) {
+    setState((s) => ({ settings: { ...s.settings, force } }))
   },
   reset() {
     state = initial

@@ -38,9 +38,9 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     // Shot composition.
     const dolly = anim.dolly
     const frame = anim.frame
-    const dist = baseDist - dolly * 0.55 + frame * (portrait ? 0.35 : 0.25)
+    const dist = baseDist - dolly * 0.55 + frame * (portrait ? -0.15 : 0.25)
     const height = 1.05 - dolly * 0.12 + frame * (portrait ? 0.55 : 0.42)
-    const lookY = 0.45 + frame * (portrait ? 0.95 : 0.78) - dolly * 0.03
+    const lookY = 0.45 + frame * (portrait ? 0.5 : 0.78) - dolly * 0.03
     const offsetX = wide ? frame * 0.62 : 0
     const px = parallax ? pointer.x * 0.25 : 0
     const py = parallax ? pointer.y * 0.12 : 0

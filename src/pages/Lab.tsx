@@ -8,21 +8,10 @@ import { RARITIES, RARITY_ORDER } from '../config/rarity'
 import { tellSequence } from '../lib/gacha'
 import { sfx } from '../lib/audio'
 import type { Item, RarityId } from '../types'
+import { ITEMS, ITEM_BY_ID } from '../data/items'
 
-const TEST_ITEM: Item = {
-  id: 'test',
-  name: 'Test longsword',
-  category: 'sword',
-  era: 'c. 1400',
-  origin: 'Europe',
-  provenance: 'antique',
-  materials: 'Steel',
-  value: 1000,
-  blurb: '',
-  image: '/items/test-22002.webp',
-  aspect: 0.346,
-  credit: 'The Met',
-  sourceUrl: '',
+function pickItem(id: string | null): Item {
+  return (id && ITEM_BY_ID[id]) || ITEMS.find((i) => i.category === 'sword' && i.value > 40000) || ITEMS[ITEMS.length - 1]!
 }
 
 /** Dev page to tune the 3D opening without the rest of the app. */
@@ -64,7 +53,7 @@ export default function Lab() {
 
   return (
     <div className="fixed inset-0 bg-ink-950">
-      <ChestScene theme={chest.theme} anim={anim} item={TEST_ITEM} rarityHex={RARITIES[rarity].hex} className="!absolute inset-0" />
+      <ChestScene theme={chest.theme} anim={anim} item={pickItem(new URLSearchParams(location.search).get('item'))} rarityHex={RARITIES[rarity].hex} className="!absolute inset-0" />
       <div className="absolute left-4 top-4 flex flex-wrap gap-2 text-xs">
         {RARITY_ORDER.map((r) => (
           <button key={r} onClick={() => setRarity(r)} className={`rounded px-2 py-1 ${r === rarity ? 'bg-bone-100 text-ink-950' : 'bg-ink-800'}`}>

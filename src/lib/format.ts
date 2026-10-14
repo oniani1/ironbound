@@ -33,3 +33,11 @@ export function timeAgo(ts: number, now = Date.now()): string {
   if (h < 24) return `${h}h ago`
   return `${Math.round(h / 24)}d ago`
 }
+
+/** Short era for chips and tiles: "Blade, 16th century; mounting, 19th century" becomes "16th century". */
+export function shortEra(era: string): string {
+  let e = era.split(';')[0] ?? era
+  e = e.replace(/^Blade,?\s*/i, '').replace(/^probably\s+/i, '').replace(/^possibly\s+/i, '')
+  e = e.replace(/^dated\b/i, 'Dated')
+  return e.charAt(0).toUpperCase() + e.slice(1)
+}

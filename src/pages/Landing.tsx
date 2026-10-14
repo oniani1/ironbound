@@ -6,7 +6,7 @@ import { ChestScene } from '../components/chest3d/ChestScene'
 import { ChestAnim } from '../components/chest3d/animState'
 import { CHEST_BY_ID } from '../config/chests'
 import { ITEMS } from '../data/items'
-import { money } from '../lib/format'
+import { money, shortEra } from '../lib/format'
 import { sfx } from '../lib/audio'
 import { useStore } from '../lib/store'
 import { Button } from '../components/ui/Button'
@@ -38,6 +38,7 @@ function Hero() {
   const signedIn = useStore((s) => s.signedIn)
   const theme = CHEST_BY_ID.king!.theme
   const teaseTimer = useRef(0)
+  const isPhone = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
 
   // Every few seconds the chest strains against its lock, as if something inside wants out.
   useEffect(() => {
@@ -61,19 +62,19 @@ function Hero() {
   return (
     <section className="relative -mt-[calc(var(--header-h)+var(--ticker-h))] min-h-[100svh] overflow-hidden">
       <div
-        className="absolute inset-0 [mask-image:linear-gradient(180deg,black_70%,transparent)] md:left-[30%]"
+        className="absolute inset-x-0 bottom-0 top-[46%] [mask-image:linear-gradient(180deg,transparent,black_18%,black_72%,transparent)] md:inset-0 md:left-[30%] md:[mask-image:linear-gradient(180deg,black_70%,transparent)]"
         onPointerEnter={() => hover(true)}
         onPointerLeave={() => hover(false)}
       >
-        <ChestScene theme={theme} anim={anim} parallax distance={0.86} className="!absolute inset-0" />
+        <ChestScene theme={theme} anim={anim} parallax distance={isPhone ? 0.62 : 0.86} className="!absolute inset-0" />
       </div>
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,var(--color-ink-950)_8%,transparent_55%)] max-md:bg-[linear-gradient(180deg,var(--color-ink-950)_18%,transparent_55%)]" />
-      <div className="pointer-events-none relative mx-auto flex min-h-[100svh] max-w-[1400px] flex-col px-4 pb-16 pt-[calc(var(--header-h)+var(--ticker-h)+2.5rem)] sm:px-6 md:justify-center md:pb-24">
+      <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(90deg,var(--color-ink-950)_8%,transparent_55%)] md:block" />
+      <div className="pointer-events-none relative mx-auto flex min-h-[100svh] max-w-[1400px] flex-col px-4 pb-[52svh] pt-[calc(var(--header-h)+var(--ticker-h)+1.75rem)] sm:px-6 md:justify-center md:pb-24 md:pt-[calc(var(--header-h)+var(--ticker-h)+2.5rem)]">
         <div className="pointer-events-auto max-w-[620px]">
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2, ease }} className="eyebrow">
             Real arms and armor, sealed in iron
           </motion.p>
-          <h1 className="font-display mt-4 text-[52px] font-semibold leading-[0.92] text-bone-50 sm:text-[84px] lg:text-[100px]">
+          <h1 className="font-display mt-3 text-[46px] font-semibold leading-[0.92] text-bone-50 sm:text-[84px] md:mt-4 lg:text-[100px]">
             {['Open the chest.', 'Keep the steel.'].map((line, i) => (
               <motion.span
                 key={line}
@@ -86,10 +87,10 @@ function Hero() {
               </motion.span>
             ))}
           </h1>
-          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.65, ease }} className="mt-6 max-w-[50ch] text-[16px] leading-relaxed text-bone-300 sm:text-[17px]">
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.65, ease }} className="mt-4 max-w-[50ch] text-[15px] leading-relaxed text-bone-300 sm:text-[17px] md:mt-6">
             Every chest holds one real piece of history, from a $20 crossbow bolt to a Gothic armor worth over a million. Authenticated, vaulted and insured. Keep it, ship it home, or sell it back in one tap.
           </motion.p>
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8, ease }} className="mt-8 flex flex-wrap items-center gap-3">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8, ease }} className="mt-6 flex flex-wrap items-center gap-3 md:mt-8">
             {signedIn ? (
               <Link to="/chests">
                 <Button size="lg" tabIndex={-1}>
@@ -105,7 +106,7 @@ function Hero() {
               See the chests →
             </Link>
           </motion.div>
-          <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.1 }} className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-[12px] text-bone-400">
+          <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.1 }} className="mt-10 hidden flex-wrap gap-x-6 gap-y-2 text-[12px] text-bone-400 md:flex">
             <li>Odds printed on every chest</li>
             <li>85 to 92% instant sell-back</li>
             <li>Insured shipping to your door</li>
@@ -143,7 +144,7 @@ function Showcase() {
               </div>
               <p className="font-display mt-2 line-clamp-1 text-[16px] font-semibold text-bone-50">{it.name}</p>
               <p className="flex justify-between text-[12px] text-bone-400">
-                <span className="truncate pr-2">{it.era}</span>
+                <span className="truncate pr-2">{shortEra(it.era)}</span>
                 <span className="font-semibold text-bone-200 tabular">{money(it.value, { compact: true })}</span>
               </p>
             </div>

@@ -40,7 +40,6 @@ E = [
     (35799, "Broad Barbed Arrowhead", "fitting", 36, "a", None, "Wide barbs for hunting and war on the high plateau."),
     (35784, "War Arrowhead", "fitting", 40, "a", None, "Heavy enough to punch through a leather coat at forty paces."),
     (29360, "Iron Snaffle Bit", "fitting", 44, "a", None, "A rider's bit from the age of the first castles."),
-    (29231, "Rowel Spur", "fitting", 48, "a", None, "Steel spur with a small star rowel, worn by a cavalryman."),
     (35809, "Swallowtail Arrowhead", "fitting", 52, "a", None, "Forked tail and long tang, still bound in its old cord."),
     (35806, "Chisel Arrowhead, Shafted", "fitting", 58, "a", None, "A broad chisel head on its original wrapped shaft."),
     (35807, "Diamond Arrowhead, Shafted", "fitting", 64, "a", None, "A diamond point on its original shaft, binding intact."),
@@ -265,9 +264,12 @@ def origin_from(culture, oid):
 
 
 def era_from(date):
-    d = (date or "").strip()
-    d = re.sub(r"\s+", " ", d)
-    return d[:1].lower() + d[1:] if d.startswith("Ca.") else d
+    d = re.sub(r"\s+", " ", (date or "").strip())
+    d = re.sub(r"^ca\.\s*", "c. ", d, flags=re.I)
+    d = re.sub(r"\bca\.\s*", "c. ", d)
+    if d and not d.startswith("c. "):
+        d = d[0].upper() + d[1:]
+    return d
 
 
 def length_weight(dim):
@@ -332,6 +334,25 @@ def orientation(rgba, category, oid=0):
     return 90 if left >= right else -90
 
 
+def strip_stand(rgba):
+    """Removes a museum display pole under a helmet: thin rows at the bottom are cleared."""
+    a = np.asarray(rgba).copy()
+    alpha = a[..., 3] > 40
+    widths = alpha.sum(axis=1)
+    if widths.max() == 0:
+        return rgba
+    limit = widths.max() * 0.12
+    y = len(widths) - 1
+    while y > 0 and widths[y] < limit:
+        y -= 1
+    if y < len(widths) - 1 and (len(widths) - 1 - y) > len(widths) * 0.03:
+        a[y + 1:, :, 3] = 0
+        im = Image.fromarray(a, "RGBA")
+        bbox = im.getbbox()
+        return im.crop(bbox) if bbox else im
+    return rgba
+
+
 def main():
     model, cand_path = sys.argv[1], sys.argv[2]
     for d in (ORIG, CUT, PUB, THUMB):
@@ -370,6 +391,8 @@ def main():
                 print("EMPTY CUTOUT", oid, name)
                 continue
         rgba = Image.open(cut_path).convert("RGBA")
+        if cat in ("helmet", "armor"):
+            rgba = strip_stand(rgba)
         rot = orientation(rgba, cat, oid)
         if rot:
             # Bake the rotation in, so every consumer gets an upright image. PIL rotates counter-clockwise.

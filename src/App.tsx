@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { Header } from './components/layout/Header'
 import { BottomNav } from './components/layout/BottomNav'
+import { DemoPanel } from './components/layout/DemoPanel'
 import { OpeningProvider } from './components/opening/OpeningProvider'
 import { OnboardingProvider } from './components/onboarding/OnboardingContext'
 import { startFeed } from './lib/feed'
@@ -26,6 +27,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       <Header />
       <main>{children}</main>
       <BottomNav />
+      <DemoPanel />
     </div>
   )
 }

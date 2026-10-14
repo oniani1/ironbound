@@ -5,7 +5,7 @@ import { CHEST_BY_ID } from '../config/chests'
 import { RARITIES } from '../config/rarity'
 import { ITEMS, ITEM_BY_ID } from '../data/items'
 import { chanceToBeatPrice, chestPool, expectedValue } from '../lib/gacha'
-import { money, oneIn, pct, timeAgo } from '../lib/format'
+import { money, oneIn, pct, shortEra, timeAgo } from '../lib/format'
 import { actions, useStore } from '../lib/store'
 import { useFeed } from '../lib/feed'
 import { sfx } from '../lib/audio'
@@ -54,7 +54,7 @@ export default function ChestDetail() {
       <div className="mx-auto grid max-w-[1400px] gap-8 px-4 pt-6 sm:px-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(380px,0.85fr)] lg:gap-12">
         {/* Live chest. */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} className="relative -mx-4 h-[360px] overflow-hidden sm:mx-0 sm:h-[460px] sm:rounded-[28px] lg:h-[620px]">
-          <ChestScene theme={chest.theme} anim={anim} parallax className="!absolute inset-0" />
+          <ChestScene theme={chest.theme} anim={anim} parallax distance={0.82} className="!absolute inset-0" />
           <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_120px_40px_var(--color-ink-950)] sm:rounded-[28px]" />
           <Link to="/chests" className="absolute left-4 top-4 rounded-full bg-ink-950/60 px-3 py-1.5 text-[12px] text-bone-300 backdrop-blur hover:text-bone-50">
             ← All chests
@@ -189,7 +189,7 @@ export default function ChestDetail() {
                       </div>
                       <p className="font-display mt-2 line-clamp-1 text-[16px] font-semibold text-bone-50">{it.name}</p>
                       <p className="flex justify-between text-[12px] text-bone-400">
-                        <span className="truncate">{it.era}</span>
+                        <span className="truncate">{shortEra(it.era)}</span>
                         <span className="font-semibold text-bone-200 tabular">{money(it.value, { compact: true })}</span>
                       </p>
                     </div>

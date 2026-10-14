@@ -2,7 +2,7 @@ import { createContext, lazy, Suspense, useCallback, useContext, useMemo, useSta
 import { useTexture } from '@react-three/drei'
 import { CHEST_BY_ID } from '../../config/chests'
 import { ITEM_BY_ID, ITEMS } from '../../data/items'
-import { rollItem } from '../../lib/gacha'
+import { rollItem, rollItemIn } from '../../lib/gacha'
 import { uid } from '../../lib/rng'
 import { actions, getState } from '../../lib/store'
 import { pushFeed } from '../../lib/feed'
@@ -53,11 +53,17 @@ export function OpeningProvider({ children }: { children: ReactNode }) {
     if (!trial && !actions.spend(total)) return { ok: false, reason: 'funds' }
     const now = Date.now()
     const results: MultiResult[] = []
+    const force = trial ? null : getState().settings.force
     for (let i = 0; i < count; i++) {
       const fixed = opts.fixedItemId ? ITEM_BY_ID[opts.fixedItemId] : undefined
-      const roll = fixed ? { item: fixed, rarity: chest.bands[0]?.rarity ?? 'rare' } : rollItem(chest, ITEMS)
+      const roll = fixed
+        ? { item: fixed, rarity: chest.bands[0]?.rarity ?? 'rare' }
+        : force && i === count - 1
+          ? rollItemIn(chest, ITEMS, force)
+          : rollItem(chest, ITEMS)
       results.push({ uid: uid(), item: roll.item, rarity: roll.rarity })
     }
+    if (force) actions.setForce(null)
     const pulls: Pull[] = results.map((r, i) => ({
       uid: r.uid,
       itemId: r.item.id,

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { sfx } from '../../lib/audio'
 
@@ -15,11 +15,17 @@ interface Props {
 const R = 46
 const C = 2 * Math.PI * R
 
+export interface HoldHandle {
+  start: () => void
+  stop: () => void
+}
+
 /**
  * Press and hold (pointer or Space) to break the seal. Releasing early lets the charge
- * drain away, so the chest visibly settles back down.
+ * drain away, so the chest visibly settles back down. The parent can also drive it, so a
+ * hold anywhere on the chest counts.
  */
-export function HoldToOpen({ duration = 1.15, onProgress, onComplete, label = 'Hold to break the seal', hint, disabled }: Props) {
+export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ duration = 1.15, onProgress, onComplete, label = 'Hold to break the seal', hint, disabled }, ref) {
   const [p, setP] = useState(0)
   const holding = useRef(false)
   const value = useRef(0)
@@ -74,6 +80,8 @@ export function HoldToOpen({ duration = 1.15, onProgress, onComplete, label = 'H
   const stop = useCallback(() => {
     holding.current = false
   }, [])
+
+  useImperativeHandle(ref, () => ({ start, stop }), [start, stop])
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -155,8 +163,8 @@ export function HoldToOpen({ duration = 1.15, onProgress, onComplete, label = 'H
       </button>
       <div className="text-center">
         <p className="font-display text-xl italic text-bone-100">{label}</p>
-        <p className="mt-1 text-xs text-bone-400">{hint ?? 'Press and hold, or hold Space'}</p>
+        <p className="mt-1 text-xs text-bone-400">{hint ?? 'Press and hold anywhere, or hold Space'}</p>
       </div>
     </motion.div>
   )
-}
+})

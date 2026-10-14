@@ -46,6 +46,19 @@ export function rollItem(chest: Chest, items: readonly Item[], r1: number = rand
   throw new Error(`Chest ${chest.id} has an empty pool`)
 }
 
+/** Demo helper: an item from a chosen rarity band, falling back to the nearest lower band. */
+export function rollItemIn(chest: Chest, items: readonly Item[], rarity: RarityId, r: number = random()): Roll {
+  const all = chestItems(chest, items)
+  const start = chest.bands.findIndex((b) => b.rarity === rarity)
+  for (let i = start < 0 ? chest.bands.length - 1 : start; i >= 0; i--) {
+    const band = chest.bands[i]
+    if (!band) continue
+    const pool = bandItems(band, all)
+    if (pool.length) return { item: pickOne(pool, r), rarity: band.rarity }
+  }
+  return rollItem(chest, items)
+}
+
 export function expectedValue(chest: Chest, items: readonly Item[]): number {
   const all = chestItems(chest, items)
   return chest.bands.reduce((sum, band) => {

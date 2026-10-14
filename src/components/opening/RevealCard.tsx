@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES } from '../../config/rarity'
-import { money } from '../../lib/format'
+import { money, shortEra } from '../../lib/format'
 import { sfx } from '../../lib/audio'
 import { Button } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
@@ -82,17 +82,17 @@ export function RevealCard({ item, rarity, chest, sold, onKeep, onSell, onShip, 
         </button>
       </div>
 
-      <motion.p {...rise(0.45)} className="eyebrow relative mt-4">
+      <motion.p {...rise(0.45)} className="eyebrow relative mt-3 sm:mt-4">
         {trial ? 'Trial chest' : chest.name} · {CATEGORY_LABEL[item.category]}
       </motion.p>
       <motion.h2 {...rise(0.52)} className="font-display relative mt-1 text-[34px] font-semibold leading-[1.02] text-bone-50 sm:text-[40px]">
         {item.name}
       </motion.h2>
       <motion.p {...rise(0.6)} className="relative mt-2 text-[13px] text-bone-300">
-        {item.era} · {item.origin} · {item.provenance === 'antique' ? 'Antique, authenticated' : `Forged by ${item.maker ?? 'master smith'}`}
+        {shortEra(item.era)} · {item.origin} · {item.provenance === 'antique' ? 'Antique, authenticated' : `Forged by ${item.maker ?? 'master smith'}`}
       </motion.p>
 
-      <motion.div {...rise(0.68)} className="relative mt-5 grid grid-cols-[1fr_auto] items-end gap-3 border-t border-bone-100/10 pt-4">
+      <motion.div {...rise(0.68)} className="relative mt-3 grid grid-cols-[1fr_auto] items-end gap-3 border-t border-bone-100/10 pt-3 sm:mt-5 sm:pt-4">
         <div>
           <p className="eyebrow !text-[10px]">Estimated value</p>
           <p className="mt-1 text-[40px] font-semibold leading-none text-bone-50 sm:text-[46px]">
@@ -117,17 +117,17 @@ export function RevealCard({ item, rarity, chest, sold, onKeep, onSell, onShip, 
         </motion.div>
       </motion.div>
 
-      <motion.div {...rise(0.76)} className="relative mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-bone-400">
+      <motion.div {...rise(0.76)} className="relative mt-3 hidden flex-wrap gap-x-4 gap-y-1 text-[12px] text-bone-400 sm:flex">
         {item.length && <span>Length <b className="font-medium text-bone-200">{item.length}</b></span>}
         {item.weight && <span>Weight <b className="font-medium text-bone-200">{item.weight}</b></span>}
         <span className="min-w-0 truncate">{item.materials}</span>
       </motion.div>
 
-      <motion.p {...rise(0.84)} className="font-display relative mt-3 line-clamp-3 text-[16px] italic leading-snug text-bone-300">
+      <motion.p {...rise(0.84)} className="font-display relative mt-3 line-clamp-2 text-[15px] italic leading-snug text-bone-300 sm:line-clamp-3 sm:text-[16px]">
         {item.blurb}
       </motion.p>
 
-      <motion.div {...rise(0.95)} className="relative mt-5 grid grid-cols-2 gap-2.5">
+      <motion.div {...rise(0.95)} className="relative mt-4 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-2.5">
         {sold != null ? (
           <div className="col-span-2 flex items-center justify-between rounded-[12px] border border-moss-400/30 bg-moss-400/10 px-4 py-3">
             <span className="text-[13px] text-bone-200">Sold back. Added to your purse.</span>
