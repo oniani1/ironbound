@@ -29,7 +29,7 @@ Vite + React 19 + TypeScript (strict, noUncheckedIndexedAccess) + Tailwind v4 (`
 - Emotional goals: anticipation before the reveal, awe at the reveal, pride in the vault, trust in the odds and the value.
 
 ### Aesthetic Direction
-- "The armory at night": a candle and forge lit vault of real steel. Warm iron-black surfaces, parchment text, brass and gold as the accent, ember orange for heat. Museum-grade object photography floating on dark, lit by rarity light.
+- "The armory at night": a torch-lit stone vault in a castle (the 3D scene sits in a blurred, darkened castle cellar panorama). Warm iron-black surfaces, parchment text, brass and gold as the accent, ember orange for heat. Museum-grade object photography floating on dark, lit by rarity light. No candles: the founder found them "wizardish".
 - Type: Grenze Gotisch for the wordmark and rarity stamps only, Cormorant Garamond for display and item names, Instrument Sans for UI and numbers (tabular figures).
 - Rarity scale is metallurgy-inspired and also named, never color alone: Common (pewter), Uncommon (verdigris), Rare (blued steel), Epic (royal purple), Legendary (gold), Relic (crimson).
 - References: Pokémon TCG Pocket (tactile opening), Genshin wishes (rarity told by light color), EA FC pack walkouts (staged information reveal), Hearthstone (face-down rarity glow), Diablo loot beams, CS2 case reel (tension), Christie's and Sotheby's catalogs (provenance typography), Elden Ring item descriptions (flavor text tone).
@@ -38,7 +38,7 @@ Vite + React 19 + TypeScript (strict, noUncheckedIndexedAccess) + Tailwind v4 (`
 
 ### Design Principles
 1. The object is the hero. Real items, large and beautifully lit. UI recedes around them.
-2. Ritual over click. Every opening is a short ritual (commit, tell, reveal) with real interaction, scaled by rarity, and always skippable.
+2. Ritual over click. Every opening is a ritual with real interaction, scaled by rarity, always skippable, in this order (founder, 2026-10-15): hold to break the seal; the lid breathes open in neutral light that tells nothing; the player lifts the lid; only then is the rarity named; the piece rises into a close shot that travels along it end to end while the light comes up; the camera pulls back to the whole piece; then its name, maker or era, and price. No length scale on the receipt.
 3. Honest numbers, in plain sight. Odds, expected value, buyback value and profit or loss are visible at a glance.
 4. Value first, sign-up later. A new visitor opens a free chest before any account wall.
 5. Light means rarity. Glow and color carry meaning (rarity, value, primary action), never decoration.
@@ -47,7 +47,7 @@ Vite + React 19 + TypeScript (strict, noUncheckedIndexedAccess) + Tailwind v4 (`
 - WCAG 2.2 AA contrast for text. Rarity is always named, never conveyed by color alone.
 - `prefers-reduced-motion`: crossfades and instant reveals, no camera shake or flashes.
 - No more than 3 flashes per second. Keyboard operable (hold Space to open). Visible focus.
-- Sound starts muted until the first user gesture; a mute toggle is always visible.
+- No sound anywhere (founder, 2026-10-15). No audio files, no sound toggle.
 
 ## Writing rules
 No em dashes in UI copy. Short sentences. Avoid filler words (see the banned list in the user's global writing standards).
