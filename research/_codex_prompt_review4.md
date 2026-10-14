@@ -1,0 +1,20 @@
+You are the design and UX reviewer for Ironbound (a physical arms-and-armor gacha mock). This is review round 4 of the full product. Your round-3 review is in `research/_codex_review3_reply.md` (8.5/10; visuals "clear yes", onboarding and opening "not yet"). Same bar as before: a clear win over Courtyard, Collector Crypt, Phygitals and GameStop Power Packs on onboarding, visuals, animation and the opening.
+
+What changed against your round-3 list (all merged on master; read the code where a screenshot cannot show behavior):
+1. First-pull aftermath follows the choice (`OnboardingContext.tsx`, `GuestInvite.tsx`, `Onboarding.tsx`). Keep lands in the vault, Sell lands in the armory, each with an inline invitation: "Your Fencing Feder is in your demo vault." or "Fencing Feder sold. $414 demo credit added." plus "Claim demo credit" and "Not now". Setup opens only on request, and its continuity line names a sold piece as sold. Once the trial is used, the header, hero and chest-detail guest buttons read "Claim demo credit".
+2. Odds honesty (your own commit 98c3334): real proportions, expandable "Rarity odds" legend, "Expected item value" and "Expected sell-back", stretched-link cards with "View chest".
+3. Honesty copy on chest detail (same commit): browser randomness, simulated inventory and insurance, fixed sample-valuation date.
+4. Reduced motion across the 3D scene (`animState.still`, `CameraRig`, `ChestModel`, `ItemRise`, `timeline.ts`): the chest appears in place, charging heats the lock without rattle or camera push, drift, float, sway, shake and sparks stop, the camera cuts instead of easing, and Replay, Inspect and batch use 200 ms opacity fades. Measured after a reduced-motion reveal: 0.04% of pixels change between frames 1.5 s apart (light flicker only).
+5. Control from the first frame (`OpeningOverlay.tsx`, `HoldToOpen.tsx`): a 44 px Close and Escape in every phase. A free chest closed before the hold stays unopened; a paid opening closed early keeps its pieces and a toast says "Your Knight's Chest pull is in your vault." Fast switched on while waiting breaks the seal at once (measured 0.9 s to actions). Space and Enter on Fast, sound or Close keep their own activation.
+Nice-to-haves done: two-line phone hero with the whole chest above the tab bar; waiting chest raised about 60 px on phones with the seal control under it; Inspect now zooms (wheel, pinch, double-click, + - 0 and arrows) and pans along the piece; every tier has its own construction (rope-handled coffer, strongbox on iron-shod runners, lacquer box on a gilt stand, wide spiked hoard with iron rings, tall crowned reliquary on gilt ball feet), with re-rendered card art. Also fixed: "Ship to me" now opens the vault's ship form, wide photos no longer overflow the phone detail grid, keyboard focus follows the result card and the batch Inspect sheet.
+
+Read `AGENTS.md` for the design context. The attached labeled sheets are desktop (1440x900) and phone (390x844): A landing; B first chest (await, charging, reveal, Inspect, kept piece in the vault with the invitation, setup banner, claim); C armory, detail and opening beats (tell, burst, macro, reveal, Inspect, Inspect zoom, Fast result); D batch of three (face down, two selected, Inspect sheet, after selling); E vault and item detail.
+
+Use `C:\Users\nikao\.claude\skills\critique\SKILL.md` and `C:\Users\nikao\.claude\skills\frontend-design\SKILL.md` as your rubric if you can read them, plus your best judgment on game feel.
+
+Reply in Markdown, under 800 words:
+1. Scores 1 to 10, one line each: first impression, visual identity, typography, color and light, layout and hierarchy, onboarding, chest opening (anticipation, reveal, payoff), motion, trust and honesty, vault and ownership, mobile, overall.
+2. Must-fix list (max 6), ordered by impact, each with the exact change and the screen label. Only list what still blocks a clear win.
+3. Nice-to-have (max 4).
+4. Verdict, one line each: onboarding, visuals, opening experience. "clear yes" or "not yet"; for any "not yet" name the single change that would flip it.
+Do not edit any files.
