@@ -1,4 +1,5 @@
-import { Seal } from '../vault/Experience'
+import { motion, useReducedMotion } from 'motion/react'
+import { EXPO, Seal } from '../vault/Experience'
 import './sections.css'
 
 const ENTRIES = [
@@ -10,5 +11,6 @@ const ENTRIES = [
 ]
 
 export default function TrustSection() {
-  return <section className="ib-landing-section ib-trust-section" id="trust" aria-labelledby="trust-title"><div className="ib-shell ib-trust-layout"><div className="ib-trust-intro"><Seal /><p className="ib-kicker">The armorer’s word</p><h2 id="trust-title" className="ib-title ib-section-title">Wonder in the pull.<br /><em>Clarity in the ledger.</em></h2><p className="ib-copy">The object, the offer and the next step. In plain sight.</p><p className="ib-trust-demo">This is a front-end demo. Custody, authentication, insurance and shipping are simulated.</p></div><dl className="ib-trust-entries">{ENTRIES.map((entry, index) => <div key={entry.label}><dt><span className="ib-kicker">{String(index + 1).padStart(2, '0')} · {entry.label}</span><span className="ib-trust-title">{entry.title}</span></dt><dd>{entry.copy}</dd></div>)}</dl></div></section>
+  const reduced = useReducedMotion()
+  return <section className="ib-landing-section ib-trust-section" id="trust" aria-labelledby="trust-title"><div className="ib-shell ib-trust-layout"><div className="ib-trust-intro"><Seal /><p className="ib-kicker">The armorer’s word</p><h2 id="trust-title" className="ib-title ib-section-title">Wonder in the pull.<br /><em>Clarity in the ledger.</em></h2><p className="ib-copy">The object, the offer and the next step. In plain sight.</p><p className="ib-trust-demo">This is a front-end demo. Custody, authentication, insurance and shipping are simulated.</p></div><dl className="ib-trust-entries">{ENTRIES.map((entry, index) => <motion.div key={entry.label} initial={{ opacity: 0, y: reduced ? 0 : 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: reduced ? 0.15 : 0.4, ease: EXPO }}><dt><span className="ib-kicker tabular">{String(index + 1).padStart(2, '0')} · {entry.label}</span><span className="ib-trust-title">{entry.title}</span></dt><dd>{entry.copy}</dd></motion.div>)}</dl></div></section>
 }

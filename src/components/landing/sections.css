@@ -1,7 +1,7 @@
 @import '../vault/experience.css';
 
-.ib-landing-section { padding-block: clamp(56px, 7vw, 112px); border-top: 1px solid var(--color-ink-700); }
-.ib-section-title { font-size: clamp(2.75rem, 5vw, 4.5rem); margin: 12px 0 24px; }
+.ib-landing-section { padding-block: clamp(64px, 7vw, 112px); border-top: 1px solid color-mix(in oklch, var(--color-bone-100) 10%, transparent); scroll-margin-top: calc(var(--header-h) + var(--ticker-h) + 16px); }
+.ib-section-title { font-size: 64px; margin: 12px 0 24px; }
 .ib-section-title em { color: var(--color-bone-200); }
 .ib-section-heading { display: flex; flex-direction: column; gap: 0; margin-bottom: 32px; }
 .ib-section-heading .ib-copy { margin: 0; }
@@ -9,77 +9,85 @@
 .ib-how-object { position: relative; min-height: 380px; display: grid; align-items: start; }
 .ib-how-object .ib-artwork { height: 380px; }
 .ib-how-object .ib-image-fit { transform: rotate(14deg); }
-.ib-object-caption { display: grid; gap: 6px; font-size: .875rem; color: var(--color-bone-300); border-top: 1px solid var(--color-ink-600); padding-top: 18px; }
+.ib-object-caption { display: grid; gap: 6px; font-size: 13px; color: var(--color-bone-400); border-top: 1px solid color-mix(in oklch, var(--color-bone-100) 10%, transparent); padding-top: 18px; }
+.ib-object-caption .font-display { color: var(--color-bone-100); line-height: 1.15; }
 .ib-how-steps { display: grid; }
 .ib-how-step { display: grid; grid-template-columns: 36px 1fr; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--color-ink-700); }
-.ib-how-number { font-family: var(--font-display); font-size: 1.75rem; color: var(--color-brass-300); line-height: 1.2; }
-.ib-how-step h3 { font-size: 1.125rem; font-weight: 500; margin: 0 0 8px; color: var(--color-bone-100); }
-.ib-how-step p { font-size: 1rem; line-height: 1.7; color: var(--color-bone-300); margin: 0; max-width: 46ch; }
-.ib-section-link { margin-top: 20px; color: var(--color-brass-300); }
-.ib-tiers { display: grid; grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--color-ink-600); }
-.ib-tier { min-width: 0; padding: 28px 0; border-bottom: 1px solid var(--color-ink-600); display: flex; flex-direction: column; }
-.ib-tier-index { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.ib-limited { font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--color-brass-300); }
-.ib-tier h3 { font-size: 2rem; line-height: 1.1; font-weight: 500; margin: 16px 0 8px; }
-.ib-tier-epithet { font-size: .875rem; color: var(--color-bone-300); margin: 0; }
-.ib-tier-price { font-size: 2.5rem; line-height: 1.15; margin: 24px 0 16px; font-weight: 500; }
-.ib-tier-tagline { color: var(--color-bone-300); font-size: .875rem; line-height: 1.7; margin: 0 0 24px; }
-.ib-tier-numbers { display: grid; gap: 12px; margin: 0 0 24px; font-size: .875rem; }
-.ib-tier-numbers > div { display: flex; justify-content: space-between; gap: 12px; }
-.ib-tier-numbers dt { color: var(--color-bone-300); }
-.ib-tier-numbers dd { margin: 0; color: var(--color-bone-100); text-align: right; }
-.ib-tier-stock { color: var(--color-bone-300); font-size: .875rem; line-height: 1.7; margin: 16px 0 0; }
-.ib-tier-stock strong { color: var(--color-brass-300); font-weight: 500; }
-.ib-tier-link { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: auto; padding-top: 24px; min-height: 52px; color: var(--color-brass-300); font-size: .875rem; font-weight: 500; text-decoration: none; }
-.ib-tier-link > span { transition: transform .2s var(--ease-out-expo); }
-.ib-tier-link:hover > span { transform: translateX(4px); }
-.ib-tier-footnote { color: var(--color-bone-300); font-size: .875rem; line-height: 1.7; max-width: 90ch; margin: 24px 0 0; }
-.ib-odds-track { display: flex; gap: 2px; height: 7px; width: 100%; overflow: hidden; }
+.ib-how-number { color: var(--color-bone-400); padding-top: 10px; }
+.ib-how-step h3 { font-family: var(--font-display); font-size: 30px; line-height: 1.15; font-weight: 500; margin: 0 0 8px; color: var(--color-bone-100); }
+.ib-how-step p { font-size: 15px; line-height: 1.7; color: var(--color-bone-300); margin: 0; max-width: 46ch; }
+.ib-section-link { margin-top: 24px; }
+.ib-tiers { border-top: 1px solid color-mix(in oklch, var(--color-bone-100) 14%, transparent); }
+.ib-tier { min-width: 0; padding: 28px 0; border-bottom: 1px solid color-mix(in oklch, var(--color-bone-100) 14%, transparent); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 20px; align-items: start; }
+.ib-tier-identity { min-width: 0; }
+.ib-tier-index { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.ib-tier-index .ib-kicker { margin: 0; }
+.ib-tier h3 { font-size: 30px; line-height: 1.1; font-weight: 500; margin: 12px 0 6px; }
+.ib-tier-epithet { font-size: 13px; color: var(--color-bone-400); margin: 0; }
+.ib-tier-price { font-size: 44px; line-height: 1.1; margin: 8px 0 0; font-weight: 500; }
+.ib-tier-tagline { color: var(--color-bone-300); font-size: 13px; line-height: 1.7; margin: 12px 0 0; max-width: 42ch; }
+.ib-tier-numbers { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin: 0; font-size: 15px; }
+.ib-tier-numbers > div { display: grid; gap: 6px; }
+.ib-tier-numbers dt { color: var(--color-bone-400); }
+.ib-tier-numbers dd { margin: 0; color: var(--color-bone-100); }
+.ib-tier-stock { color: var(--color-bone-400); font-size: 13px; line-height: 1.7; margin: 12px 0 0; }
+.ib-tier-stock strong { color: var(--color-bone-200); font-weight: 500; }
+.ib-tier-odds { grid-column: 1 / -1; min-width: 0; }
+.ib-tier-odds > p { margin: 0 0 12px; }
+.ib-tier-link { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; color: var(--color-bone-200); text-decoration: none; }
+.ib-tier-link > svg { transition: transform .2s var(--ease-out-expo); flex-shrink: 0; }
+.ib-tier-link:hover { color: var(--color-bone-50); }
+.ib-tier-link:hover > svg { transform: translateX(4px); }
+.ib-tier-footnote { color: var(--color-bone-400); font-size: 13px; line-height: 1.7; max-width: 90ch; margin: 24px 0 0; }
+.ib-odds-track { display: flex; gap: 2px; height: 4px; width: 100%; overflow: hidden; }
 .ib-odds-track > div { flex-shrink: 1; }
 .ib-odds-track span { display: block; width: 100%; height: 100%; }
 .ib-odds-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; list-style: none; padding: 0; margin: 16px 0 0; }
-.ib-odds-legend li { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: .75rem; color: var(--color-bone-200); }
+.ib-odds-legend li { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; color: var(--color-bone-200); }
 .ib-odds-legend li > span:last-child { margin-left: auto; }
-.ib-odds-dot { display: inline-block; flex-shrink: 0; width: 6px; height: 6px; border-radius: 1px; }
-.ib-odds-details { margin-top: 10px; font-size: .875rem; }
+.ib-odds-dot { display: inline-block; flex-shrink: 0; width: 5px; height: 5px; transform: rotate(45deg); margin-right: 3px; }
+.ib-odds-details { margin-top: 4px; font-size: 13px; }
 .ib-odds-details summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--color-bone-200); min-height: 44px; cursor: pointer; list-style: none; }
 .ib-odds-details summary::-webkit-details-marker { display: none; }
-.ib-odds-details summary > span { transition: transform .2s var(--ease-out-expo); }
-.ib-odds-details[open] summary > span { transform: rotate(45deg); }
+.ib-odds-details summary > svg { transition: transform .2s var(--ease-out-expo); }
+.ib-odds-details[open] summary > svg { transform: rotate(180deg); }
 .ib-odds-details ul { list-style: none; display: grid; gap: 12px; margin: 12px 0; padding: 0; }
 .ib-odds-details li { display: flex; justify-content: space-between; gap: 12px; color: var(--color-bone-200); }
 .ib-odds-details li > span:last-child { white-space: nowrap; }
-.ib-odds-details small { display: block; color: var(--color-bone-300); font-size: .75rem; margin-top: 4px; }
+.ib-odds-details small { display: block; color: var(--color-bone-400); font-size: 13px; margin-top: 4px; }
 .ib-trust-section { background: var(--color-ink-900); }
 .ib-trust-layout { display: grid; gap: 36px; }
 .ib-trust-intro > .ib-seal { margin-bottom: 24px; }
-.ib-trust-demo { color: var(--color-bone-300); font-size: .875rem; line-height: 1.7; max-width: 40ch; }
+.ib-trust-demo { color: var(--color-bone-400); font-size: 13px; line-height: 1.7; max-width: 40ch; }
 .ib-trust-entries { margin: 0; }
 .ib-trust-entries > div { padding-block: 24px; border-top: 1px solid var(--color-ink-600); }
 .ib-trust-entries > div:last-child { border-bottom: 1px solid var(--color-ink-600); }
-.ib-trust-title { display: block; font-family: var(--font-display); font-size: 1.875rem; line-height: 1.2; margin-top: 10px; }
-.ib-trust-entries dd { font-size: 1rem; line-height: 1.7; color: var(--color-bone-300); margin: 12px 0 0; max-width: 52ch; }
+.ib-trust-title { display: block; font-family: var(--font-display); font-size: 30px; line-height: 1.2; margin-top: 10px; }
+.ib-trust-entries dd { font-size: 15px; line-height: 1.7; color: var(--color-bone-300); margin: 12px 0 0; max-width: 52ch; }
 .ib-faq-layout { display: grid; gap: 20px; }
 .ib-faq-item { border-top: 1px solid var(--color-ink-600); }
 .ib-faq-item:last-child { border-bottom: 1px solid var(--color-ink-600); }
 .ib-faq-item h3 { margin: 0; }
-.ib-faq-item button { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: 100%; min-height: 76px; padding: 16px 0; text-align: left; background: none; border: 0; color: var(--color-bone-100); font-family: var(--font-display); font-size: 1.5rem; font-weight: 500; }
-.ib-faq-plus { font-family: var(--font-sans); font-size: 1.5rem; color: var(--color-brass-300); flex-shrink: 0; transition: transform .25s var(--ease-out-expo); }
+.ib-faq-item button { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: 100%; min-height: 76px; padding: 20px 0; text-align: left; background: none; border: 0; color: var(--color-bone-200); font-family: var(--font-display); font-size: 30px; font-weight: 500; transition: color .2s var(--ease-out-expo); }
+.ib-faq-item button:hover, .ib-faq-item button[aria-expanded="true"] { color: var(--color-bone-50); }
+.ib-faq-plus { color: var(--color-bone-400); flex-shrink: 0; transition: transform .25s var(--ease-out-expo); }
 .ib-faq-item[data-open="true"] .ib-faq-plus { transform: rotate(45deg); }
 .ib-faq-answer { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .2s var(--ease-out-expo), opacity .15s var(--ease-out-expo); }
 .ib-faq-answer > div { overflow: hidden; }
-.ib-faq-answer p { margin: 0; padding-bottom: 24px; font-size: 1rem; line-height: 1.75; color: var(--color-bone-300); max-width: 62ch; }
+.ib-faq-answer p { margin: 0; padding: 0 40px 24px 0; font-size: 15px; line-height: 1.75; color: var(--color-bone-300); max-width: 62ch; }
 .ib-faq-item[data-open="true"] .ib-faq-answer { grid-template-rows: 1fr; opacity: 1; transition-duration: .32s, .25s; }
-.ib-footer { padding-block: 40px max(32px, env(safe-area-inset-bottom)); border-top: 1px solid var(--color-ink-600); background: var(--color-ink-900); }
+.ib-footer { padding-block: 40px calc(32px + env(safe-area-inset-bottom)); border-top: 1px solid var(--color-ink-600); background: var(--color-ink-900); }
 .ib-footer-top { display: grid; gap: 12px; }
-.ib-footer-top > p { color: var(--color-bone-300); font-size: 1.375rem; margin: 0; }
+.ib-footer-top > p { color: var(--color-bone-300); font-size: 24px; margin: 0; }
 .ib-footer nav { display: flex; gap: 24px; flex-wrap: wrap; }
 .ib-footer a { color: var(--color-bone-200); text-decoration: none; }
-.ib-footer a:hover { color: var(--color-brass-300); }
-.ib-footer nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: .875rem; }
-.ib-footer-bottom { border-top: 1px solid var(--color-ink-700); margin-top: 24px; padding-top: 24px; display: grid; gap: 16px; color: var(--color-bone-300); font-size: .875rem; line-height: 1.8; }
+.ib-footer a:hover { color: var(--color-bone-50); }
+.ib-footer nav a { display: inline-flex; align-items: center; min-height: 44px; }
+.ib-footer-bottom { border-top: 1px solid var(--color-ink-700); margin-top: 32px; padding-top: 24px; display: grid; gap: 16px; color: var(--color-bone-400); font-size: 13px; line-height: 1.8; }
 .ib-footer-bottom p { margin: 0; }
 .ib-footer-bottom a { text-decoration: underline; text-underline-offset: 3px; }
-@media (min-width: 640px) { .ib-tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ib-tier { padding: 28px 24px; border-right: 1px solid var(--color-ink-600); } .ib-tier:nth-child(2n) { border-right: 0; } .ib-tier h3 { min-height: 2.2em; } .ib-tier-tagline { min-height: 5.1em; } .ib-tier-price { font-size: 2.25rem; } }
-@media (min-width: 1024px) { .ib-how-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 96px; align-items: center; } .ib-how-object .ib-artwork { height: 620px; } .ib-how-object .ib-image-fit { transform: rotate(18deg); } .ib-section-heading { flex-direction: row; justify-content: space-between; align-items: end; gap: 40px; margin-bottom: 48px; } .ib-section-heading .ib-copy { margin-bottom: 24px; } .ib-trust-layout { grid-template-columns: 1fr 1fr; gap: 96px; } .ib-trust-intro { align-self: start; position: sticky; top: 48px; } .ib-faq-layout { grid-template-columns: .7fr 1.3fr; gap: 80px; } .ib-footer-top { display: flex; align-items: center; justify-content: space-between; gap: 24px; } .ib-footer-bottom { grid-template-columns: 1fr 1fr; gap: 40px; } }
-@media (min-width: 1200px) { .ib-tiers { grid-template-columns: repeat(5, minmax(0, 1fr)); } .ib-tier { padding: 24px 18px; border-right: 1px solid var(--color-ink-600); } .ib-tier:first-child { padding-left: 0; } .ib-tier:last-child { border-right: 0; padding-right: 0; } .ib-tier:nth-child(2n) { border-right: 1px solid var(--color-ink-600); } .ib-tier h3 { font-size: 1.75rem; min-height: 2.2em; } .ib-tier-epithet { min-height: 3em; } .ib-tier-tagline { min-height: 6.8em; } .ib-tier-numbers > div { display: grid; gap: 4px; } .ib-tier-numbers dd { text-align: left; } .ib-tier-price { font-size: 2rem; } }
+@media (min-width: 640px) { .ib-tier { grid-template-columns: minmax(0, 1.4fr) minmax(0, .6fr) minmax(0, 1fr); gap: 24px 32px; } .ib-tier-numbers { grid-column: auto; grid-template-columns: 1fr; } .ib-tier-odds { grid-column: 1 / 3; } .ib-tier-link { grid-column: 3; justify-content: flex-end; } }
+@media (min-width: 1024px) { .ib-how-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 96px; align-items: center; } .ib-how-object .ib-artwork { height: 620px; } .ib-how-object .ib-image-fit { transform: rotate(18deg); } .ib-section-heading { flex-direction: row; justify-content: space-between; align-items: end; gap: 40px; margin-bottom: 48px; } .ib-section-heading .ib-copy { margin-bottom: 24px; } .ib-trust-layout { grid-template-columns: 1fr 1fr; gap: 96px; } .ib-trust-intro { align-self: start; position: sticky; top: calc(var(--header-h) + var(--ticker-h) + 24px); } .ib-faq-layout { grid-template-columns: .7fr 1.3fr; gap: 80px; } .ib-footer-top { display: flex; align-items: center; justify-content: space-between; gap: 24px; } .ib-footer-bottom { grid-template-columns: 1fr 1fr; gap: 40px; } }
+@media (min-width: 1200px) { .ib-tier { grid-template-columns: minmax(0, 1.5fr) minmax(0, .5fr) minmax(0, .85fr) minmax(0, 1fr) auto; gap: 32px; padding-block: 32px; } .ib-tier-odds, .ib-tier-link { grid-column: auto; } .ib-tier-link { white-space: nowrap; margin-top: 10px; } }
+@media (max-width: 767px) { .ib-section-title { font-size: 44px; } .ib-faq-item button { font-size: 24px; } .ib-how-object .ib-image-fit { transform: rotate(10deg); } .ib-footer { padding-bottom: calc(96px + env(safe-area-inset-bottom)); } }
+@media (prefers-reduced-motion: reduce) { .ib-tier-link:hover > svg, .ib-faq-item[data-open="true"] .ib-faq-plus, .ib-odds-details[open] summary > svg { transform: none; } }
