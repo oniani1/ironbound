@@ -339,9 +339,10 @@ STAND_IDS = {27587}
 
 
 def strip_post(rgba):
-    """Removes a wooden cross stand from a kabuto photo. The post is found under the first
-    narrow neck below the helmet and followed up to where it meets the brim; the image is
-    cut straight across there, so the helmet ends cleanly at its brim."""
+    """Removes a wooden cross stand from a kabuto photo. Below the first narrow neck under the
+    helmet only the stand remains, so those rows are cleared. Above it the post stands in
+    front of the neck guard: its columns are cleared up to where it meets the brim, and the
+    metal on either side is kept."""
     a = np.asarray(rgba).copy()
     h, w = a.shape[:2]
     alpha = a[..., 3] > 40
@@ -371,17 +372,17 @@ def strip_post(rgba):
     if best[1] - best[0] < 4:
         return rgba
     x0, x1 = best[0], best[1] + 1
-    # Follow the post up while its columns stay warm, mid to light wood.
+    # Follow the post up to the brim. The wood darkens gradually with shade; the brim's
+    # lacquered underside is a sharply dark row, which is where the post ends.
     top = cut
     for y in range(cut - 1, max(0, cut - int(h * 0.35)), -1):
         seg = rgb[y, x0:x1]
         lum = (0.299 * seg[:, 0] + 0.587 * seg[:, 1] + 0.114 * seg[:, 2]) / 255
-        warm = seg[:, 0] - seg[:, 2]
-        wood = alpha[y, x0:x1] & (lum > 0.33) & (warm > 15) & (warm < 95)
-        if wood.mean() < 0.6:
+        if np.median(lum) < 0.25:
             break
         top = y
-    a[top:, :, 3] = 0
+    a[cut:, :, 3] = 0
+    a[top:cut, max(0, x0 - 2):min(w, x1 + 2), 3] = 0
     im = Image.fromarray(a, "RGBA")
     bbox = im.getbbox()
     return im.crop(bbox) if bbox else im
