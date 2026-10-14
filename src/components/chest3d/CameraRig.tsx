@@ -60,14 +60,19 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     let lookY = 0.45 - lift - dolly * 0.03 + frame * (revealLook - 0.45)
     let height = 1.05 - lift - dolly * 0.12 + frame * (revealLook + 0.25 - 1.05)
     let offsetX = wide && !sheet ? frame * anim.cardSide * Math.min(0.75, halfH * aspect * 0.42) : 0
-    // Macro: close on the upper third of the piece (hilt, visor, maker's mark), centered.
+    // Macro: close on the piece, travelling along it as anim.along runs 0 to 1. Tall pieces
+    // are read top to bottom (hilt or crest first), wide ones left to right.
     const m = anim.macro * frame
     if (m > 0) {
-      const macroLook = anim.focusY + anim.focusH * anim.macroBias
-      dist += (Math.max(1.1, revealDist * 0.46) - dist) * m
+      const tall = anim.focusH >= anim.focusW * 1.1
+      const reach = 0.42
+      const close = Math.min(1.3, Math.max(0.55, Math.max(anim.focusH, anim.focusW) * 0.75))
+      const macroLook = tall ? anim.focusY + anim.focusH * (reach - anim.along * reach * 2) : anim.focusY
+      const macroX = tall ? 0 : anim.focusW * (-reach + anim.along * reach * 2)
+      dist += (close - dist) * m
       lookY += (macroLook - lookY) * m
       height += (macroLook + 0.04 - height) * m
-      offsetX *= 1 - m
+      offsetX += (macroX - offsetX) * m
     }
     // Inspect zoom: move in on the piece and look along it.
     const z = anim.zoom * frame

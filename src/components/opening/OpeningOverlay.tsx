@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
-import { CaretUp, FastForward, SpeakerHigh, SpeakerSlash, X } from '@phosphor-icons/react'
+import { CaretUp, FastForward, X } from '@phosphor-icons/react'
 import { ChestScene } from '../chest3d/ChestScene'
 import { ChestAnim } from '../chest3d/animState'
 import { applyCharge, introTimeline, revealTimeline, settleReveal, type Phase } from '../chest3d/timeline'
@@ -12,7 +12,6 @@ import { chestPool, tellSequence } from '../../lib/gacha'
 import { ITEMS } from '../../data/items'
 import { ItemImg } from '../ui/ItemImg'
 import { actions, useStore } from '../../lib/store'
-import { sfx } from '../../lib/audio'
 import { toast } from '../../lib/toast'
 import { money, shortEra } from '../../lib/format'
 import { HoldToOpen, type HoldHandle } from './HoldToOpen'
@@ -42,7 +41,7 @@ function useReducedMotion() {
 }
 
 export default function OpeningOverlay({ session }: { session: OpeningSession }) {
-  const { chest, results, trial } = session
+  const { chest, results, trial, spectate } = session
   const multi = results.length > 1
   const anim = useMemo(() => new ChestAnim(), [])
   const tl = useRef<gsap.core.Timeline | null>(null)
@@ -56,7 +55,6 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   const closeBtn = useRef<HTMLButtonElement>(null)
   const skipBtn = useRef<HTMLButtonElement>(null)
   const fast = useStore((s) => s.settings.fast)
-  const sound = useStore((s) => s.settings.sound)
   const balance = useStore((s) => s.balance)
   const reduced = useReducedMotion()
   const { open, close } = useOpening()
@@ -75,13 +73,13 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     tl.current?.kill()
     if (reduced) {
       // Reduced motion: no flight, no flashes. The result fades in.
-      sfx.burst(RARITIES[best.rarity].tier)
       settleReveal(anim, best.rarity, multi)
       setPhase('reveal')
       return
     }
-    tl.current = revealTimeline(anim, { tell, fast: fastRef.current, multi, reducedMotion: reduced, onPhase: setPhase, onTell: setTellStep, lift: true })
-  }, [anim, tell, multi, reduced, best.rarity])
+    // Spectators watch: no lift to wait for.
+    tl.current = revealTimeline(anim, { tell, fast: fastRef.current, multi, reducedMotion: reduced, onPhase: setPhase, onTell: setTellStep, lift: !spectate })
+  }, [anim, tell, multi, reduced, best.rarity, spectate])
 
   // Lift: the lid hangs half open until the player drags it up, taps, or presses Space.
   // It never blocks: after a few seconds it opens by itself.
@@ -94,49 +92,30 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   }, [])
   useEffect(() => {
     if (phase !== 'lift') return
-    sfx.heartbeat(0.9)
-    const beat = window.setInterval(() => sfx.heartbeat(0.7), 860)
     const auto = window.setTimeout(resumeLift, 4500)
-    return () => {
-      window.clearInterval(beat)
-      window.clearTimeout(auto)
-    }
+    return () => window.clearTimeout(auto)
   }, [phase, resumeLift])
 
-  // The seal: a heartbeat that quickens as the charge builds.
-  const lastBeat = useRef(0)
-  const onCharge = useCallback(
-    (p: number) => {
-      applyCharge(anim, p)
-      const now = performance.now()
-      if (p > 0.06 && now - lastBeat.current > 980 - p * 560) {
-        lastBeat.current = now
-        sfx.heartbeat(0.45 + p * 0.55)
-      }
-    },
-    [anim],
-  )
+  // The seal heats and strains as the charge builds.
+  const onCharge = useCallback((p: number) => applyCharge(anim, p), [anim])
 
   // Intro: the chest drops onto the plinth. In fast mode the seal breaks by itself.
   useEffect(() => {
-    sfx.unlock()
-    sfx.startAmbience()
     document.body.style.overflow = 'hidden'
     tl.current = introTimeline(
       anim,
       () => {
-        if (fastRef.current) {
+        // Fast mode and spectators break the seal by themselves; spectators see it strain first.
+        if (fastRef.current || spectate) {
           const o = { p: 0 }
           tl.current = gsap.timeline()
-          tl.current.to(o, { p: 1, duration: 0.08, ease: 'power1.in', onUpdate: () => applyCharge(anim, o.p), onComplete: startReveal })
+          tl.current.to(o, { p: 1, duration: fastRef.current ? 0.08 : 1.1, ease: 'power1.in', onUpdate: () => applyCharge(anim, o.p), onComplete: startReveal })
         } else setPhase('await')
       },
       fastRef.current,
     )
     return () => {
       tl.current?.kill()
-      sfx.stopAmbience()
-      sfx.stopCharge()
       document.body.style.overflow = ''
     }
   }, [anim, startReveal])
@@ -211,7 +190,6 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       return
     }
     const ms = fastRef.current || reduced || multi ? 0 : TITLE_MS[RARITIES[best.rarity].tier] ?? 900
-    if (ms) sfx.stamp()
     const t = window.setTimeout(() => setCardReady(true), ms)
     return () => window.clearTimeout(t)
   }, [phase, reduced, multi, best.rarity])
@@ -228,6 +206,10 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   // Close works from the first frame. Before the seal breaks, a free chest stays unopened;
   // a paid opening keeps its pieces in the vault.
   const exit = useCallback(() => {
+    if (spectate) {
+      tl.current?.kill()
+      return close({ skipCallback: true })
+    }
     if (phase === 'reveal') return close()
     tl.current?.kill()
     if (trial && (phase === 'intro' || phase === 'await')) {
@@ -236,7 +218,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     }
     if (!trial) toast(results.length > 1 ? `Your ${results.length} ${chest.name} pulls are in your vault.` : `Your ${chest.name} pull is in your vault.`)
     close()
-  }, [phase, trial, session.pulls, results.length, chest.name, close])
+  }, [phase, trial, spectate, session.pulls, results.length, chest.name, close])
 
   // Fast switched on while waiting: break the seal now.
   useEffect(() => {
@@ -281,13 +263,10 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   }, [phase, exit, skip, resumeLift])
 
   const sell = (uids: string[]) => {
-    const amounts = uids.map((u) => {
+    uids.forEach((u) => {
       const r = results.find((x) => x.uid === u)!
-      const amt = Math.round(r.item.value * chest.buyback)
-      actions.sellBack(u, amt)
-      return amt
+      actions.sellBack(u, Math.round(r.item.value * chest.buyback))
     })
-    if (amounts.length) sfx.coins(Math.min(14, 4 + amounts.length * 2))
     setSoldUids((s) => {
       const n = new Set(s)
       uids.forEach((u) => n.add(u))
@@ -310,7 +289,8 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     [chest],
   )
   const rarityHex = RARITIES[best.rarity].hex
-  const showClues = !multi && (phase === 'rise' || phase === 'burst')
+  // Clues only once the piece is on its way: the burst belongs to the rarity's name.
+  const showClues = !multi && phase === 'rise'
 
   return (
     <motion.div
@@ -360,7 +340,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         className={`absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 ${multi && phase === 'reveal' ? 'bg-[linear-gradient(180deg,var(--color-ink-950)_60%,transparent)] pb-5' : ''}`}
       >
         <div className="min-w-0">
-          <p className="eyebrow truncate">{trial ? 'Your first chest' : chest.epithet}</p>
+          <p className="eyebrow truncate">{spectate ? `Watching ${spectate.by === 'You' ? 'your' : spectate.by ? `${spectate.by}'s` : 'a'} pull · simulated` : trial ? 'Your first chest' : chest.epithet}</p>
           <p className="font-display truncate text-xl font-semibold text-bone-50">
             {trial ? 'Trial Chest' : chest.name}
             {multi && <span className="ml-2 text-base font-normal text-bone-300">× {results.length}</span>}
@@ -379,9 +359,6 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
             </span>
             Fast
           </button>
-          <IconButton size="lg" onClick={() => actions.toggleSound()} className="bg-ink-950/40 backdrop-blur" aria-label={sound ? 'Mute sound' : 'Unmute sound'}>
-            {sound ? <SpeakerHigh size={18} weight="light" /> : <SpeakerSlash size={18} weight="light" />}
-          </IconButton>
           {(phase === 'tell' || phase === 'lift' || phase === 'burst' || phase === 'rise') && (
             <button
               ref={skipBtn}
@@ -443,7 +420,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       {/* The rarity is named as the light climbs, never told by color alone. */}
       <div className="pointer-events-none absolute inset-x-0 bottom-[16%] flex justify-center" aria-live="polite">
         <AnimatePresence mode="wait">
-          {phase === 'tell' && tellStep && (
+          {phase === 'burst' && tellStep && (
             <motion.p
               key={tellStep}
               initial={{ opacity: 0, y: 10, scale: 0.9 }}
@@ -623,6 +600,11 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
               rarity={first.rarity}
               chest={chest}
               trial={trial}
+              spectate={spectate}
+              onOpenChest={() => {
+                close({ skipCallback: true })
+                navigate(`/chests/${chest.id}`)
+              }}
               sold={soldUids.has(first.uid) ? Math.round(first.item.value * chest.buyback) : null}
               onKeep={() => close()}
               onSell={() => sell([first.uid])}
@@ -647,7 +629,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       </AnimatePresence>
 
       {/* Purse under the controls, so the cost and the sell-back credit are visible here too. */}
-      {!trial && phase === 'reveal' && (
+      {!trial && !spectate && phase === 'reveal' && (
         <motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}

@@ -51,18 +51,15 @@ export class ChestAnim {
   hero = false
   /** Macro shot 0..1: camera close on a telling detail of the item, then pulls back. */
   macro = 0
-  /** Where the macro looks, as a fraction of item height above its center. */
+  /** Where the macro looks, as a fraction of item height above its center (Inspect and still shots). */
   macroBias = 0.26
+  /** The reveal's travel along the piece in the macro shot: 0 at one end, 1 at the other. */
+  along = 0
   /** Phones: fraction of the screen height covered by the result sheet. */
   sheet = 0.5
   /** Wide screens: 1 while the result card sits on the right, 0 when it is tucked away. */
   cardSide = 1
-  /** Candles on the plinth: 0 dark, 1 all lit (they catch one after another as this rises). */
-  candles = 1
-  /** Candle flames take this color by candleTintAmt (rarity light for the top tiers). */
-  candleTint = new Color('#ff9a4a')
-  candleTintAmt = 0
-  /** A flare in every flame, for beats and the blackout's return. */
+  /** A flare in the torchlight and the chest's glow, for beats and the rarity's arrival. */
   flare = 0
   /** Room light 0..1: torches, key, rim and environment. Dips to near dark for a blackout. */
   room = 1
@@ -103,8 +100,8 @@ export class ChestAnim {
     this.bursts = []
     this.frame = 0
     this.macro = 0
+    this.along = 0
     this.flare = 0
-    this.candleTintAmt = 0
     this.room = 1
     this.crane = 0
     this.orbit = 0

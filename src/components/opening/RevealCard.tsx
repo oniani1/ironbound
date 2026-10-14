@@ -4,13 +4,11 @@ import { ArrowCounterClockwise, MagnifyingGlass, ShareNetwork } from '@phosphor-
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES } from '../../config/rarity'
 import { money, provenanceLine, resaleLabel, sourceHost } from '../../lib/format'
-import { sfx } from '../../lib/audio'
 import { Button } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
 import { Pips, Tag } from '../ui/RarityTag'
 import { ShareSheet } from '../social/ShareSheet'
 import { CoinBurst } from '../ui/CoinBurst'
-import { ScaleBar } from '../ui/ScaleBar'
 
 interface Props {
   draw?: string
@@ -25,6 +23,9 @@ interface Props {
   onReplay: () => void
   canAfford: boolean
   trial?: boolean
+  /** Watching someone else's pull: no keep, sell or ship, an invitation to open this chest. */
+  spectate?: { by?: string }
+  onOpenChest?: () => void
   /** Fast mode: everything lands at once. */
   fast?: boolean
   /** Reports the card's rendered height so the camera can frame the item above it. */
@@ -47,7 +48,7 @@ const CATEGORY_LABEL: Record<Item['category'], string> = {
   fitting: 'Fitting',
 }
 
-export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, onShip, onAgain, onReplay, canAfford, trial, fast, onHeight, collapsed, onToggle }: Props) {
+export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, onShip, onAgain, onReplay, canAfford, trial, spectate, onOpenChest, fast, onHeight, collapsed, onToggle }: Props) {
   const r = RARITIES[rarity]
   const offer = Math.round(item.value * chest.buyback)
   const delta = item.value - chest.price
@@ -77,11 +78,6 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
   }, [collapsed])
   // Fast and reduced motion: final values and actions at once, opacity only.
   const instant = fast || reduced || revisit
-
-  useEffect(() => {
-    const t = window.setTimeout(() => sfx.stamp(), fast || reduced ? 0 : 200)
-    return () => window.clearTimeout(t)
-  }, [])
 
   // Keyboard focus lands on the main action, then follows the Inspect toggle.
   useEffect(() => {
@@ -166,7 +162,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
       </div>
 
       <motion.p {...rise(0.17)} className="eyebrow relative mt-3 sm:mt-4">
-        {trial ? 'Guided demo · sample Rare result' : `${chest.name} · ${CATEGORY_LABEL[item.category]}`}
+        {spectate ? `${spectate.by ?? 'Someone'} pulled this · ${chest.name}` : trial ? 'Guided demo · sample Rare result' : `${chest.name} · ${CATEGORY_LABEL[item.category]}`}
       </motion.p>
       <motion.h2 {...rise(0.24)} className="font-display relative mt-1 text-[30px] font-semibold leading-[1.02] text-bone-50 sm:text-[40px]">
         {item.name}
@@ -193,7 +189,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
           </p>
           <p className="mt-1 text-[36px] font-semibold leading-none text-bone-50 sm:text-[46px]">
             {/* The value is stated, not teased: it lands at once below Epic and rolls briefly above. */}
-            <CountUp to={item.value} duration={instant || r.tier < 4 ? 0.01 : 0.8} delay={instant || r.tier < 4 ? 0 : 0.3} ticks={!instant && r.tier >= 4} onDone={() => setCounted(true)} />
+            <CountUp to={item.value} duration={instant || r.tier < 4 ? 0.01 : 0.8} delay={instant || r.tier < 4 ? 0 : 0.3} onDone={() => setCounted(true)} />
           </p>
         </div>
         <motion.div
@@ -223,9 +219,6 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         <span className="hidden min-w-0 truncate sm:inline">{item.materials}</span>
       </motion.div>
 
-      <motion.div {...rise(0.5)} className="relative hidden sm:block">
-        <ScaleBar length={item.length} color={r.cssVar} delay={0.9} instant={instant} label={['helmet', 'armor', 'shield'].includes(item.category) ? 'Height' : 'Length'} />
-      </motion.div>
       <motion.p {...rise(0.56)} className="font-display relative mt-3 hidden text-[16px] italic leading-snug text-bone-300 sm:line-clamp-3">
         {item.blurb}
       </motion.p>
@@ -236,6 +229,14 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
           Added to your demo vault. Every pull ends the same way: keep it, sell it back now or ship it home.
         </motion.p>
       )}
+      {spectate ? (
+        <motion.div {...rise(0.67)} className="relative mt-4 grid gap-2 sm:mt-5">
+          <Button data-testid="spectate-open" ref={keepRef} variant="primary" size="lg" onClick={onOpenChest}>
+            Open {chest.name} · {money(chest.price)}
+          </Button>
+          <p className="text-center text-[12px] text-bone-400">A replay of a simulated pull. Nothing was charged and nothing enters your vault.</p>
+        </motion.div>
+      ) : (
       <motion.div {...rise(0.67)} className="relative mt-3 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-2.5">
         {sold != null ? (
           <div className="col-span-2 flex items-center justify-between border-y border-moss-400/25 py-3">
@@ -271,7 +272,8 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
           </Button>
         )}
       </motion.div>
-      {draw && (
+      )}
+      {draw && !spectate && (
         <motion.p {...rise(0.77)} className="relative mt-3 hidden items-center justify-center gap-1.5 text-[11px] text-bone-400 sm:flex" title={`Draw ${draw}`}>
           <span className="block h-1 w-1 rounded-full bg-moss-400" />
           Simulated draw 0x{draw.slice(0, 6)}…{draw.slice(-4)} · no on-chain transaction
