@@ -14,6 +14,8 @@ interface RevealOptions {
   multi?: boolean
   reducedMotion?: boolean
   onPhase: (p: Phase) => void
+  /** Called with each rarity the light passes through. */
+  onTell?: (r: RarityId) => void
 }
 
 function tweenColor(tl: gsap.core.Timeline, target: Color, hex: string, at: number | string, duration: number) {
@@ -54,7 +56,7 @@ export function applyCharge(anim: ChestAnim, p: number) {
  * then is lit and glinted. Lengths scale with the final rarity.
  */
 export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
-  const { tell, fast, multi, reducedMotion, onPhase } = opts
+  const { tell, fast, multi, reducedMotion, onPhase, onTell } = opts
   const final = tell[tell.length - 1] ?? 'common'
   const tier = RARITIES[final].tier
   const steps = fast ? [final] : tell
@@ -79,7 +81,10 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   tl.call(() => sfx.creak(0.6), [], `>-${0.35 * k}`)
   tweenColor(tl, anim.glowColor, first.hex, '<', 0.25 * k)
   tl.to(anim, { lid: 0.1, glow: 1.1, duration: 0.32 * k, ease: 'power3.out' }, '<')
-  tl.call(() => anim.emit(24, new Color(first.hex), 0.7))
+  tl.call(() => {
+    anim.emit(24, new Color(first.hex), 0.7)
+    onTell?.(first.id)
+  })
 
   // Upgrades: a jolt, a bell, a brighter color. One per step.
   steps.slice(1).forEach((r, i) => {
@@ -89,6 +94,7 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
     tl.call(() => {
       sfx.ting(i + 1)
       anim.emit(36 + i * 20, new Color(rr.hex), 0.9)
+      onTell?.(r)
     })
     tweenColor(tl, anim.glowColor, rr.hex, '<', 0.18)
     tl.to(anim, { lid: 0.14 + i * 0.03, glow: 1.25 + i * 0.2, bloom: 0.2 + i * 0.15, duration: 0.22, ease: 'back.out(2)' })

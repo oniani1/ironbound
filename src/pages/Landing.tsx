@@ -13,6 +13,7 @@ import { Button } from '../components/ui/Button'
 import { useOnboarding } from '../components/onboarding/OnboardingContext'
 import { LandingSections } from '../components/landing/sections'
 import { ItemImg } from '../components/ui/ItemImg'
+import type { Item } from '../types'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -117,9 +118,25 @@ function Hero() {
   )
 }
 
-/** A slow river of real items, cheapest to dearest, so the range is felt before it is read. */
+/** A slow river of real items. Grails and commons alternate, so the range is felt at a glance. */
 function Showcase() {
-  const items = useMemo(() => [...ITEMS].sort((a, b) => a.value - b.value), [])
+  const items = useMemo(() => {
+    const sorted = [...ITEMS].sort((a, b) => b.value - a.value)
+    const high = sorted.slice(0, 18)
+    const low = sorted.slice(-60).filter((_, i) => i % 3 === 0)
+    const mix: Item[] = []
+    for (let i = 0; i < Math.max(high.length, low.length); i++) {
+      const h = high[i]
+      const l = low[i]
+      if (h) mix.push(h)
+      if (l) mix.push(l)
+    }
+    return mix
+  }, [])
+  const range = useMemo(() => {
+    const v = ITEMS.map((i) => i.value)
+    return { min: Math.min(...v), max: Math.max(...v) }
+  }, [])
   const loop = [...items, ...items]
   return (
     <section className="relative border-y border-bone-100/[0.06] bg-ink-950 py-10" aria-label="Items in the chests">
@@ -127,7 +144,7 @@ function Showcase() {
         <div>
           <p className="eyebrow">In the chests right now</p>
           <p className="font-display mt-1 text-[28px] font-semibold text-bone-50 sm:text-[34px]">
-            From {money(items[0]?.value ?? 0)} to {money(items[items.length - 1]?.value ?? 0, { compact: true })}
+            From {money(range.min)} to {money(range.max, { compact: true })}
           </p>
         </div>
         <Link to="/chests" className="hidden text-[13px] text-bone-300 hover:text-bone-50 sm:block">

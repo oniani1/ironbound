@@ -6,6 +6,7 @@ import { ChestScene } from '../chest3d/ChestScene'
 import { ChestAnim } from '../chest3d/animState'
 import { applyCharge, introTimeline, revealTimeline, settleReveal, type Phase } from '../chest3d/timeline'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
+import type { RarityId } from '../../types'
 import { chestPool, tellSequence } from '../../lib/gacha'
 import { ITEMS } from '../../data/items'
 import { ItemImg } from '../ui/ItemImg'
@@ -40,6 +41,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   const hold = useRef<HoldHandle>(null)
   const [phase, setPhase] = useState<Phase>('intro')
   const [soldUids, setSoldUids] = useState<Set<string>>(new Set())
+  const [tellStep, setTellStep] = useState<RarityId | null>(null)
   const fast = useStore((s) => s.settings.fast)
   const sound = useStore((s) => s.settings.sound)
   const balance = useStore((s) => s.balance)
@@ -58,7 +60,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
 
   const startReveal = useCallback(() => {
     tl.current?.kill()
-    tl.current = revealTimeline(anim, { tell, fast: fastRef.current, multi, reducedMotion: reduced, onPhase: setPhase })
+    tl.current = revealTimeline(anim, { tell, fast: fastRef.current, multi, reducedMotion: reduced, onPhase: setPhase, onTell: setTellStep })
   }, [anim, tell, multi, reduced])
 
   // Intro: the chest drops onto the plinth. In fast mode the seal breaks by itself.
@@ -97,7 +99,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     anim.idle = 0
     setPhase('tell')
     window.setTimeout(() => {
-      tl.current = revealTimeline(anim, { tell, fast: false, multi, reducedMotion: reduced, onPhase: setPhase })
+      tl.current = revealTimeline(anim, { tell, fast: false, multi, reducedMotion: reduced, onPhase: setPhase, onTell: setTellStep })
     }, 250)
   }, [anim, tell, multi, reduced])
 
@@ -250,6 +252,25 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
                 hint={trial ? 'Press and hold anywhere on the seal. Release and it cools.' : undefined}
               />
             </div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* The rarity is named as the light climbs, never told by color alone. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-[16%] flex justify-center" aria-live="polite">
+        <AnimatePresence mode="wait">
+          {phase === 'tell' && tellStep && (
+            <motion.p
+              key={tellStep}
+              initial={{ opacity: 0, y: 8, scale: 0.92, letterSpacing: '0.5em' }}
+              animate={{ opacity: 1, y: 0, scale: 1, letterSpacing: '0.32em' }}
+              exit={{ opacity: 0, y: -6, transition: { duration: 0.15 } }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="text-[13px] font-semibold uppercase"
+              style={{ color: RARITIES[tellStep].cssVar, textShadow: `0 0 18px ${RARITIES[tellStep].cssVar}` }}
+            >
+              {RARITIES[tellStep].label}
+            </motion.p>
           )}
         </AnimatePresence>
       </div>
