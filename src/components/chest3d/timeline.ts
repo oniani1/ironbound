@@ -120,11 +120,12 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
     if (tier >= 4) anim.emit(60, '#fff2d6', 1.4)
   }, [], 'burst')
   tl.to(anim, { lid: 1, duration: 0.55 * k, ease: 'back.out(1.6)' }, 'burst')
-  tl.to(anim, { glow: 1.5 + tier * 0.12, duration: 0.25 }, 'burst')
+  tl.to(anim, { glow: (1.5 + tier * 0.12) * (fast ? 0.8 : 1), duration: 0.25 }, 'burst')
   tl.to(anim, { beam: tier >= 2 ? 1 : 0.55, duration: 0.3 * k, ease: 'power2.out' }, 'burst')
   tl.fromTo(anim, { ring: 0.001 }, { ring: 1, duration: 1.1, ease: 'power2.out' }, 'burst')
-  tl.to(anim, { bloom: 0.5 + tier * 0.22, duration: 0.12 }, 'burst')
-  tl.to(anim, { bloom: 0.15 + tier * 0.04, duration: 1.2, ease: 'power2.out' }, 'burst+=0.12')
+  // Fast lands within half a second of the burst, so its flash is smaller and settles sooner.
+  tl.to(anim, { bloom: (0.5 + tier * 0.22) * (fast ? 0.55 : 1), duration: 0.12 }, 'burst')
+  tl.to(anim, { bloom: 0.15 + tier * 0.04, duration: fast ? 0.3 : 1.2, ease: 'power2.out' }, 'burst+=0.12')
   tl.to(anim, { shake: (0.4 + tier * 0.22) * shakeK, duration: 0.05 }, 'burst')
   tl.to(anim, { shake: 0, duration: 0.7 + tier * 0.1, ease: 'power3.out' }, 'burst+=0.05')
   if (tier >= 4 && !reducedMotion) {
@@ -153,7 +154,7 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   if (macro) tl.set(anim, { macro: 1 }, `rise-=${0.3 * k}`)
   tl.to(anim, { frame: 1, duration: macro ? 0.6 : riseDur * 0.85, ease: 'power2.inOut' }, `rise-=${0.3 * k}`)
   tl.to(anim, { item: 1, duration: riseDur, ease: macro ? 'power3.out' : 'power2.out' }, 'rise')
-  tl.to(anim, { beam: tier >= 2 ? 0.38 : 0.22, glow: 1.0, duration: 1.4 }, 'rise+=0.3')
+  tl.to(anim, { beam: tier >= 2 ? 0.38 : 0.22, glow: 1.0, duration: fast ? 0.35 : 1.4 }, fast ? 'rise' : 'rise+=0.3')
   tl.to(anim, { itemLit: 1, duration: litDur, ease: 'power2.inOut' }, `rise+=${litAt}`)
   tl.call(() => {
     if (tier >= 3) sfx.shimmer(0.7, tier)
