@@ -2,9 +2,9 @@
 // publisher expects (no html, head or body tags), repackages the 3D chest for locked-down
 // hosts, and lists the supporting files in batches small enough for one publish each.
 //
-// Usage: node scripts/artifact-page.mjs [dist-artifact]
+// Usage: VITE_NO_THUMBS=1 node scripts/artifact-page.mjs [dist-artifact] (same env as the build)
 // Writes <dir>/ironbound.html and prints the batches as JSON.
-import { existsSync, readFileSync, readdirSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, rmSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 
@@ -81,6 +81,10 @@ async function inlineChest() {
 }
 
 await inlineChest()
+
+// The host caps a version at 511 files. A build made with VITE_NO_THUMBS=1 loads full images
+// in lists, so the thumbnail copies are dropped from the upload.
+if (process.env.VITE_NO_THUMBS) rmSync(join(dir, 'items', 'thumb'), { recursive: true, force: true })
 
 const html = readFileSync(join(dir, 'index.html'), 'utf8')
 const head = html.match(/<head>([\s\S]*?)<\/head>/)?.[1] ?? ''
