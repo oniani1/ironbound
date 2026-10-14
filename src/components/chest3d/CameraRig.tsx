@@ -93,7 +93,20 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     const shake = still ? 0 : anim.shake
     const sx = shake * (Math.sin(t * 71.3) * 0.6 + Math.sin(t * 113.7) * 0.4) * 0.05
     const sy = shake * (Math.sin(t * 89.1) * 0.6 + Math.sin(t * 127.3) * 0.4) * 0.05
+    // Arrival: the camera starts high and far and cranes down to the framing.
+    const crane = anim.crane
+    height += crane * 1.7
+    dist += crane * 1.3
+    lookY += crane * 0.12
     pos.set(offsetX + px + driftX + sx, height + py + driftY + sy, dist)
+    // The tease drifts slowly around the chest, which stays at the origin.
+    if (anim.orbit) {
+      const c = Math.cos(anim.orbit)
+      const s = Math.sin(anim.orbit)
+      const x = pos.x
+      pos.x = x * c + pos.z * s
+      pos.z = -x * s + pos.z * c
+    }
     look.set(offsetX + sx * 0.4, lookY + sy * 0.4, 0)
     // Reduced motion: cut to the framing instead of easing toward it.
     const k = still ? 1 : 1 - Math.exp(-dt * 4.5)

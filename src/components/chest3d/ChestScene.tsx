@@ -7,6 +7,7 @@ import type { ChestAnim } from './animState'
 import { ChestModel } from './ChestModel'
 import { CameraRig } from './CameraRig'
 import { LootBeam, Shockwave, Sparks } from './Effects3D'
+import { Candles, DustMotes } from './Atmosphere'
 import { ItemRise } from './ItemRise'
 import { PostFX } from './PostFX'
 import { Stage } from './Stage'
@@ -157,6 +158,8 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
         <LootBeam anim={anim} />
         <Shockwave anim={anim} />
         {!render && <Sparks anim={anim} />}
+        {!render && plinth && <Candles anim={anim} />}
+        {!render && fx && <DustMotes anim={anim} count={typeof window !== 'undefined' && window.innerWidth < 768 ? 150 : 260} />}
       </Suspense>
       {item && (
         <Suspense fallback={null}>

@@ -57,6 +57,23 @@ export class ChestAnim {
   sheet = 0.5
   /** Wide screens: 1 while the result card sits on the right, 0 when it is tucked away. */
   cardSide = 1
+  /** Candles on the plinth: 0 dark, 1 all lit (they catch one after another as this rises). */
+  candles = 1
+  /** Candle flames take this color by candleTintAmt (rarity light for the top tiers). */
+  candleTint = new Color('#ff9a4a')
+  candleTintAmt = 0
+  /** A flare in every flame, for beats and the blackout's return. */
+  flare = 0
+  /** Room light 0..1: torches, key, rim and environment. Dips to near dark for a blackout. */
+  room = 1
+  /** Camera crane: 1 starts high and far for the arrival, 0 is the normal framing. */
+  crane = 0
+  /** Slow orbit around the chest during the tease, in radians. */
+  orbit = 0
+  /** Light leaking through the cracked lid as rays, 0..1. */
+  gapLight = 0
+  /** The chest lifts off the plinth for the top tiers, 0..1. */
+  levitate = 0
   /** Inspect: zoom toward the piece 0..1, and where along its height the camera looks (-0.5..0.5). */
   zoom = 0
   panY = 0
@@ -86,5 +103,12 @@ export class ChestAnim {
     this.bursts = []
     this.frame = 0
     this.macro = 0
+    this.flare = 0
+    this.candleTintAmt = 0
+    this.room = 1
+    this.crane = 0
+    this.orbit = 0
+    this.gapLight = 0
+    this.levitate = 0
   }
 }

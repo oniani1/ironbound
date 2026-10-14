@@ -40,7 +40,7 @@ function Torch({ position, phase, anim }: { position: [number, number, number]; 
   useFrame((state) => {
     const t = state.clock.elapsedTime + phase
     const flicker = 0.82 + Math.sin(t * 9.3) * 0.06 + Math.sin(t * 23.1) * 0.05 + Math.sin(t * 3.7) * 0.07
-    if (light.current) light.current.intensity = 5.5 * flicker * (1 - anim.beam * 0.35)
+    if (light.current) light.current.intensity = 5.5 * flicker * (1 - anim.beam * 0.35) * anim.room
   })
   return <pointLight ref={light} position={position} color="#ff9b4a" distance={7} decay={1.6} />
 }
@@ -82,11 +82,23 @@ function Plinth({ stone, anim }: { stone: THREE.Texture; anim: ChestAnim }) {
 export function Stage({ anim, plinth = true, floor = true }: { anim: ChestAnim; plinth?: boolean; floor?: boolean }) {
   const stone = useStoneTexture()
   const floorUniforms = useMemo(() => ({ uColor: { value: new THREE.Color('#1a1410') } }), [])
+  const ambient = useRef<THREE.AmbientLight>(null)
+  const key = useRef<THREE.SpotLight>(null)
+  const rim = useRef<THREE.SpotLight>(null)
+  // Room light: the arrival brings it up, a blackout takes it almost to nothing.
+  useFrame((state) => {
+    const r = anim.room
+    if (ambient.current) ambient.current.intensity = 0.16 * r
+    if (key.current) key.current.intensity = 42 * (0.12 + r * 0.88)
+    if (rim.current) rim.current.intensity = 16 * r
+    state.scene.environmentIntensity = 1.35 * (0.1 + r * 0.9)
+  })
   return (
     <>
-      <ambientLight intensity={0.16} color="#ffd9b0" />
+      <ambientLight ref={ambient} intensity={0.16} color="#ffd9b0" />
       {/* Key: warm top-front light, the "candle above the vault". */}
       <spotLight
+        ref={key}
         position={[1.6, 3.6, 2.4]}
         angle={0.42}
         penumbra={0.85}
@@ -96,7 +108,7 @@ export function Stage({ anim, plinth = true, floor = true }: { anim: ChestAnim; 
         color="#ffd6a3"
       />
       {/* Cool rim from behind to separate the silhouette from the dark. */}
-      <spotLight position={[-2.2, 2.6, -2.8]} angle={0.5} penumbra={1} intensity={16} distance={10} color="#9fb4ff" />
+      <spotLight ref={rim} position={[-2.2, 2.6, -2.8]} angle={0.5} penumbra={1} intensity={16} distance={10} color="#9fb4ff" />
       <Torch position={[-2.4, 1.6, -1.2]} phase={0} anim={anim} />
       <Torch position={[2.5, 1.5, -1.4]} phase={2.1} anim={anim} />
       <Environment resolution={128} frames={1} environmentIntensity={1.35}>

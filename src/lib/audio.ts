@@ -12,6 +12,7 @@ class Sfx {
   private noiseBuf: AudioBuffer | null = null
   private charge: { osc: OscillatorNode; osc2: OscillatorNode; gain: GainNode; filter: BiquadFilterNode; crackle: AudioBufferSourceNode; cGain: GainNode } | null = null
   private ambience: { nodes: AudioNode[]; gain: GainNode; stop: () => void } | null = null
+  private tensionBed: { osc: OscillatorNode; filter: BiquadFilterNode; gain: GainNode; src: AudioBufferSourceNode; nGain: GainNode } | null = null
   private muted = !getState().settings.sound
 
   constructor() {
@@ -405,6 +406,95 @@ class Sfx {
   stopAmbience() {
     this.ambience?.stop()
     this.ambience = null
+    this.stopTension()
+  }
+
+  // ----- Opening ritual v2 -----
+
+  /** A candle catching: a soft breath of flame. */
+  ignite() {
+    if (!this.ready) return
+    const t = this.now()
+    this.noise(t, 0.35, { freq: 700, freqEnd: 2200, q: 0.9, gain: 0.07, attack: 0.04, wet: 0.6 })
+    this.tone(t, 180, 0.12, { gain: 0.05, freqEnd: 90, wet: 0.3 })
+  }
+
+  /** One heartbeat: a strong low thump and a softer echo. */
+  heartbeat(strength = 1) {
+    if (!this.ready) return
+    const t = this.now()
+    this.tone(t, 62, 0.2, { gain: 0.42 * strength, freqEnd: 38, wet: 0.15 })
+    this.tone(t + 0.21, 58, 0.18, { gain: 0.26 * strength, freqEnd: 36, wet: 0.15 })
+  }
+
+  /** The lid falling back onto the chest: wood on wood, a little iron. */
+  slam(strength = 1) {
+    if (!this.ready) return
+    const t = this.now()
+    this.tone(t, 96, 0.3, { gain: 0.4 * strength, freqEnd: 44, wet: 0.35 })
+    this.noise(t, 0.12, { type: 'lowpass', freq: 1300, gain: 0.32 * strength, wet: 0.4 })
+    this.metal(t + 0.01, 0.6, 0.04 * strength, 0.25)
+  }
+
+  /** A held bed of rising tension under the tease; set 0..1, stop to release. */
+  startTension() {
+    if (!this.ready || this.tensionBed) return
+    const ctx = this.ctx!
+    const t = this.now()
+    const gain = ctx.createGain()
+    gain.gain.setValueAtTime(0.0001, t)
+    gain.gain.exponentialRampToValueAtTime(0.05, t + 0.8)
+    const filter = ctx.createBiquadFilter()
+    filter.type = 'lowpass'
+    filter.frequency.value = 220
+    filter.Q.value = 6
+    const osc = ctx.createOscillator()
+    osc.type = 'sawtooth'
+    osc.frequency.value = 55
+    osc.connect(filter)
+    const src = ctx.createBufferSource()
+    src.buffer = this.noiseBuf
+    src.loop = true
+    const nGain = ctx.createGain()
+    nGain.gain.value = 0.25
+    src.connect(nGain).connect(filter)
+    filter.connect(gain).connect(this.out(0.7))
+    osc.start(t)
+    src.start(t)
+    this.tensionBed = { osc, filter, gain, src, nGain }
+  }
+
+  setTension(level: number) {
+    const b = this.tensionBed
+    if (!b || !this.ready) return
+    const t = this.now()
+    const x = Math.max(0, Math.min(1, level))
+    b.filter.frequency.setTargetAtTime(220 + x * x * 2400, t, 0.25)
+    b.osc.frequency.setTargetAtTime(55 * (1 + x * 0.5), t, 0.4)
+    b.gain.gain.setTargetAtTime(0.05 + x * 0.11, t, 0.3)
+  }
+
+  stopTension(release = 0.35) {
+    const b = this.tensionBed
+    if (!b || !this.ctx) return
+    const t = this.now()
+    b.gain.gain.setTargetAtTime(0.0001, t, release / 3)
+    b.osc.stop(t + release + 0.2)
+    b.src.stop(t + release + 0.2)
+    this.tensionBed = null
+  }
+
+  /** Before a top-tier reveal: everything drops away to a sub-bass fall and silence. */
+  blackout() {
+    if (!this.ready) return
+    const t = this.now()
+    this.tone(t, 70, 1.1, { gain: 0.5, freqEnd: 24, attack: 0.02, wet: 0.6 })
+    this.stopTension(0.15)
+    const amb = this.ambience?.gain
+    if (amb) {
+      amb.gain.setTargetAtTime(0.02, t, 0.05)
+      amb.gain.setTargetAtTime(0.5, t + 0.9, 0.4)
+    }
   }
 }
 

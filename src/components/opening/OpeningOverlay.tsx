@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
+import { CaretUp, FastForward, SpeakerHigh, SpeakerSlash, X } from '@phosphor-icons/react'
 import { ChestScene } from '../chest3d/ChestScene'
 import { ChestAnim } from '../chest3d/animState'
 import { applyCharge, introTimeline, revealTimeline, settleReveal, type Phase } from '../chest3d/timeline'
@@ -15,6 +16,8 @@ import { sfx } from '../../lib/audio'
 import { toast } from '../../lib/toast'
 import { money, shortEra } from '../../lib/format'
 import { HoldToOpen, type HoldHandle } from './HoldToOpen'
+import { IconButton } from '../ui/Button'
+import { Pips } from '../ui/RarityTag'
 import { RevealCard } from './RevealCard'
 import { MultiReveal } from './MultiReveal'
 import { useOpening, type OpeningSession } from './OpeningProvider'
@@ -29,6 +32,9 @@ const CATEGORY_CLUE: Record<string, string> = {
   armor: 'Armor',
   fitting: 'A fitting',
 }
+
+/** How long the piece is named on its own before the receipt, by rarity tier. */
+const TITLE_MS: Record<number, number> = { 1: 750, 2: 900, 3: 1100, 4: 1250, 5: 1500, 6: 1700 }
 
 function useReducedMotion() {
   return useMemo(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches, [])
@@ -73,8 +79,42 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       setPhase('reveal')
       return
     }
-    tl.current = revealTimeline(anim, { tell, fast: fastRef.current, multi, reducedMotion: reduced, onPhase: setPhase, onTell: setTellStep })
+    tl.current = revealTimeline(anim, { tell, fast: fastRef.current, multi, reducedMotion: reduced, onPhase: setPhase, onTell: setTellStep, lift: true })
   }, [anim, tell, multi, reduced, best.rarity])
+
+  // Lift: the lid hangs half open until the player drags it up, taps, or presses Space.
+  // It never blocks: after a few seconds it opens by itself.
+  const lifting = useRef<{ y: number } | null>(null)
+  const resumeLift = useCallback(() => {
+    const t = tl.current
+    if (!t || !t.paused()) return
+    lifting.current = null
+    t.play()
+  }, [])
+  useEffect(() => {
+    if (phase !== 'lift') return
+    sfx.heartbeat(0.9)
+    const beat = window.setInterval(() => sfx.heartbeat(0.7), 860)
+    const auto = window.setTimeout(resumeLift, 4500)
+    return () => {
+      window.clearInterval(beat)
+      window.clearTimeout(auto)
+    }
+  }, [phase, resumeLift])
+
+  // The seal: a heartbeat that quickens as the charge builds.
+  const lastBeat = useRef(0)
+  const onCharge = useCallback(
+    (p: number) => {
+      applyCharge(anim, p)
+      const now = performance.now()
+      if (p > 0.06 && now - lastBeat.current > 980 - p * 560) {
+        lastBeat.current = now
+        sfx.heartbeat(0.45 + p * 0.55)
+      }
+    },
+    [anim],
+  )
 
   // Intro: the chest drops onto the plinth. In fast mode the seal breaks by itself.
   useEffect(() => {
@@ -118,7 +158,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     anim.idle = 0
     setPhase('tell')
     window.setTimeout(() => {
-      tl.current = revealTimeline(anim, { tell, fast: false, multi, reducedMotion: reduced, onPhase: setPhase, onTell: setTellStep })
+      tl.current = revealTimeline(anim, { tell, fast: false, multi, reducedMotion: reduced, onPhase: setPhase, onTell: setTellStep, lift: false })
     }, 250)
   }, [anim, tell, multi, reduced])
 
@@ -169,9 +209,11 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       setCollapsed(false)
       return
     }
-    const t = window.setTimeout(() => setCardReady(true), fastRef.current || reduced || multi ? 0 : 500)
+    const ms = fastRef.current || reduced || multi ? 0 : TITLE_MS[RARITIES[best.rarity].tier] ?? 900
+    if (ms) sfx.stamp()
+    const t = window.setTimeout(() => setCardReady(true), ms)
     return () => window.clearTimeout(t)
-  }, [phase, reduced, multi])
+  }, [phase, reduced, multi, best.rarity])
 
   // Keyboard focus: Close while the chest lands, the seal while it waits, Skip while it
   // opens, the result card after. The provider returns it to the launcher on exit.
@@ -208,7 +250,11 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') exit()
-      if ((e.key === 's' || e.key === 'S') && (phase === 'tell' || phase === 'burst' || phase === 'rise')) skip()
+      if ((e.key === 's' || e.key === 'S') && (phase === 'tell' || phase === 'lift' || phase === 'burst' || phase === 'rise')) skip()
+      if ((e.key === ' ' || e.key === 'Enter') && phase === 'lift') {
+        e.preventDefault()
+        resumeLift()
+      }
       // Tab cycles inside the opening; the batch Inspect sheet runs its own cycle.
       if (e.key === 'Tab' && root.current && !e.defaultPrevented) {
         const active = document.activeElement
@@ -231,7 +277,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [phase, exit, skip])
+  }, [phase, exit, skip, resumeLift])
 
   const sell = (uids: string[]) => {
     const amounts = uids.map((u) => {
@@ -268,6 +314,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   return (
     <motion.div
       ref={root}
+      data-lenis-prevent
       className="fixed inset-0 z-50 overflow-hidden bg-ink-950"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -318,35 +365,35 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
             {multi && <span className="ml-2 text-base font-normal text-bone-300">× {results.length}</span>}
           </p>
         </div>
-        <div className="flex items-center gap-1.5">
-          <label className="flex min-h-11 cursor-pointer items-center gap-2 whitespace-nowrap rounded-full bg-ink-900/70 px-3.5 text-[13px] text-bone-300 backdrop-blur hover:text-bone-100">
-            <input type="checkbox" className="accent-[var(--color-brass-500)]" checked={fast} onChange={(e) => actions.setFast(e.target.checked)} />
-            Fast
-          </label>
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => actions.toggleSound()}
-            className="flex h-11 min-w-11 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-ink-900/70 px-3 text-[13px] text-bone-300 backdrop-blur hover:text-bone-100"
-            aria-label={sound ? 'Mute sound' : 'Unmute sound'}
+            role="switch"
+            aria-checked={fast}
+            aria-label="Fast opening"
+            onClick={() => actions.setFast(!fast)}
+            className="flex h-11 items-center gap-2.5 whitespace-nowrap rounded-full bg-ink-950/40 px-3.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-bone-300 shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_14%,transparent)] backdrop-blur transition-colors hover:text-bone-100"
           >
-            <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
-              <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" stroke="none" />
-              {sound ? <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" /> : <path d="M16 9.5l5 5M21 9.5l-5 5" />}
-            </svg>
-            <span className="hidden sm:inline">{sound ? 'Sound on' : 'Muted'}</span>
+            <span className={`relative block h-[14px] w-[24px] rounded-full transition-colors duration-200 ${fast ? 'bg-brass-500' : 'bg-bone-100/15'}`} aria-hidden>
+              <span className={`absolute top-[2px] block h-[10px] w-[10px] rounded-full bg-bone-50 transition-[left] duration-200 ${fast ? 'left-[12px]' : 'left-[2px]'}`} />
+            </span>
+            Fast
           </button>
-          {(phase === 'tell' || phase === 'burst' || phase === 'rise') && (
+          <IconButton size="lg" onClick={() => actions.toggleSound()} className="bg-ink-950/40 backdrop-blur" aria-label={sound ? 'Mute sound' : 'Unmute sound'}>
+            {sound ? <SpeakerHigh size={18} weight="light" /> : <SpeakerSlash size={18} weight="light" />}
+          </IconButton>
+          {(phase === 'tell' || phase === 'lift' || phase === 'burst' || phase === 'rise') && (
             <button
               ref={skipBtn}
               data-testid="skip"
               onClick={skip}
-              className="min-h-11 rounded-full bg-bone-100/10 px-4 text-[13px] font-semibold text-bone-100 backdrop-blur hover:bg-bone-100/20 max-sm:fixed max-sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:bg-ink-900/80 max-sm:px-6"
+              className="flex min-h-11 items-center gap-2 rounded-full bg-ink-950/40 px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-bone-100 shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_18%,transparent)] backdrop-blur transition-colors hover:bg-bone-100/10 max-sm:fixed max-sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:px-6"
             >
-              Skip ›
+              Skip <FastForward size={14} weight="light" aria-hidden />
             </button>
           )}
-          <button ref={closeBtn} onClick={exit} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink-900/70 text-bone-300 backdrop-blur hover:text-bone-50" aria-label="Close">
-            ✕
-          </button>
+          <IconButton ref={closeBtn} size="lg" onClick={exit} className="bg-ink-950/40 backdrop-blur" aria-label="Close">
+            <X size={18} weight="light" />
+          </IconButton>
         </div>
       </div>
 
@@ -360,14 +407,14 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
             transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            <p className="eyebrow !text-[10px]">Could be inside</p>
-            <div className="mt-2 flex gap-2">
+            <p className="eyebrow">Could be inside</p>
+            <div className="mt-3 flex gap-3">
               {tease.map((it) => (
-                <div key={it.id} className="w-[58px] text-center">
-                  <div className="h-[58px] rounded-xl border border-bone-100/10 bg-ink-950/60 p-1.5 backdrop-blur">
+                <div key={it.id} className="w-[56px] text-center">
+                  <div className="vitrine h-[56px] p-1">
                     <ItemImg item={it} className="h-full w-full" />
                   </div>
-                  <p className="mt-1 text-[10px] font-semibold text-bone-300 tabular">{money(it.value, { compact: true })}</p>
+                  <p className="mt-1.5 text-[11px] font-semibold text-bone-300 tabular">{money(it.value, { compact: true })}</p>
                 </div>
               ))}
             </div>
@@ -383,7 +430,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
               <HoldToOpen
                 ref={hold}
                 autoFocus
-                onProgress={(p) => applyCharge(anim, p)}
+                onProgress={onCharge}
                 onComplete={startReveal}
                 hint={trial ? 'Press and hold anywhere on the seal. Release and it cools.' : undefined}
               />
@@ -398,32 +445,83 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
           {phase === 'tell' && tellStep && (
             <motion.p
               key={tellStep}
-              initial={{ opacity: 0, y: 8, scale: 0.92, letterSpacing: '0.5em' }}
-              animate={{ opacity: 1, y: 0, scale: 1, letterSpacing: '0.32em' }}
-              exit={{ opacity: 0, y: -6, transition: { duration: 0.15 } }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[13px] font-semibold uppercase"
-              style={{ color: RARITIES[tellStep].cssVar, textShadow: `0 0 18px ${RARITIES[tellStep].cssVar}` }}
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.15 } }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="flex items-center gap-4"
+              style={{ color: RARITIES[tellStep].cssVar }}
             >
-              {RARITIES[tellStep].label}
+              <span className="h-px w-8 bg-current opacity-60 sm:w-14" aria-hidden />
+              <span className="font-gothic text-[32px] leading-none sm:text-[42px]" style={{ textShadow: `0 0 26px color-mix(in oklch, ${RARITIES[tellStep].cssVar} 60%, transparent), 0 2px 10px oklch(0% 0 0 / .8)` }}>
+                {RARITIES[tellStep].stamp}
+              </span>
+              <span className="h-px w-8 bg-current opacity-60 sm:w-14" aria-hidden />
             </motion.p>
           )}
         </AnimatePresence>
       </div>
 
+      {/* Lift: drag up anywhere, tap, or press Space. */}
+      {phase === 'lift' && (
+        <div
+          className="absolute inset-0 cursor-grab touch-none select-none active:cursor-grabbing"
+          data-testid="lift-surface"
+          onPointerDown={(e) => {
+            ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
+            lifting.current = { y: e.clientY }
+          }}
+          onPointerMove={(e) => {
+            const l = lifting.current
+            if (!l) return
+            const dy = Math.max(0, l.y - e.clientY)
+            anim.lid = 0.2 + Math.min(1, dy / 240) * 0.24
+            anim.glow = 1.4 + Math.min(1, dy / 240) * 0.8
+            if (dy > 150) resumeLift()
+          }}
+          onPointerUp={(e) => {
+            const l = lifting.current
+            if (!l) return
+            const dy = l.y - e.clientY
+            lifting.current = null
+            if (dy > 50 || Math.abs(dy) < 8) resumeLift()
+            else gsap.to(anim, { lid: 0.2, duration: 0.35, ease: 'power2.out' })
+          }}
+        />
+      )}
+      <AnimatePresence>
+        {phase === 'lift' && (
+          <motion.div
+            key="lift-hint"
+            className="pointer-events-none absolute inset-x-0 bottom-[14%] flex flex-col items-center gap-1.5 px-6 text-center"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            transition={{ duration: 0.5, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <motion.span className="text-brass-300" animate={reduced ? undefined : { y: [0, -7, 0] }} transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }} aria-hidden>
+              <CaretUp size={26} weight="light" />
+            </motion.span>
+            <p className="font-display text-[24px] italic text-bone-50 [text-shadow:0_2px_16px_oklch(0%_0_0/.85)]">Lift the lid</p>
+            <p className="caps text-bone-300">Drag up, tap, or press Space</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Staged clues while the item rises: type, era, origin. */}
       <div className="pointer-events-none absolute inset-x-0 bottom-[18%] flex justify-center px-4">
         <AnimatePresence>
           {showClues && (
-            <motion.div key="clues" className="flex flex-wrap justify-center gap-2" exit={{ opacity: 0, transition: { duration: 0.2 } }}>
+            <motion.div key="clues" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-display text-[19px] italic text-bone-50 [text-shadow:0_2px_14px_oklch(0%_0_0/.9)] sm:text-[21px]" exit={{ opacity: 0, transition: { duration: 0.2 } }}>
               {[CATEGORY_CLUE[first.item.category] ?? 'An object', first.item.provenance === 'forged' ? 'Master-forged' : shortEra(first.item.era), first.item.origin].map((c, i) => (
                 <motion.span
                   key={c + i}
+                  className="flex items-center gap-3"
                   initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
                   animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  transition={{ delay: (fast ? 0.1 : 0.35) + i * (fast ? 0.12 : 0.32), duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                  className="rounded-full border border-bone-100/15 bg-ink-950/60 px-3.5 py-1.5 font-display text-[17px] italic text-bone-100 backdrop-blur"
+                  transition={{ delay: (fast ? 0.1 : 0.45) + i * (fast ? 0.12 : 0.42), duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 >
+                  {i > 0 && <span className="text-[14px] not-italic text-bone-400" aria-hidden>·</span>}
                   {c}
                 </motion.span>
               ))}
@@ -487,6 +585,27 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         )}
       </AnimatePresence>
 
+      {/* Title: the piece is named on its own for a beat before the receipt slides in. */}
+      <AnimatePresence>
+        {phase === 'reveal' && !cardReady && !multi && (
+          <motion.div
+            key="title"
+            className="pointer-events-none absolute inset-x-0 bottom-[9%] flex flex-col items-center px-6 text-center"
+            initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -8, transition: { duration: 0.25 } }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            data-testid="reveal-title"
+          >
+            <p className="caps flex items-center gap-2" style={{ color: RARITIES[first.rarity].cssVar }}>
+              <Pips tier={RARITIES[first.rarity].tier} color={RARITIES[first.rarity].cssVar} />
+              {RARITIES[first.rarity].label}
+            </p>
+            <p className="font-display mt-3 text-[44px] font-semibold leading-[0.95] text-bone-50 [text-shadow:0_4px_30px_oklch(0%_0_0/.85)] sm:text-[68px]">{first.item.name}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Reveal. */}
       <AnimatePresence>
         {phase === 'reveal' && cardReady && !multi && (
@@ -531,10 +650,11 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         <motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute right-4 top-[calc(max(1rem,env(safe-area-inset-top))+52px)] z-20 rounded-full bg-ink-900/70 px-3 py-1.5 text-xs text-bone-300 backdrop-blur sm:right-6"
+          className="absolute right-4 top-[calc(max(1rem,env(safe-area-inset-top))+56px)] z-20 flex items-baseline gap-2 sm:right-6"
           data-coin-target
         >
-          Purse <span className="font-semibold text-bone-100 tabular">{money(balance, { cents: !Number.isInteger(balance) })}</span>
+          <span className="caps text-bone-400">Purse</span>
+          <span className="text-[14px] font-semibold text-bone-100 tabular">{money(balance, { cents: !Number.isInteger(balance) })}</span>
         </motion.div>
       )}
     </motion.div>

@@ -66,7 +66,9 @@ export function ItemRise({ item, anim, color, glow = 1, hero = false }: Props) {
           float n = texture2D(uMap, vUv + vec2(o.x, 0.0)).a + texture2D(uMap, vUv - vec2(o.x, 0.0)).a
                   + texture2D(uMap, vUv + vec2(0.0, o.y)).a + texture2D(uMap, vUv - vec2(0.0, o.y)).a;
           float edge = clamp((4.0 * a - n) * 1.4, 0.0, 1.0);
-          vec3 silhouette = vec3(0.02, 0.016, 0.012) + uRim * edge * 2.6;
+          // Backlit, not blacked out: a trace of the steel shows so a broad piece held close
+          // reads as an object in shadow, never as a black slab.
+          vec3 silhouette = tex.rgb * mix(vec3(0.07), uRim * 0.09, 0.5) + uRim * edge * 2.6;
           vec3 lit = tex.rgb * 1.04 + uRim * edge * 0.35;
           float diag = vUv.x * 0.55 + vUv.y;
           float d = abs(diag - (uGlint * 1.9 - 0.2));

@@ -267,6 +267,10 @@ function buildOrnament(theme: ChestTheme): THREE.Object3D | null {
   return g
 }
 
+function glowFor(anim: ChestAnim) {
+  return 0.4 + Math.min(anim.glow, 2) * 0.5
+}
+
 export function ChestModel({ theme, anim }: Props) {
   const scene = INLINE ? use(loadInlineScene()) : useGLTF(URL).scene
   const seam = useRef<THREE.Mesh>(null)
@@ -274,6 +278,43 @@ export function ChestModel({ theme, anim }: Props) {
   const light = useRef<THREE.PointLight>(null)
   const root = useRef<THREE.Group>(null)
   const rigged = useMemo(() => rig(scene, theme), [scene, theme])
+  const rays = useRef<THREE.Mesh>(null)
+  // Origin at the bottom edge, built once (translating in onUpdate would accumulate).
+  const rayGeo = useMemo(() => new THREE.PlaneGeometry(2.4, 1.5).translate(0, 0.75, 0), [])
+  // Light escaping a cracked lid: rays fanning up from the seam, drawn on a plane that
+  // turns to face the camera so they read as beams in the air from any angle.
+  const rayMat = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        toneMapped: false,
+        side: THREE.DoubleSide,
+        uniforms: { uColor: { value: new THREE.Color() }, uA: { value: 0 }, uTime: { value: 0 } },
+        vertexShader: /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+        fragmentShader: /* glsl */ `
+          uniform vec3 uColor; uniform float uA; uniform float uTime; varying vec2 vUv;
+          void main(){
+            vec2 p = vec2((vUv.x - 0.5) * 2.4, vUv.y * 1.5);
+            float sx = clamp(p.x, -0.42, 0.42);
+            vec2 d = p - vec2(sx, 0.0);
+            float dist = length(d);
+            float ang = atan(d.x, d.y + 0.0001);
+            float rays = 0.5 + 0.5 * sin(ang * 26.0 + sin(ang * 6.0 + uTime * 0.5) * 2.2);
+            rays = pow(rays, 3.0) * (0.6 + 0.4 * sin(uTime * 1.7 + ang * 3.0));
+            float fall = exp(-dist * 2.4) * smoothstep(0.0, 0.03, p.y);
+            float core = exp(-dist * 22.0) * smoothstep(0.0, 0.01, p.y);
+            // Rays that run near flat fade out, and so does everything near the plane's edges,
+            // so no straight line ever shows where the plane ends.
+            float up = smoothstep(0.02, 0.45, d.y / max(dist, 0.0001));
+            float edges = smoothstep(0.0, 0.16, vUv.x) * smoothstep(1.0, 0.84, vUv.x) * smoothstep(1.0, 0.72, vUv.y);
+            float a = ((0.25 + rays * 0.75) * fall * up + core * 0.8) * edges * uA;
+            gl_FragColor = vec4(uColor * 1.6, a);
+          }`,
+      }),
+    [],
+  )
   const form = theme.form ? FORMS[theme.form] : null
   const base = useMemo(() => buildBase(theme), [theme])
   const heatColor = useMemo(() => new THREE.Color(), [])
@@ -310,9 +351,22 @@ export function ChestModel({ theme, anim }: Props) {
     const idleCrack = anim.idle * (0.018 + (anim.still ? 0 : Math.sin(t * 1.3) * 0.008))
     hinge.rotation.x = -(anim.lid * LID_OPEN + Math.max(0, rattle) * 0.06 + idleCrack)
     if (root.current) {
-      root.current.rotation.z = anim.rattle * Math.sin(t * 43) * 0.014
+      // The top tiers lift the chest off the plinth and let it drift.
+      const lev = anim.levitate
+      const drift = anim.still ? 0 : lev
+      root.current.rotation.z = anim.rattle * Math.sin(t * 43) * 0.014 + drift * Math.sin(t * 1.3) * 0.012
+      root.current.rotation.x = drift * Math.sin(t * 0.9) * 0.01
       root.current.position.x = anim.rattle * Math.sin(t * 57) * 0.007
-      root.current.position.y = (1 - anim.drop) * 1.8 + (form?.lift ?? 0)
+      root.current.position.y = (1 - anim.drop) * 1.8 + (form?.lift ?? 0) + lev * 0.08 + drift * Math.sin(t * 1.7) * 0.008
+    }
+    if (rays.current) {
+      // Turn about the vertical axis toward the camera (the chest sits at the origin).
+      rays.current.rotation.set(0, Math.atan2(state.camera.position.x, state.camera.position.z), 0)
+      // Rays live while the lid is cracked and give way to the beam once it opens.
+      rayMat.uniforms.uA!.value = anim.gapLight * Math.min(1, glowFor(anim)) * Math.max(0, 1 - Math.max(0, anim.lid - 0.3) * 3)
+      rayMat.uniforms.uTime!.value = anim.still ? 0 : t
+      ;(rayMat.uniforms.uColor!.value as THREE.Color).copy(anim.glowColor)
+      rays.current.visible = rayMat.uniforms.uA!.value > 0.003
     }
     if (lock) {
       const off = anim.lockOff
@@ -349,6 +403,10 @@ export function ChestModel({ theme, anim }: Props) {
       <group scale={form?.scale ?? [1, 1, 1]}>
       <primitive object={rigged.clone} />
       <primitive object={rigged.hinge} />
+      {/* Rays from the seam, origin at the plane's bottom edge. The plane sits inside the
+          chest so the lid and box hide it: the light shows around the chest and through the
+          gap, never painted over the wood. */}
+      <mesh ref={rays} position={[0, 0.425, -0.02]} material={rayMat} geometry={rayGeo} />
       {/* Thin glowing seam just under the lid edge. */}
       <mesh ref={seam} position={[0, 0.419, 0.2635]}>
         <planeGeometry args={[0.84, 0.007]} />
