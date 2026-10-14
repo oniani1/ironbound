@@ -8,6 +8,7 @@ import { Button } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
 import { Pips } from '../ui/RarityTag'
 import { CoinBurst } from '../ui/CoinBurst'
+import { ScaleBar } from '../ui/ScaleBar'
 
 interface Props {
   draw?: string
@@ -136,6 +137,9 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         <span className="min-w-0 truncate">{item.materials}</span>
       </motion.div>
 
+      <motion.div {...rise(0.5)} className="relative hidden sm:block">
+        <ScaleBar length={item.length} color={r.cssVar} delay={0.9} />
+      </motion.div>
       <motion.p {...rise(0.56)} className="font-display relative mt-3 line-clamp-2 text-[15px] italic leading-snug text-bone-300 sm:line-clamp-3 sm:text-[16px]">
         {item.blurb}
       </motion.p>
