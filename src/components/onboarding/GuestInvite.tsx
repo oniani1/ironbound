@@ -49,7 +49,7 @@ export function GuestInvite() {
                   Your <b className="font-semibold text-bone-50">{item.name}</b> is in your demo vault.
                 </>
               )}
-              <span className="block text-bone-300">Claim $1,000 demo credit to open any chest. A banner is optional.</span>
+              <span className="block text-bone-300">Claim $1,000 demo credit toward your next chest. A banner is optional.</span>
             </p>
             <div className="flex w-full gap-2 sm:w-auto">
               <Button size="sm" className="!h-11 flex-1 sm:flex-none" onClick={start} data-testid="claim-credit">

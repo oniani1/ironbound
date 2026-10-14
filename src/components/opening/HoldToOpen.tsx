@@ -10,6 +10,8 @@ interface Props {
   label?: string
   hint?: string
   disabled?: boolean
+  /** Take keyboard focus when it appears, so Space and Enter charge the seal at once. */
+  autoFocus?: boolean
 }
 
 const R = 46
@@ -25,7 +27,7 @@ export interface HoldHandle {
  * drain away, so the chest visibly settles back down. The parent can also drive it, so a
  * hold anywhere on the chest counts.
  */
-export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ duration = 1.15, onProgress, onComplete, label = 'Hold to break the seal', hint, disabled }, ref) {
+export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ duration = 1.15, onProgress, onComplete, label = 'Hold to break the seal', hint, disabled, autoFocus }, ref) {
   const [p, setP] = useState(0)
   const holding = useRef(false)
   const value = useRef(0)
@@ -35,6 +37,11 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
   const rattleAcc = useRef(0)
   const cb = useRef({ onProgress, onComplete })
   cb.current = { onProgress, onComplete }
+  const button = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (autoFocus) button.current?.focus({ preventScroll: true })
+  }, [autoFocus])
 
   const loop = useCallback(
     (t: number) => {
@@ -118,6 +125,7 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
         type="button"
         aria-label={label}
         data-testid="hold-to-open"
+        ref={button}
         onPointerDown={(e) => {
           ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
           start()
@@ -125,7 +133,7 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
         onPointerUp={stop}
         onPointerCancel={stop}
         onContextMenu={(e) => e.preventDefault()}
-        className="group relative grid h-28 w-28 touch-none select-none place-items-center rounded-full outline-none"
+        className="group relative grid h-28 w-28 touch-none select-none place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-brass-300 focus-visible:ring-offset-4 focus-visible:ring-offset-ink-950"
         style={{ WebkitTouchCallout: 'none' }}
       >
         {/* Heat halo grows with the charge. */}

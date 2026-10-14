@@ -42,6 +42,8 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [inspect, setInspect] = useState<MultiResult | null>(null)
   const timers = useRef<number[]>([])
+  const revealAllBtn = useRef<HTMLButtonElement>(null)
+  const keepAllBtn = useRef<HTMLButtonElement>(null)
   const allFlipped = flipped.size === results.length
   const total = results.reduce((s, r) => s + r.item.value, 0)
   const cost = chest.price * results.length
@@ -51,6 +53,13 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
   )
 
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), [])
+
+  useEffect(() => {
+    const target = allFlipped ? keepAllBtn.current : revealAllBtn.current
+    const active = document.activeElement
+    if (!active || active === document.body || active.closest('[data-testid="opening-overlay"]') === null || !active.isConnected) target?.focus({ preventScroll: true })
+    else if (allFlipped && active === revealAllBtn.current) target?.focus({ preventScroll: true })
+  }, [allFlipped])
 
   const offerOf = (r: MultiResult) => Math.round(r.item.value * chest.buyback)
   const unsold = results.filter((r) => !soldUids.has(r.uid))
@@ -200,7 +209,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
       <div className="flex min-h-[112px] w-full max-w-[560px] flex-col items-center gap-3 max-sm:sticky max-sm:bottom-[max(0.75rem,env(safe-area-inset-bottom))]">
         {!allFlipped ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="flex flex-col items-center gap-2">
-            <Button data-testid="reveal-all" variant="primary" size="lg" onClick={revealAll}>
+            <Button ref={revealAllBtn} data-testid="reveal-all" variant="primary" size="lg" onClick={revealAll}>
               Reveal all
             </Button>
             <p className="text-[13px] text-bone-300">Or flip them one by one. The glow tells you the rarity.</p>
@@ -231,7 +240,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
               </dl>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={onDone}>
+              <Button ref={keepAllBtn} variant="primary" onClick={onDone}>
                 {unsold.length === 0 ? 'Done' : unsold.length < results.length ? 'Keep the rest' : 'Keep all'}
               </Button>
               <Button data-testid="sell-selected" variant="secondary" onClick={sellPicked} disabled={picked.length === 0}>
@@ -272,6 +281,15 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
             sold={soldUids.has(inspect.uid)}
             instant={instant}
             onSell={() => onSell([inspect.uid])}
+            onKeep={() => {
+              const uid = inspect.uid
+              setSelected((s) => {
+                const n = new Set(s)
+                n.delete(uid)
+                return n
+              })
+              setInspect(null)
+            }}
             onClose={() => setInspect(null)}
           />
         )}
@@ -281,11 +299,12 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
 }
 
 /** One piece from a batch, large, with its own sell-back offer. */
-function InspectSheet({ result, chest, sold, instant, onSell, onClose }: { result: MultiResult; chest: Chest; sold: boolean; instant: boolean; onSell: () => void; onClose: () => void }) {
+function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }: { result: MultiResult; chest: Chest; sold: boolean; instant: boolean; onSell: () => void; onKeep: () => void; onClose: () => void }) {
   const { item } = result
   const r = RARITIES[result.rarity]
   const offer = Math.round(item.value * chest.buyback)
   const closeRef = useRef<HTMLButtonElement>(null)
+  const panel = useRef<HTMLDivElement>(null)
   const closeCb = useRef(onClose)
   closeCb.current = onClose
 
@@ -295,9 +314,24 @@ function InspectSheet({ result, chest, sold, instant, onSell, onClose }: { resul
     closeRef.current?.focus()
     // Escape closes the sheet before it can close the whole opening.
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      e.stopPropagation()
-      closeCb.current()
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        closeCb.current()
+        return
+      }
+      if (e.key !== 'Tab' || !panel.current) return
+      // Tab cycles inside the sheet.
+      const nodes = [...panel.current.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input, [tabindex]:not([tabindex="-1"])')]
+      const firstNode = nodes[0]
+      const lastNode = nodes[nodes.length - 1]
+      if (!firstNode || !lastNode) return
+      if (e.shiftKey && document.activeElement === firstNode) {
+        e.preventDefault()
+        lastNode.focus()
+      } else if (!e.shiftKey && document.activeElement === lastNode) {
+        e.preventDefault()
+        firstNode.focus()
+      }
     }
     window.addEventListener('keydown', onKey, true)
     return () => {
@@ -320,6 +354,7 @@ function InspectSheet({ result, chest, sold, instant, onSell, onClose }: { resul
       data-testid="multi-inspect"
     >
       <motion.div
+        ref={panel}
         onClick={(e) => e.stopPropagation()}
         className="plate relative w-full max-w-[480px] rounded-t-[22px] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-[22px]"
         initial={{ y: instant ? 0 : 40 }}
@@ -360,7 +395,7 @@ function InspectSheet({ result, chest, sold, instant, onSell, onClose }: { resul
             </div>
           ) : (
             <>
-              <Button variant="primary" onClick={onClose}>
+              <Button variant="primary" onClick={onKeep}>
                 Keep
               </Button>
               <Button

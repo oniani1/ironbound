@@ -107,7 +107,9 @@ export function OpeningProvider({ children }: { children: ReactNode }) {
 
   return (
     <OpeningContext.Provider value={value}>
-      {children}
+      <div className="contents" inert={!!session}>
+        {children}
+      </div>
       {session && (
         <Suspense fallback={<div className="fixed inset-0 z-50 bg-ink-950" />}>
           <OpeningOverlay key={session.key} session={session} />

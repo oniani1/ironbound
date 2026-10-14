@@ -45,6 +45,9 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   const [tellStep, setTellStep] = useState<RarityId | null>(null)
   const [cardReady, setCardReady] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
+  const root = useRef<HTMLDivElement>(null)
+  const closeBtn = useRef<HTMLButtonElement>(null)
+  const skipBtn = useRef<HTMLButtonElement>(null)
   const fast = useStore((s) => s.settings.fast)
   const sound = useStore((s) => s.settings.sound)
   const balance = useStore((s) => s.balance)
@@ -170,6 +173,19 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     return () => window.clearTimeout(t)
   }, [phase, reduced, multi])
 
+  // Keyboard focus: Close while the chest lands, the seal while it waits, Skip while it
+  // opens, the result card after. On exit it returns to the control that started it.
+  useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    closeBtn.current?.focus({ preventScroll: true })
+    return () => {
+      if (opener?.isConnected) opener.focus({ preventScroll: true })
+    }
+  }, [])
+  useEffect(() => {
+    if (phase === 'tell') skipBtn.current?.focus({ preventScroll: true })
+  }, [phase])
+
   // Close works from the first frame. Before the seal breaks, a free chest stays unopened;
   // a paid opening keeps its pieces in the vault.
   const exit = useCallback(() => {
@@ -197,6 +213,25 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') exit()
       if ((e.key === 's' || e.key === 'S') && (phase === 'tell' || phase === 'burst' || phase === 'rise')) skip()
+      // Tab cycles inside the opening; the batch Inspect sheet runs its own cycle.
+      if (e.key === 'Tab' && root.current && !e.defaultPrevented) {
+        const active = document.activeElement
+        if (active?.closest('[data-testid="multi-inspect"]')) return
+        const nodes = [...root.current.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter((n) => n.getClientRects().length > 0)
+        const firstNode = nodes[0]
+        const lastNode = nodes[nodes.length - 1]
+        if (!firstNode || !lastNode) return
+        if (!active || !root.current.contains(active)) {
+          e.preventDefault()
+          firstNode.focus()
+        } else if (e.shiftKey && active === firstNode) {
+          e.preventDefault()
+          lastNode.focus()
+        } else if (!e.shiftKey && active === lastNode) {
+          e.preventDefault()
+          firstNode.focus()
+        }
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -236,6 +271,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
 
   return (
     <motion.div
+      ref={root}
       className="fixed inset-0 z-50 overflow-hidden bg-ink-950"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -303,11 +339,16 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
             <span className="hidden sm:inline">{sound ? 'Sound on' : 'Muted'}</span>
           </button>
           {(phase === 'tell' || phase === 'burst' || phase === 'rise') && (
-            <button data-testid="skip" onClick={skip} className="min-h-11 rounded-full bg-bone-100/10 px-4 text-[13px] font-semibold text-bone-100 backdrop-blur hover:bg-bone-100/20">
+            <button
+              ref={skipBtn}
+              data-testid="skip"
+              onClick={skip}
+              className="min-h-11 rounded-full bg-bone-100/10 px-4 text-[13px] font-semibold text-bone-100 backdrop-blur hover:bg-bone-100/20 max-sm:fixed max-sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:bg-ink-900/80 max-sm:px-6"
+            >
               Skip ›
             </button>
           )}
-          <button onClick={exit} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink-900/70 text-bone-300 backdrop-blur hover:text-bone-50" aria-label="Close">
+          <button ref={closeBtn} onClick={exit} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink-900/70 text-bone-300 backdrop-blur hover:text-bone-50" aria-label="Close">
             ✕
           </button>
         </div>
@@ -345,6 +386,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
             <div className="pointer-events-auto">
               <HoldToOpen
                 ref={hold}
+                autoFocus
                 onProgress={(p) => applyCharge(anim, p)}
                 onComplete={startReveal}
                 hint={trial ? 'Press and hold anywhere on the seal. Release and it cools.' : undefined}

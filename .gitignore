@@ -7,3 +7,4 @@ assets-src/
 .vercel
 research/_codex_*_log.txt
 dist-artifact/
+__pycache__/
