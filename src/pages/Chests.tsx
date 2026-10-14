@@ -59,8 +59,8 @@ function ChestCard({ chest, index }: { chest: Chest; index: number }) {
       <Link
         to={`/chests/${chest.id}`}
         data-testid={`chest-card-${chest.id}`}
-        className="plate group relative flex flex-col overflow-hidden rounded-[22px] p-5 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1.5 hover:border-brass-500/35"
-        style={{ minHeight: `calc(420px + ${lift}px)` }}
+        className="plate group relative flex flex-col overflow-hidden rounded-[22px] p-5 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1.5 hover:border-brass-500/35 sm:min-h-[var(--mh)]"
+        style={{ ['--mh' as string]: `calc(420px + ${lift}px)` }}
       >
         <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: `radial-gradient(70% 45% at 50% 32%, color-mix(in oklch, ${chest.theme.glow} 16%, transparent), transparent)` }} />
         <div className="flex items-start justify-between">
