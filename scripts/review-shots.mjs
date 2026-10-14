@@ -87,7 +87,7 @@ async (page) => {
         await inspect.click()
         await page.waitForTimeout(1300)
         await shot(`${tag}-08-trial-inspect`)
-        await page.getByRole('button', { name: 'Details' }).click()
+        await page.getByRole('button', { name: 'Show details' }).click()
         await page.waitForTimeout(500)
       }
       // Keep lands in the vault with an invitation; setup opens only on request.

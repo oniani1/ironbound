@@ -111,7 +111,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         <span className="font-gothic text-[22px] leading-none" style={{ color: r.cssVar }}>{r.stamp}</span>
         <span className="min-w-0 flex-1 truncate font-display text-[17px] text-bone-50 sm:flex-none">{item.name}</span>
         <span className="text-[15px] font-semibold text-bone-100 tabular">{money(item.value)}</span>
-        <Button ref={toggleRef} size="sm" variant="secondary" className="!h-11" onClick={onToggle} aria-label="Show the result card">
+        <Button ref={toggleRef} size="sm" variant="secondary" className="!h-11" onClick={onToggle} aria-label="Show details">
           Details
         </Button>
       </motion.aside>
