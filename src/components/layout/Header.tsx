@@ -39,7 +39,7 @@ export function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-30 transition-[background-color,box-shadow] duration-500 ${solid ? 'bg-ink-950/82 shadow-[0_1px_0_color-mix(in_oklch,var(--color-bone-100)_7%,transparent)] backdrop-blur-xl' : 'bg-transparent'}`}
+      className={`sticky top-0 z-30 transition-[background-color,box-shadow] duration-500 ${solid ? 'bg-ink-950/95 shadow-[0_1px_0_color-mix(in_oklch,var(--color-bone-100)_7%,transparent)]' : 'bg-transparent'}`}
     >
       <div className="mx-auto flex h-[var(--header-h)] max-w-[1400px] items-center gap-10 px-4 sm:px-6">
         <Logo />

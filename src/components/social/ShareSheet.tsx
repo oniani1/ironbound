@@ -89,7 +89,7 @@ export function ShareSheet({ pull, onClose }: { pull: SharePull; onClose: () => 
 
   return createPortal(
     <motion.div
-      className="fixed inset-0 z-[80] flex items-end justify-center bg-ink-950/80 backdrop-blur-sm sm:items-center sm:p-6"
+      className="fixed inset-0 z-[80] flex items-end justify-center bg-ink-950/80 sm:items-center sm:p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

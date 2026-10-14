@@ -38,7 +38,9 @@ export function LootBeam({ anim }: { anim: ChestAnim }) {
             float facing = abs(dot(normalize(vNormalW), normalize(vViewDir)));
             float core = pow(facing, 3.2);
             float v = vUv.y;
-            float fadeUp = pow(1.0 - v, 1.8);
+            // Interpolated UVs can land a hair past 1.0 at the rim, and pow() of a negative
+            // base is NaN on some GPUs; one NaN pixel, spread by the bloom, blacks out the frame.
+            float fadeUp = pow(clamp(1.0 - v, 0.0, 1.0), 1.8);
             float fadeBase = smoothstep(0.0, 0.04, v);
             // Whole numbers of waves around the cylinder: the streaks meet themselves at the
             // UV seam, so no line shows where the geometry closes.
@@ -87,7 +89,7 @@ export function Shockwave({ anim }: { anim: ChestAnim }) {
             // vUv.x runs across the ring width in RingGeometry; soften both edges.
             float r = length(vUv - 0.5) * 2.0;
             float band = smoothstep(0.0, 0.5, 1.0 - abs(r - 0.94) / 0.06);
-            float a = pow(1.0 - uP, 3.2) * 0.75 * band;
+            float a = pow(clamp(1.0 - uP, 0.0, 1.0), 3.2) * 0.75 * band;
             gl_FragColor = vec4(uColor * 1.4, a);
           }`,
       }),
@@ -148,23 +150,37 @@ export function Sparks({ anim, idleRate = 14 }: { anim: ChestAnim; idleRate?: nu
           varying vec3 vColor;
           varying float vSize;
           uniform float uScale;
+          varying float vNear;
           void main() {
             vColor = color;
             vSize = size;
             vec4 mv = modelViewMatrix * vec4(position, 1.0);
-            gl_PointSize = size * uScale * (300.0 / -mv.z);
+            float z = -mv.z;
+            // A spark that drifts up past a close camera would grow without bound (size / z)
+            // and flash the frame. Sparks this close are dropped, nearer ones fade, and every
+            // size is capped.
+            if (z < 0.3) {
+              vSize = 0.0;
+              vNear = 0.0;
+              gl_PointSize = 0.0;
+              gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+              return;
+            }
+            vNear = smoothstep(0.3, 0.9, z);
+            gl_PointSize = min(size * uScale * (300.0 / z), 40.0);
             gl_Position = projectionMatrix * mv;
           }`,
         fragmentShader: /* glsl */ `
           varying vec3 vColor;
           varying float vSize;
+          varying float vNear;
           void main() {
             vec2 c = gl_PointCoord - 0.5;
             float d = length(c);
             float a = smoothstep(0.5, 0.0, d);
-            a = a * a;
+            a = a * a * vNear;
             if (vSize <= 0.0) discard;
-            gl_FragColor = vec4(vColor * (1.5 + a * 2.0) * a, a);
+            gl_FragColor = vec4(min(vColor * (1.5 + a * 2.0) * a, vec3(6.0)), a);
           }`,
       }),
     [],

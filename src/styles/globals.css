@@ -54,6 +54,15 @@
   --animate-marquee: marquee 60s linear infinite;
 }
 
+@keyframes ib-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes ember-rise {
   0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0; }
   10% { opacity: 1; }
@@ -190,16 +199,16 @@ img {
   border-color: color-mix(in oklch, var(--color-bone-100) 10%, transparent);
 }
 
-/* Film grain over the whole app; static, cheap. */
+/* Film grain over the whole app; static, cheap. Plain alpha on purpose: a blend mode here
+   makes the compositor read back the WebGL canvas under it, which flashed black frames. */
 .grain::after {
   content: "";
   position: fixed;
-  inset: -50%;
+  inset: 0;
   pointer-events: none;
   z-index: 100;
-  opacity: 0.07;
+  opacity: 0.035;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.92  0 0 0 0 0.8  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  mix-blend-mode: overlay;
 }
 
 /* Hairline rules, like a ledger. */

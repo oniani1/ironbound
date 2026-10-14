@@ -39,7 +39,17 @@ export function DustMotes({ anim, count = 240 }: { anim: ChestAnim; count?: numb
           vNear = 1.0 - smoothstep(0.15, 1.2, length(p.xz));
           vSeed = seed;
           vec4 mv = modelViewMatrix * vec4(p, 1.0);
-          gl_PointSize = (2.0 + seed * 3.0) * uPx * (2.2 / -mv.z);
+          float z = -mv.z;
+          // Motes at the camera would blow up to the size of the screen; drop them, fade the
+          // near ones and cap the size.
+          if (z < 0.3) {
+            gl_PointSize = 0.0;
+            gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+            vNear = 0.0;
+            return;
+          }
+          vNear *= smoothstep(0.3, 1.0, z);
+          gl_PointSize = min((2.0 + seed * 3.0) * uPx * (2.2 / z), 24.0);
           gl_Position = projectionMatrix * mv;
         }`,
       fragmentShader: /* glsl */ `

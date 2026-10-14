@@ -105,7 +105,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
       <motion.aside
         ref={box}
         data-testid="reveal-card"
-        className="pointer-events-auto relative flex w-full items-center gap-3 rounded-t-[10px] border border-bone-100/10 bg-ink-900/92 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:w-auto sm:rounded-[10px] sm:py-2 sm:pl-5 sm:pr-2"
+        className="pointer-events-auto relative flex w-full items-center gap-3 rounded-t-[10px] border border-bone-100/10 bg-ink-900/97 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:w-auto sm:rounded-[10px] sm:py-2 sm:pl-5 sm:pr-2"
         initial={{ opacity: 0, y: reduced || fast ? 0 : 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: reduced || fast ? 0.2 : 0.3, ease }}
@@ -124,7 +124,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
     <motion.aside
       ref={box}
       data-testid="reveal-card"
-      className="pointer-events-auto relative w-full overflow-hidden rounded-t-[10px] border border-bone-100/10 bg-ink-900/92 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:rounded-[10px] sm:p-7 md:w-[440px]"
+      className="pointer-events-auto relative w-full overflow-hidden rounded-t-[10px] border border-bone-100/10 bg-ink-900/97 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:rounded-[10px] sm:p-7 md:w-[440px]"
       initial={{ opacity: 0, y: instant ? 0 : 60 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: instant ? 0 : 30, transition: { duration: instant ? 0.2 : 0.25 } }}

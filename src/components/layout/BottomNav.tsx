@@ -12,7 +12,7 @@ const ITEMS = [
 export function BottomNav() {
   const vaultCount = useStore((s) => s.pulls.filter((p) => p.status === 'vaulted').length)
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-bone-100/[0.07] bg-ink-950/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden" aria-label="Primary">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-bone-100/[0.07] bg-ink-950/97 pb-[env(safe-area-inset-bottom)] md:hidden" aria-label="Primary">
       <ul className="grid grid-cols-3">
         {ITEMS.map(({ to, label, Icon }) => (
           <li key={to}>

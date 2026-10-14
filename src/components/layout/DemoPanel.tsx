@@ -32,7 +32,7 @@ export function DemoToggle({ className = '' }: { className?: string }) {
   return (
     <button
       onClick={() => setOpen((o) => !o)}
-      className={`relative place-items-center rounded-full bg-ink-900/85 text-bone-400 opacity-60 shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_12%,transparent)] backdrop-blur transition-[color,opacity] hover:text-bone-100 hover:opacity-100 ${className}`}
+      className={`relative place-items-center rounded-full bg-ink-900/85 text-bone-400 opacity-60 shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_12%,transparent)] transition-[color,opacity] hover:text-bone-100 hover:opacity-100 ${className}`}
       title={force ? `Demo controls · next pull ${RARITIES[force].label}` : 'Demo controls'}
       aria-expanded={open}
       aria-label="Demo controls"

@@ -16,7 +16,7 @@ export function Toasts() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
             transition={{ duration: reduced ? 0.2 : 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="pointer-events-auto flex max-w-[520px] items-center gap-2 rounded-full border border-bone-100/12 bg-ink-900/95 py-1 pl-4 pr-1 text-[14px] text-bone-100 shadow-[0_18px_40px_-18px_oklch(0%_0_0/.8)] backdrop-blur-md"
+            className="pointer-events-auto flex max-w-[520px] items-center gap-2 rounded-full border border-bone-100/12 bg-ink-900/95 py-1 pl-4 pr-1 text-[14px] text-bone-100 shadow-[0_18px_40px_-18px_oklch(0%_0_0/.8)]"
           >
             <span className="block h-1.5 w-1.5 shrink-0 rounded-full bg-moss-400" aria-hidden />
             <span className="py-2">{t.text}</span>

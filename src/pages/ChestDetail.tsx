@@ -160,7 +160,7 @@ export default function ChestDetail() {
       </div>
 
       {/* Phones: the purchase stays within thumb reach above the tab bar. */}
-      <div className="fixed inset-x-0 bottom-[calc(57px+env(safe-area-inset-bottom))] z-20 border-t border-bone-100/[0.08] bg-ink-950/95 px-3 py-2.5 backdrop-blur-md md:hidden">
+      <div className="fixed inset-x-0 bottom-[calc(57px+env(safe-area-inset-bottom))] z-20 border-t border-bone-100/[0.08] bg-ink-950/95 px-3 py-2.5 md:hidden">
         {short && (
           <div className="mb-2 flex items-center justify-between px-1 py-1 text-[12px]">
             <span className="text-bone-100">Purse is {money(total - balance)} short.</span>

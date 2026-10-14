@@ -73,11 +73,14 @@ function Hero() {
   return (
     <section className="relative -mt-[calc(var(--header-h)+var(--ticker-h))] min-h-[100svh] overflow-hidden">
       <div
-        className="absolute inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] top-[38%] [mask-image:linear-gradient(180deg,transparent,black_14%,black_93%,transparent)] md:inset-0 md:left-[30%] md:[mask-image:linear-gradient(180deg,black_70%,transparent)]"
+        className="absolute inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] top-[38%] md:inset-0 md:left-[30%]"
         onPointerEnter={() => hover(true)}
         onPointerLeave={() => hover(false)}
       >
         <ChestScene theme={theme} anim={anim} item={featured} heroItem rarityHex="#ffc94d" itemGlow={0.6} parallax className="!absolute inset-0" />
+        {/* Edge fades as plain overlays: a CSS mask on a live WebGL canvas can flicker. */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[14%] bg-[linear-gradient(180deg,var(--color-ink-950),transparent)] md:hidden" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[8%] bg-[linear-gradient(0deg,var(--color-ink-950),transparent)] md:h-[30%]" />
       </div>
       {/* Solid ink up to where the scene begins, so its left edge never shows, then a soft fade. */}
       <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(90deg,var(--color-ink-950)_31%,color-mix(in_oklch,var(--color-ink-950)_65%,transparent)_42%,transparent_62%)] md:block" />
