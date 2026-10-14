@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import type { Item, Pull } from '../../types'
 import { CHEST_BY_ID } from '../../config/chests'
@@ -16,7 +16,10 @@ import { ShipFlow, ShipmentTimeline } from './ShipFlow'
 import { comparableSales, itemHash, VALUED_ON } from './valuation'
 
 export function ItemDetail({ pull, item }: { pull: Pull; item: Item }) {
-  const [flow, setFlow] = useState<'idle' | 'sell' | 'ship'>('idle')
+  const [params] = useSearchParams()
+  // "Ship to me" on a result card arrives with ?ship=1 and opens the form at once.
+  const [flow, setFlow] = useState<'idle' | 'sell' | 'ship'>(() => (params.get('ship') === '1' && pull.status === 'vaulted' ? 'ship' : 'idle'))
+  const shipRef = useRef<HTMLDivElement>(null)
   const [celebrate, setCelebrate] = useState(false)
   const [error, setError] = useState('')
   const reduced = useReducedMotion()
@@ -30,6 +33,14 @@ export function ItemDetail({ pull, item }: { pull: Pull; item: Item }) {
   const certificate = `IB-${itemHash(pull.uid).toString(16).toUpperCase().padStart(8, '0')}`
   useEffect(() => { if (flow === 'sell') confirmHeading.current?.focus() }, [flow])
   useEffect(() => { if (celebrate) receiptHeading.current?.focus() }, [celebrate])
+  // Bring the form into view; from a result card, wait out the page transition and its scroll reset.
+  const fromQuery = useRef(flow === 'ship')
+  useEffect(() => {
+    if (flow !== 'ship') return
+    const t = window.setTimeout(() => shipRef.current?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' }), fromQuery.current ? 450 : 0)
+    fromQuery.current = false
+    return () => window.clearTimeout(t)
+  }, [flow, reduced])
 
   function sell() {
     if (committed.current || offer === null) return
@@ -62,7 +73,7 @@ export function ItemDetail({ pull, item }: { pull: Pull; item: Item }) {
         {vaulted && <div className="ib-actions"><div className="ib-detail-inline-actions">{actionButtons}</div><Button variant="ghost" disabled aria-describedby="market-coming-soon">List on market</Button><p id="market-coming-soon" className="ib-actions-note">Marketplace coming soon. Keeping this item in your vault is free.</p></div>}
         <AnimatePresence mode="wait">
           {vaulted && flow === 'sell' && <motion.section key="sell" className="ib-transaction" initial={{ opacity: 0, y: reduced ? 0 : 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ duration: 0.25, ease: EXPO }} aria-labelledby="sell-title"><p className="ib-kicker">Sell-back · demo</p><h2 id="sell-title" ref={confirmHeading} tabIndex={-1} className="ib-transaction-heading">Trade your steel for credit?</h2><p className="ib-sale-amount tabular">{money(offer ?? 0)}</p><p className="ib-copy">This exact offer goes to your demo balance. {item.name} leaves your vault. The sale cannot be reversed.</p>{error && <p className="ib-error" role="alert">{error}</p>}<div className="ib-transaction-buttons"><Button onClick={sell}>Confirm sell-back</Button><Button variant="ghost" onClick={() => { setFlow('idle'); actionButton.current?.focus() }}>Keep in vault</Button></div></motion.section>}
-          {vaulted && flow === 'ship' && <motion.div key="ship" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ duration: 0.25, ease: EXPO }}><ShipFlow pull={pull} onCancel={() => { setFlow('idle'); actionButton.current?.focus() }} /></motion.div>}
+          {vaulted && flow === 'ship' && <motion.div key="ship" ref={shipRef} className="scroll-mt-28" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ duration: 0.25, ease: EXPO }}><ShipFlow pull={pull} onCancel={() => { setFlow('idle'); actionButton.current?.focus() }} /></motion.div>}
         </AnimatePresence>
         {pull.status === 'sold' && <section className="ib-transaction" aria-live="polite"><p className="ib-kicker">Sale recorded</p><h2 ref={receiptHeading} tabIndex={-1} className="ib-transaction-heading">Steel into coin.</h2><div className="ib-sale-amount">{celebrate && <CoinBurst />}<span aria-hidden="true"><CountUp to={pull.soldFor ?? 0} format={(n) => `+${money(n)}`} /></span><span className="sr-only">{money(pull.soldFor ?? 0)} added to your demo balance.</span></div><p className="ib-copy">Added to your demo balance. This item remains in your sold history.</p><Link to="/chests" className="ib-action-link mt-4">Choose another chest <span aria-hidden="true">→</span></Link></section>}
         {(pull.status === 'shipping' || pull.status === 'shipped') && <ShipmentTimeline pull={pull} autoFocus={flow === 'ship'} />}

@@ -60,8 +60,8 @@
 .ib-empty-rack::before { content: ''; position: absolute; left: 0; right: 0; top: 25px; height: 1px; background: var(--color-ink-600); }
 .ib-vault-note { border-top: 1px solid var(--color-ink-700); padding-block: 20px 32px; font-size: .875rem; color: var(--color-bone-300); }
 .ib-detail-top { padding-block: 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.ib-detail-grid { display: grid; gap: 28px; padding-block: 0 48px; }
-.ib-detail-identity, .ib-detail-info { min-width: 0; }
+.ib-detail-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 0 48px; }
+.ib-detail-identity, .ib-detail-image, .ib-detail-info { min-width: 0; }
 .ib-detail-mobile-actions { display: none; }
 .ib-viewer { background: var(--color-ink-900); border: 1px solid var(--color-ink-700); position: relative; overflow: hidden; }
 .ib-viewer-stage { height: 400px; position: relative; overflow: hidden; touch-action: pan-y; cursor: zoom-in; }
