@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { actions, useStore } from '../../lib/store'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
@@ -11,6 +12,7 @@ import { sfx } from '../../lib/audio'
 export function DemoPanel() {
   const [open, setOpen] = useState(false)
   const force = useStore((s) => s.settings.force)
+  const navigate = useNavigate()
   return (
     <div className="fixed bottom-[calc(136px+env(safe-area-inset-bottom))] right-3 z-[35] flex flex-col items-end md:bottom-4 md:left-4 md:right-auto md:items-start">
       <AnimatePresence>
@@ -62,7 +64,8 @@ export function DemoPanel() {
               <button
                 onClick={() => {
                   actions.reset()
-                  window.location.assign('/')
+                  setOpen(false)
+                  navigate('/')
                 }}
                 className="rounded-lg bg-ink-800 px-2 py-1.5 text-[11px] font-semibold text-bone-200 hover:text-ember-400"
               >

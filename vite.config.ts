@@ -10,6 +10,8 @@ export default defineConfig({
   server: { port: 5183, strictPort: true },
   build: {
     chunkSizeWarningLimit: 1600,
+    // Artifact builds inline fonts so they never depend on the host's font policy.
+    assetsInlineLimit: process.env.VITE_HASH_ROUTER === '1' ? 64 * 1024 : 4096,
     rollupOptions: {
       output: {
         manualChunks(id: string) {
