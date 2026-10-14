@@ -1,4 +1,4 @@
-import { createContext, lazy, Suspense, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useTexture } from '@react-three/drei'
 import { CHEST_BY_ID } from '../../config/chests'
 import { ITEM_BY_ID, ITEMS } from '../../data/items'
@@ -9,7 +9,8 @@ import { pushFeed } from '../../lib/feed'
 import type { Chest, Pull } from '../../types'
 import type { MultiResult } from './MultiReveal'
 
-const OpeningOverlay = lazy(() => import('./OpeningOverlay'))
+const loadOverlay = () => import('./OpeningOverlay')
+const OpeningOverlay = lazy(loadOverlay)
 
 export interface OpenOptions {
   trial?: boolean
@@ -44,6 +45,13 @@ export function useOpening() {
 
 export function OpeningProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<OpeningSession | null>(null)
+
+  // Warm the overlay code while the browser is idle, so the first opening starts at once.
+  useEffect(() => {
+    const w = window as Window & { requestIdleCallback?: (cb: () => void) => number }
+    if (w.requestIdleCallback) w.requestIdleCallback(() => void loadOverlay())
+    else window.setTimeout(() => void loadOverlay(), 1500)
+  }, [])
 
   const open = useCallback((chestId: string, count = 1, opts: OpenOptions = {}): OpenResult => {
     const chest = CHEST_BY_ID[chestId]

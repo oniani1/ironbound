@@ -139,7 +139,7 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   // Item rises as a silhouette inside the beam, then is lit and glinted.
   const riseDur = (tier >= 5 ? 1.6 : 1.15) * k
   const litAt = riseDur * 0.7
-  tl.addLabel('rise', `burst+=${(tier >= 5 ? 0.75 : 0.45) * k}`)
+  tl.addLabel('rise', `burst+=${fast ? 0.05 : (tier >= 5 ? 0.75 : 0.45) * k}`)
   tl.call(() => {
     onPhase('rise')
     sfx.whoosh(0.8 + tier * 0.1)
@@ -162,7 +162,7 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
     tl.to(anim, { macro: 0, duration: 1.0, ease: 'power3.inOut' }, `rise+=${pullBack}`)
     tl.call(() => sfx.whoosh(0.45), [], `rise+=${pullBack}`)
   }
-  tl.call(() => onPhase('reveal'), [], macro ? `rise+=${pullBack + 0.85}` : `rise+=${riseDur * 0.8}`)
+  tl.call(() => onPhase('reveal'), [], macro ? `rise+=${pullBack + 0.85}` : `rise+=${riseDur * (fast ? 0.4 : 0.8)}`)
   return tl
 }
 

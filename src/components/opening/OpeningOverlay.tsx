@@ -82,7 +82,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         if (fastRef.current) {
           const o = { p: 0 }
           tl.current = gsap.timeline()
-          tl.current.to(o, { p: 1, duration: 0.15, ease: 'power1.in', onUpdate: () => applyCharge(anim, o.p), onComplete: startReveal })
+          tl.current.to(o, { p: 1, duration: 0.08, ease: 'power1.in', onUpdate: () => applyCharge(anim, o.p), onComplete: startReveal })
         } else setPhase('await')
       },
       fastRef.current,
