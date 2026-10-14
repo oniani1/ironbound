@@ -89,8 +89,8 @@ export function Shockwave({ anim }: { anim: ChestAnim }) {
           void main() {
             // vUv.x runs across the ring width in RingGeometry; soften both edges.
             float r = length(vUv - 0.5) * 2.0;
-            float band = smoothstep(0.0, 0.35, 1.0 - abs(r - 0.92) / 0.08);
-            float a = pow(1.0 - uP, 2.2) * 0.9 * band;
+            float band = smoothstep(0.0, 0.5, 1.0 - abs(r - 0.94) / 0.06);
+            float a = pow(1.0 - uP, 3.2) * 0.75 * band;
             gl_FragColor = vec4(uColor * 1.4, a);
           }`,
       }),
@@ -101,7 +101,7 @@ export function Shockwave({ anim }: { anim: ChestAnim }) {
     material.uniforms.uP!.value = anim.ring
     if (mesh.current) {
       mesh.current.visible = anim.ring > 0.001 && anim.ring < 0.999
-      const s = 0.35 + anim.ring * 2.4
+      const s = 0.55 + anim.ring * 1.7
       mesh.current.scale.set(s, s, s)
     }
   })

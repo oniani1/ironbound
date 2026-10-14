@@ -154,7 +154,7 @@ export function ChestModel({ theme, anim }: Props) {
     const glow = anim.glow
     if (light.current) {
       light.current.color.copy(anim.glowColor)
-      light.current.intensity = Math.min(glow, 2.2) * (0.9 + open * 5.5)
+      light.current.intensity = Math.min(glow, 2) * (0.8 + open * 3.4)
       light.current.distance = 2.2 + open * 2.5
     }
     if (seam.current) {

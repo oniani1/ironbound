@@ -274,9 +274,14 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
 
       {/* Purse, bottom-left, so the cost and the sell-back credit are visible here too. */}
       {!trial && phase === 'reveal' && (
-        <div className="absolute left-4 top-20 hidden rounded-full bg-ink-900/70 px-3 py-1.5 text-xs text-bone-300 backdrop-blur md:block">
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute right-4 top-[calc(max(1rem,env(safe-area-inset-top))+44px)] rounded-full bg-ink-900/70 px-3 py-1.5 text-xs text-bone-300 backdrop-blur sm:right-6"
+          data-coin-target
+        >
           Purse <span className="font-semibold text-bone-100 tabular">{money(balance, { cents: true })}</span>
-        </div>
+        </motion.div>
       )}
     </motion.div>
   )

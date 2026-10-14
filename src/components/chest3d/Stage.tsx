@@ -79,11 +79,11 @@ export function Stage({ anim, plinth = true, floor = true }: { anim: ChestAnim; 
         <group position={[0, -0.36, 0]}>
           <mesh receiveShadow castShadow position={[0, 0.165, 0]}>
             <cylinderGeometry args={[0.86, 0.94, 0.33, 8, 1]} />
-            <meshStandardMaterial map={stone} color="#8c8278" roughness={0.92} metalness={0} />
+            <meshStandardMaterial map={stone} color="#5f574f" roughness={0.95} metalness={0} />
           </mesh>
           <mesh receiveShadow position={[0, 0.345, 0]}>
             <cylinderGeometry args={[0.8, 0.86, 0.03, 8, 1]} />
-            <meshStandardMaterial map={stone} color="#a39686" roughness={0.85} metalness={0} />
+            <meshStandardMaterial map={stone} color="#6f655b" roughness={0.9} metalness={0} />
           </mesh>
         </group>
       )}

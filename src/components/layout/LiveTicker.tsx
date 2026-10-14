@@ -18,7 +18,7 @@ export function LiveTicker() {
       </div>
       <div className="relative flex-1 overflow-hidden [mask-image:linear-gradient(90deg,black_85%,transparent)]">
         <ul className="flex items-center gap-6 whitespace-nowrap pl-2">
-          <AnimatePresence initial={false}>
+          <AnimatePresence initial={false} mode="popLayout">
             {feed.map((e) => {
               const item = ITEM_BY_ID[e.itemId]
               if (!item) return null

@@ -7,6 +7,7 @@ import { sfx } from '../../lib/audio'
 import { Button } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
 import { Pips } from '../ui/RarityTag'
+import { CoinBurst } from '../ui/CoinBurst'
 
 interface Props {
   item: Item
@@ -39,6 +40,17 @@ export function RevealCard({ item, rarity, chest, sold, onKeep, onSell, onShip, 
   const delta = item.value - chest.price
   const mult = chest.price > 0 ? item.value / chest.price : 0
   const [counted, setCounted] = useState(false)
+  const [coins, setCoins] = useState<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null)
+
+  const sellWithCoins = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    const target = document.querySelector('[data-coin-target]')?.getBoundingClientRect()
+    setCoins({
+      from: { x: r.left + r.width / 2, y: r.top + r.height / 2 },
+      to: target ? { x: target.left + target.width / 2, y: target.top + target.height / 2 } : { x: window.innerWidth - 60, y: 36 },
+    })
+    onSell()
+  }
 
   useEffect(() => {
     const t = window.setTimeout(() => sfx.stamp(), 380)
@@ -138,7 +150,7 @@ export function RevealCard({ item, rarity, chest, sold, onKeep, onSell, onShip, 
             <Button data-testid="keep" variant="primary" size="lg" className="col-span-2" onClick={onKeep}>
               Keep in vault
             </Button>
-            <Button data-testid="sell" variant="secondary" onClick={onSell} sub={`${Math.round(chest.buyback * 100)}% instant`}>
+            <Button data-testid="sell" variant="secondary" onClick={sellWithCoins} sub={`${Math.round(chest.buyback * 100)}% instant`}>
               Sell for {money(offer)}
             </Button>
             <Button variant="secondary" onClick={onShip} sub="Insured courier">
@@ -157,6 +169,7 @@ export function RevealCard({ item, rarity, chest, sold, onKeep, onSell, onShip, 
           </Button>
         )}
       </motion.div>
+      {coins && <CoinBurst from={coins.from} to={coins.to} onDone={() => setCoins(null)} />}
     </motion.aside>
   )
 }

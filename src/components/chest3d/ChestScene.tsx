@@ -1,5 +1,6 @@
-import { Suspense, useEffect, useMemo } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
+import { PerformanceMonitor } from '@react-three/drei'
 import * as THREE from 'three'
 import type { ChestTheme, Item } from '../../types'
 import type { ChestAnim } from './animState'
@@ -34,6 +35,38 @@ function DebugHandle({ anim }: { anim: ChestAnim }) {
     w.__r3f = state
     w.__anim = anim
   }, [state, anim])
+  // Frame timing measured inside the loop: CPU cost of each render call plus frame deltas.
+  useEffect(() => {
+    const gl = state.gl
+    const w = window as unknown as { __perf?: { render: number[]; delta: number[] } }
+    const perf: { render: number[]; delta: number[] } = (w.__perf = { render: [], delta: [] })
+    const orig = gl.render.bind(gl)
+    let acc = 0
+    gl.render = (scene, camera) => {
+      const t0 = performance.now()
+      orig(scene, camera)
+      acc += performance.now() - t0
+    }
+    let last = performance.now()
+    let raf = 0
+    const tick = () => {
+      const now = performance.now()
+      perf.delta.push(now - last)
+      perf.render.push(acc)
+      acc = 0
+      last = now
+      if (perf.delta.length > 600) {
+        perf.delta.shift()
+        perf.render.shift()
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => {
+      cancelAnimationFrame(raf)
+      gl.render = orig
+    }
+  }, [state.gl])
   return null
 }
 
@@ -54,16 +87,19 @@ interface Props {
 
 export function ChestScene({ theme, anim, item, rarityHex = '#ffc94d', parallax, plinth = true, fx = true, className, distance, frameloop = 'always', render = false }: Props) {
   const bg = useMemo(() => cssColorToHex('--color-ink-950'), [])
+  // Start sharp, drop resolution if the device cannot hold the frame rate.
+  const [dpr, setDpr] = useState(() => Math.min(typeof window === 'undefined' ? 1 : window.devicePixelRatio, 1.75))
   return (
     <Canvas
       className={className}
       shadows
       frameloop={frameloop}
-      dpr={[1, 1.75]}
+      dpr={render ? 1 : dpr}
       gl={render ? { antialias: true, alpha: true, preserveDrawingBuffer: true, toneMapping: THREE.ACESFilmicToneMapping } : { antialias: false, powerPreference: 'high-performance', toneMapping: THREE.NoToneMapping }}
       camera={render ? { fov: 26, position: [1.25, 1.0, 2.75], near: 0.05, far: 40 } : { fov: 32, position: [0, 1.05, 3.15], near: 0.05, far: 40 }}
       onCreated={render ? ({ camera }) => camera.lookAt(0, 0.3, 0) : undefined}
     >
+      {!render && <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(Math.min(window.devicePixelRatio, 1.75))} />}
       {!render && <color attach="background" args={[bg]} />}
       {!render && <fog attach="fog" args={[bg, 4.5, 11]} />}
       <Suspense fallback={null}>
