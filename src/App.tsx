@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'motion/react'
 import { Header } from './components/layout/Header'
 import { BottomNav } from './components/layout/BottomNav'
 import { DemoPanel } from './components/layout/DemoPanel'
@@ -14,27 +15,57 @@ const ChestDetail = lazy(() => import('./pages/ChestDetail'))
 const Lab = lazy(() => import('./pages/Lab'))
 const RenderChest = lazy(() => import('./pages/RenderChest'))
 
-function ScrollToTop() {
-  const { pathname } = useLocation()
-  useEffect(() => {
-    window.scrollTo({ top: 0 })
-  }, [pathname])
-  return null
+function VaultSoon() {
+  return <div className="mx-auto max-w-[1400px] px-6 py-24 text-bone-300">Vault coming in the next merge.</div>
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+/** Page key: the vault list and an item inside it are different pages; chest ids too. */
+function pageKey(pathname: string) {
+  return pathname.replace(/\/$/, '') || '/'
+}
+
+/**
+ * The header, tab bar and demo controls persist; pages cross-fade with a short rise.
+ * Scroll resets once the old page has left, so the jump is never visible.
+ */
+function AppRoutes() {
+  const location = useLocation()
+  const bare = location.pathname.startsWith('/lab') || location.pathname.startsWith('/dev/')
+  if (bare) {
+    return (
+      <Routes location={location}>
+        {import.meta.env.DEV && <Route path="/lab" element={<Lab />} />}
+        {import.meta.env.DEV && <Route path="/dev/render/:id" element={<RenderChest />} />}
+      </Routes>
+    )
+  }
   return (
     <div className="grain min-h-[100dvh]">
       <Header />
-      <main>{children}</main>
+      <main>
+        <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo({ top: 0 })}>
+          <motion.div
+            key={pageKey(location.pathname)}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } }}
+            exit={{ opacity: 0, y: -6, transition: { duration: 0.18, ease: [0.7, 0, 0.84, 0] } }}
+          >
+            <Suspense fallback={<div className="min-h-[70dvh]" />}>
+              <Routes location={location}>
+                <Route path="/" element={<Landing />} />
+                <Route path="/chests" element={<Chests />} />
+                <Route path="/chests/:id" element={<ChestDetail />} />
+                <Route path="/vault/*" element={<VaultSoon />} />
+                <Route path="*" element={<Landing />} />
+              </Routes>
+            </Suspense>
+          </motion.div>
+        </AnimatePresence>
+      </main>
       <BottomNav />
       <DemoPanel />
     </div>
   )
-}
-
-function VaultSoon() {
-  return <div className="mx-auto max-w-[1400px] px-6 py-24 text-bone-300">Vault coming in the next merge.</div>
 }
 
 export default function App() {
@@ -52,17 +83,8 @@ export default function App() {
   return (
     <OpeningProvider>
       <OnboardingProvider>
-        <ScrollToTop />
         <Suspense fallback={<div className="min-h-[100dvh] bg-ink-950" />}>
-          <Routes>
-            {import.meta.env.DEV && <Route path="/lab" element={<Lab />} />}
-            {import.meta.env.DEV && <Route path="/dev/render/:id" element={<RenderChest />} />}
-            <Route path="/" element={<Shell><Landing /></Shell>} />
-            <Route path="/chests" element={<Shell><Chests /></Shell>} />
-            <Route path="/chests/:id" element={<Shell><ChestDetail /></Shell>} />
-            <Route path="/vault/*" element={<Shell><VaultSoon /></Shell>} />
-            <Route path="*" element={<Shell><Landing /></Shell>} />
-          </Routes>
+          <AppRoutes />
         </Suspense>
       </OnboardingProvider>
     </OpeningProvider>
