@@ -103,7 +103,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         {item.name}
       </motion.h2>
       <motion.p {...rise(0.32)} className="relative mt-2 text-[13px] text-bone-300">
-        {shortEra(item.era)} · {item.origin} · {item.provenance === 'antique' ? 'Antique, authenticated' : `Forged by ${item.maker ?? 'master smith'}`}
+        {item.provenance === 'antique' ? `${shortEra(item.era)} · ${item.origin} · Antique, authenticated` : `${shortEra(item.era)} · Forged by ${item.maker ?? 'a master smith'}`}
       </motion.p>
 
       <motion.div {...rise(0.4)} className="relative mt-3 grid grid-cols-[1fr_auto] items-end gap-3 border-t border-bone-100/10 pt-3 sm:mt-5 sm:pt-4">
