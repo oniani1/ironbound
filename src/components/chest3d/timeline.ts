@@ -141,8 +141,8 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   // boss) while grazing light runs down the steel, then pulls back to show the whole piece.
   const macro = !fast && !reducedMotion && tier >= 3
   const riseDur = macro ? 0.85 : (tier >= 5 ? 1.6 : 1.15) * k
-  const litAt = macro ? 0.2 : riseDur * 0.7
-  const litDur = macro ? 0.5 : 0.55 * k
+  const litAt = macro ? 0.2 : fast ? 0 : riseDur * 0.7
+  const litDur = macro ? 0.5 : fast ? 0.15 : 0.55 * k
   tl.addLabel('rise', `burst+=${fast ? 0.05 : (tier >= 5 ? 0.75 : 0.45) * k}`)
   tl.call(() => {
     onPhase('rise')
@@ -158,8 +158,11 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   }, [], `rise+=${litAt}`)
   const glintAt = macro ? litAt + 0.05 : litAt + 0.15
   const glintDur = macro ? 0.6 : 0.8 * k
-  tl.fromTo(anim, { glint: 0 }, { glint: 1, duration: glintDur, ease: 'power2.inOut' }, `rise+=${glintAt}`)
-  tl.set(anim, { glint: -1 }, `rise+=${glintAt + glintDur}`)
+  // Fast mode lands the piece fully lit, without a sweep.
+  if (!fast) {
+    tl.fromTo(anim, { glint: 0 }, { glint: 1, duration: glintDur, ease: 'power2.inOut' }, `rise+=${glintAt}`)
+    tl.set(anim, { glint: -1 }, `rise+=${glintAt + glintDur}`)
+  }
   const pullBack = 0.75
   if (macro) {
     tl.to(anim, { macro: 0, duration: 0.75, ease: 'power3.inOut' }, `rise+=${pullBack}`)

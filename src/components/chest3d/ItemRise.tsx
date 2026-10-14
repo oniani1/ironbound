@@ -69,8 +69,12 @@ export function ItemRise({ item, anim, color, glow = 1, hero = false }: Props) {
           vec3 silhouette = vec3(0.02, 0.016, 0.012) + uRim * edge * 2.6;
           vec3 lit = tex.rgb * 1.04 + uRim * edge * 0.35;
           float diag = vUv.x * 0.55 + vUv.y;
-          float band = smoothstep(0.08, 0.0, abs(diag - (uGlint * 1.9 - 0.2)));
-          vec3 col = mix(silhouette, lit, uLit) + band * vec3(1.0, 0.95, 0.86) * 1.5 * uLit;
+          float d = abs(diag - (uGlint * 1.9 - 0.2));
+          float lum = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
+          float band = smoothstep(0.1, 0.0, d);
+          float rake = smoothstep(0.38, 0.0, d);
+          vec3 sheen = vec3(1.0, 0.95, 0.86) * (band * (0.3 + 1.1 * lum) + rake * 0.4 * lum);
+          vec3 col = mix(silhouette, lit, uLit) + sheen * uLit;
           gl_FragColor = vec4(col, a * uOpacity);
         }`,
     })

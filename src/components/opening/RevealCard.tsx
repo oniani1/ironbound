@@ -114,7 +114,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
     <motion.aside
       ref={box}
       data-testid="reveal-card"
-      className="pointer-events-auto relative w-full overflow-hidden rounded-t-[22px] border border-bone-100/10 bg-ink-900/88 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_-30px_80px_-20px_oklch(0%_0_0/.7)] backdrop-blur-md sm:rounded-[22px] sm:p-7 md:w-[440px]"
+      className="pointer-events-auto relative w-full overflow-hidden rounded-t-[22px] border border-bone-100/10 bg-ink-900/88 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-30px_80px_-20px_oklch(0%_0_0/.7)] backdrop-blur-md sm:rounded-[22px] sm:p-7 md:w-[440px]"
       initial={{ opacity: 0, y: instant ? 0 : 60 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: instant ? 0 : 30, transition: { duration: instant ? 0.2 : 0.25 } }}
@@ -151,7 +151,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
       <motion.p {...rise(0.17)} className="eyebrow relative mt-3 sm:mt-4">
         {trial ? 'Guided demo · sample Rare result' : `${chest.name} · ${CATEGORY_LABEL[item.category]}`}
       </motion.p>
-      <motion.h2 {...rise(0.24)} className="font-display relative mt-1 text-[34px] font-semibold leading-[1.02] text-bone-50 sm:text-[40px]">
+      <motion.h2 {...rise(0.24)} className="font-display relative mt-1 text-[30px] font-semibold leading-[1.02] text-bone-50 sm:text-[40px]">
         {item.name}
       </motion.h2>
       <motion.p {...rise(0.32)} className="relative mt-2 text-[13px] text-bone-300">
@@ -161,7 +161,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
       <motion.div {...rise(0.4)} className="relative mt-3 grid grid-cols-[1fr_auto] items-end gap-3 border-t border-bone-100/10 pt-3 sm:mt-5 sm:pt-4">
         <div>
           <p className="eyebrow !text-[11px]">Estimated item value</p>
-          <p className="mt-1 text-[40px] font-semibold leading-none text-bone-50 sm:text-[46px]">
+          <p className="mt-1 text-[36px] font-semibold leading-none text-bone-50 sm:text-[46px]">
             <CountUp to={item.value} duration={instant ? 0.01 : rarity === 'common' ? 0.7 : 1.4} delay={instant ? 0 : 0.45} ticks={!instant} onDone={() => setCounted(true)} />
           </p>
         </div>
@@ -197,11 +197,11 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
       </motion.p>
 
       {trial && sold == null && (
-        <motion.p {...rise(0.62)} className="relative mt-4 rounded-[12px] border border-brass-500/25 bg-brass-500/[0.07] px-3.5 py-2.5 text-[13px] leading-snug text-bone-200">
-          Added to your demo vault. Every pull ends with the same choice: keep it, sell it back instantly, or ship it home.
+        <motion.p {...rise(0.62)} className="relative mt-3 rounded-[12px] border border-brass-500/25 bg-brass-500/[0.07] px-3.5 py-2 text-[13px] leading-snug text-bone-200 sm:mt-4 sm:py-2.5">
+          Added to your demo vault. Every pull ends the same way: keep it, sell it back now or ship it home.
         </motion.p>
       )}
-      <motion.div {...rise(0.67)} className="relative mt-4 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-2.5">
+      <motion.div {...rise(0.67)} className="relative mt-3 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-2.5">
         {sold != null ? (
           <div className="col-span-2 flex items-center justify-between rounded-[12px] border border-moss-400/30 bg-moss-400/10 px-4 py-3">
             <span className="text-[13px] text-bone-200">Sold back. Added to your purse.</span>
@@ -237,7 +237,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         )}
       </motion.div>
       {draw && (
-        <motion.p {...rise(0.77)} className="relative mt-3 flex items-center justify-center gap-1.5 text-[11px] text-bone-400" title={`Draw ${draw}`}>
+        <motion.p {...rise(0.77)} className="relative mt-2.5 flex items-center justify-center gap-1.5 text-[11px] text-bone-400 sm:mt-3" title={`Draw ${draw}`}>
           <span className="block h-1 w-1 rounded-full bg-moss-400" />
           Simulated draw 0x{draw.slice(0, 6)}…{draw.slice(-4)} · no on-chain transaction
         </motion.p>

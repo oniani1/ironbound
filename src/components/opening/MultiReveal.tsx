@@ -100,7 +100,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
             <motion.div
               key={r.uid}
               data-testid="multi-card"
-              className="group relative aspect-[4/5] w-[calc(50%-6px)] max-w-[190px] sm:aspect-[3/4] sm:w-[170px]"
+              className="group relative aspect-[4/5] w-[calc(50%-6px)] max-w-[190px] sm:aspect-[3/4] sm:w-[170px] sm:max-w-none lg:w-[200px]"
               initial={instant ? { opacity: 0 } : { opacity: 0, y: 120, rotateZ: (i - results.length / 2) * 6, scale: 0.6 }}
               animate={{ opacity: 1, y: 0, rotateZ: 0, scale: 1 }}
               transition={instant ? { duration: 0.2 } : { duration: 0.7, delay: 0.1 + i * 0.09, ease }}
