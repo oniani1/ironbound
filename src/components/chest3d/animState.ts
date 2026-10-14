@@ -57,6 +57,9 @@ export class ChestAnim {
   sheet = 0.5
   /** Wide screens: 1 while the result card sits on the right, 0 when it is tucked away. */
   cardSide = 1
+  /** Inspect: zoom toward the piece 0..1, and where along its height the camera looks (-0.5..0.5). */
+  zoom = 0
+  panY = 0
   /** Reduced motion: no drift, shake, float, sparks or camera easing. Light still changes. */
   still = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 

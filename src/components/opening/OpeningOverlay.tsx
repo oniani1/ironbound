@@ -127,9 +127,36 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     [anim],
   )
 
-  // Inspect: the card steps aside and the camera centers the piece.
+  // Inspect: the card steps aside and the camera centers the piece. Zoom resets on the way out.
   useEffect(() => {
     anim.cardSide = collapsed ? 0 : 1
+    anim.zoom = 0
+    anim.panY = 0
+  }, [collapsed, anim])
+
+  // Inspect gestures: wheel or pinch to zoom, drag to look along the piece, double tap to jump in.
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const pinch = useRef(0)
+  const setZoom = (z: number) => {
+    anim.zoom = Math.max(0, Math.min(1, z))
+    if (anim.zoom === 0) anim.panY = 0
+  }
+  const pan = (dy: number) => {
+    anim.panY = Math.max(-0.5, Math.min(0.5, anim.panY + (dy / window.innerHeight) * (0.6 + anim.zoom)))
+  }
+  useEffect(() => {
+    if (!collapsed) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === '+' || e.key === '=') setZoom(anim.zoom + 0.2)
+      else if (e.key === '-') setZoom(anim.zoom - 0.2)
+      else if (e.key === '0') setZoom(0)
+      else if (e.key === 'ArrowUp') pan(-60)
+      else if (e.key === 'ArrowDown') pan(60)
+      else return
+      e.preventDefault()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
   }, [collapsed, anim])
 
   // Let the player look at the piece before the receipt slides in.
@@ -366,6 +393,61 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
           )}
         </AnimatePresence>
       </div>
+
+      {/* Inspect: the whole scene is a zoom surface. */}
+      {phase === 'reveal' && collapsed && !multi && (
+        <div
+          className="absolute inset-0 cursor-zoom-in touch-none select-none"
+          data-testid="inspect-surface"
+          onWheel={(e) => setZoom(anim.zoom - e.deltaY * 0.0015)}
+          onDoubleClick={(e) => {
+            if (anim.zoom > 0.3) setZoom(0)
+            else {
+              setZoom(0.7)
+              anim.panY = Math.max(-0.5, Math.min(0.5, (0.5 - e.clientY / window.innerHeight) * 0.9))
+            }
+          }}
+          onPointerDown={(e) => {
+            ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
+            pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+            const [a, b] = [...pointers.current.values()]
+            pinch.current = a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0
+          }}
+          onPointerMove={(e) => {
+            const prev = pointers.current.get(e.pointerId)
+            if (!prev) return
+            pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+            const [a, b] = [...pointers.current.values()]
+            if (a && b) {
+              const d = Math.hypot(a.x - b.x, a.y - b.y)
+              if (pinch.current > 0) setZoom(anim.zoom + (d - pinch.current) / 260)
+              pinch.current = d
+            } else pan(e.clientY - prev.y)
+          }}
+          onPointerUp={(e) => {
+            pointers.current.delete(e.pointerId)
+            pinch.current = 0
+          }}
+          onPointerCancel={(e) => {
+            pointers.current.delete(e.pointerId)
+            pinch.current = 0
+          }}
+        />
+      )}
+      <AnimatePresence>
+        {phase === 'reveal' && collapsed && !multi && (
+          <motion.p
+            key="inspect-hint"
+            className="pointer-events-none absolute inset-x-0 top-[calc(max(1rem,env(safe-area-inset-top))+64px)] px-4 text-center text-[13px] text-bone-300"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 1, 0] }}
+            transition={{ duration: 4.5, times: [0, 0.08, 0.8, 1] }}
+          >
+            <span className="hidden sm:inline">Scroll to zoom, drag to look along the piece. Double-click to jump in.</span>
+            <span className="sm:hidden">Pinch to zoom, drag to look along the piece.</span>
+          </motion.p>
+        )}
+      </AnimatePresence>
 
       {/* Reveal. */}
       <AnimatePresence>

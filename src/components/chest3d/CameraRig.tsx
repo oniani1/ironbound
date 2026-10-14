@@ -69,6 +69,15 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
       height += (macroLook + 0.04 - height) * m
       offsetX *= 1 - m
     }
+    // Inspect zoom: move in on the piece and look along it.
+    const z = anim.zoom * frame
+    if (z > 0) {
+      const zoomLook = anim.focusY + anim.panY * anim.focusH
+      dist += (Math.max(0.8, revealDist * 0.3) - dist) * z
+      lookY += (zoomLook - lookY) * z
+      height += (zoomLook + 0.04 - height) * z
+      offsetX *= 1 - z
+    }
     if (anim.hero) {
       // Chest and displayed piece framed together, from the plinth to the tip of the blade.
       const top = anim.focusY + anim.focusH / 2
