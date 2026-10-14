@@ -152,7 +152,8 @@ async (mcpPage) => {
       await page.waitForTimeout(250)
       await shot(`${tag}-15-open-burst`)
       await waitPhase('rise')
-      await page.waitForTimeout(450)
+      // Mid-travel: the camera dives first, then moves along the piece.
+      await page.waitForTimeout(2200)
       await shot(`${tag}-16-open-macro`)
       await waitPhase('reveal')
       await page.waitForTimeout(3800)
@@ -171,7 +172,7 @@ async (mcpPage) => {
         await page.waitForTimeout(1300)
         await shot(`${tag}-19-inspect-zoom`)
       }
-      await page.getByLabel('Close').first().click()
+      await page.getByTestId('opening-overlay').getByLabel('Close', { exact: true }).click()
       await page.waitForTimeout(600)
 
       // Fast mode: final values and actions at once.
@@ -187,7 +188,7 @@ async (mcpPage) => {
       await page.getByTestId('keep').waitFor({ state: 'attached', timeout: 8000 })
       await page.waitForTimeout(250)
       await shot(`${tag}-20-fast-result`)
-      await page.getByLabel('Close').first().click()
+      await page.getByTestId('opening-overlay').getByLabel('Close', { exact: true }).click()
       await page.waitForTimeout(500)
 
       // Batch of three: face down, flipped, two selected.

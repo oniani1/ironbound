@@ -5,8 +5,10 @@ import * as THREE from 'three'
 import type { ChestAnim } from './animState'
 import { asset } from '../../lib/asset'
 
-// Turns the panorama so the cellar's slit window sits behind the chest, a little to the right.
-const ROTATION_Y = 1.75
+// Turns the panorama so the cellar's stone archway stands behind the chest and frames it,
+// tilted a little so the arch sits at the chest's height rather than above the frame.
+const ROTATION_Y = 5.5
+const TILT_X = -0.18
 
 /**
  * The room around the chest: the stone-vaulted cellar of Castle Zavelstein ("Castle Zavelstein
@@ -23,7 +25,7 @@ export function CastleBackdrop({ anim, strength = 0.3 }: { anim: ChestAnim; stre
     const prev = scene.background
     scene.background = tex
     scene.backgroundBlurriness = 0.065
-    scene.backgroundRotation.set(0, ROTATION_Y, 0)
+    scene.backgroundRotation.set(TILT_X, ROTATION_Y, 0)
     return () => {
       scene.background = prev
     }

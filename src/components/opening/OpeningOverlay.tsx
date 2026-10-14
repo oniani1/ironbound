@@ -490,7 +490,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       <div className="pointer-events-none absolute inset-x-0 bottom-[18%] flex justify-center px-4">
         <AnimatePresence>
           {showClues && (
-            <motion.div key="clues" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-display text-[19px] italic text-bone-50 [text-shadow:0_2px_14px_oklch(0%_0_0/.9)] sm:text-[21px]" exit={{ opacity: 0, transition: { duration: 0.2 } }}>
+            <motion.div key="clues" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-[2px] bg-[radial-gradient(closest-side,oklch(8%_0.01_60/.72),transparent)] px-10 py-3 font-display text-[19px] italic text-bone-50 [text-shadow:0_2px_14px_oklch(0%_0_0/.9)] sm:text-[21px]" exit={{ opacity: 0, transition: { duration: 0.2 } }}>
               {[CATEGORY_CLUE[first.item.category] ?? 'An object', first.item.provenance === 'forged' ? 'New work' : shortEra(first.item.era), first.item.origin].map((c, i) => (
                 <motion.span
                   key={c + i}

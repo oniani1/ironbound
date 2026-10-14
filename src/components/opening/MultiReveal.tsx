@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Check, X } from '@phosphor-icons/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
-import { money, provenanceLine, resaleLabel } from '../../lib/format'
+import { money, provenanceLine, resaleLabel, RETAIL_CHECKED, sourceHost } from '../../lib/format'
 import { Button, IconButton } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
 import { RarityTag, Tag } from '../ui/RarityTag'
@@ -391,6 +391,13 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
           <div>
             <dt className="eyebrow !text-[11px]">{item.provenance === 'forged' ? 'Retail price, new' : 'Estimated value'}</dt>
             <dd className="mt-1 text-[24px] font-semibold text-bone-50">{money(item.value)}</dd>
+            {item.provenance === 'forged' && item.priceSource && (
+              <dd className="mt-1">
+                <a href={item.priceSource} target="_blank" rel="noreferrer" className="text-[11px] text-bone-300 underline decoration-bone-100/25 underline-offset-2 hover:text-bone-100">
+                  {sourceHost(item.priceSource)}, read {RETAIL_CHECKED}
+                </a>
+              </dd>
+            )}
           </div>
           <div>
             <dt className="eyebrow !text-[11px]">Sell-back offer</dt>
