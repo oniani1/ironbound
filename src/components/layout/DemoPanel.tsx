@@ -74,12 +74,13 @@ export function DemoPanel() {
       </AnimatePresence>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 rounded-full border border-bone-100/10 bg-ink-900/85 px-2.5 py-1 text-[10px] font-semibold text-bone-400 opacity-70 backdrop-blur transition-[color,opacity] hover:text-bone-100 hover:opacity-100 md:px-3 md:py-1.5 md:text-[11px]"
+        className="flex h-7 min-w-7 items-center justify-center gap-1.5 rounded-full border border-bone-100/10 bg-ink-900/85 px-2 text-[10px] font-semibold text-bone-400 opacity-60 backdrop-blur transition-[color,opacity] hover:text-bone-100 hover:opacity-100 md:h-auto md:px-3 md:py-1.5 md:text-[11px] md:opacity-70"
         aria-expanded={open}
+        aria-label="Demo controls"
         data-testid="demo-toggle"
       >
         <span className="block h-1.5 w-1.5 rounded-full" style={{ background: force ? RARITIES[force].cssVar : 'var(--color-bone-400)' }} />
-        Demo{force ? ` · ${RARITIES[force].label}` : ''}
+        <span className="sr-only md:not-sr-only">Demo{force ? ` · ${RARITIES[force].label}` : ''}</span>
       </button>
     </div>
   )
