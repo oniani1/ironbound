@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { ArrowCounterClockwise, MagnifyingGlass, ShareNetwork } from '@phosphor-icons/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES } from '../../config/rarity'
-import { money, provenanceLine, resaleLabel, RETAIL_CHECKED, sourceHost } from '../../lib/format'
+import { money, provenanceLine, resaleLabel, RETAIL_CHECKED_SHORT, sourceHost } from '../../lib/format'
 import { Button } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
 import { Pips, Tag } from '../ui/RarityTag'
@@ -183,7 +183,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
             {item.provenance === 'forged' ? 'Retail price, new' : 'Estimated item value'}
             {item.provenance === 'forged' && item.priceSource && (
               <a href={item.priceSource} target="_blank" rel="noreferrer" className="ml-2 normal-case tracking-normal text-bone-300 underline decoration-bone-100/25 underline-offset-2 hover:text-bone-100">
-                {sourceHost(item.priceSource)}, read {RETAIL_CHECKED}
+                {sourceHost(item.priceSource)} · {RETAIL_CHECKED_SHORT}
               </a>
             )}
           </p>

@@ -55,6 +55,7 @@ export function resaleLabel(r: Item['resale']): string {
 
 /** When the retail prices of new work were read. */
 export const RETAIL_CHECKED = 'October 2026'
+export const RETAIL_CHECKED_SHORT = 'Oct 2026'
 
 /** "regenyei.com" from a price source URL, for a short link label. */
 export function sourceHost(url?: string): string {
