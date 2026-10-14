@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Chest } from '../../types'
+import { asset } from '../../lib/asset'
 
 /** Pre-rendered still of the 3D chest in its tier finish, with a light pool underneath. */
 export function ChestArt({ chest, className = '', glow = 1 }: { chest: Chest; className?: string; glow?: number }) {
@@ -12,7 +13,7 @@ export function ChestArt({ chest, className = '', glow = 1 }: { chest: Chest; cl
       />
       {!failed ? (
         <img
-          src={`/chests/${chest.id}.webp`}
+          src={asset(`/chests/${chest.id}.webp`)}
           alt={`${chest.name}`}
           className="relative h-full w-full object-contain drop-shadow-[0_24px_30px_oklch(0%_0_0/.65)]"
           onError={() => setFailed(true)}

@@ -9,6 +9,7 @@ import { ITEM_BY_ID } from '../../data/items'
 import { Button } from '../ui/Button'
 import { Emblem } from '../layout/Logo'
 import { Steps } from './steps'
+import { asset } from '../../lib/asset'
 
 type StepId = 'arms' | 'how' | 'trial' | 'claim'
 const ORDER: StepId[] = ['arms', 'how', 'trial', 'claim']
@@ -113,7 +114,7 @@ function TrialIntro({ onOpen }: { onOpen: () => void }) {
   return (
     <div className="mx-auto flex max-w-[560px] flex-col items-center text-center">
       <motion.img
-        src="/chests/trial.webp"
+        src={asset("/chests/trial.webp")}
         alt=""
         className="w-[min(340px,80vw)] drop-shadow-[0_30px_50px_oklch(0%_0_0/.7)]"
         initial={{ y: -40, opacity: 0, rotate: -3 }}

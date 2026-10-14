@@ -61,7 +61,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
   const belowPrice = unsold.filter((r) => r.item.value < chest.price)
 
   return (
-    <div className="pointer-events-auto flex w-full max-w-[1100px] flex-col items-center gap-6 px-4">
+    <div className="pointer-events-auto mx-auto flex w-full max-w-[1100px] flex-col items-center gap-6 px-4">
       <div className="flex w-full flex-wrap justify-center gap-3 sm:gap-4" style={{ perspective: 1400 }}>
         {results.map((r, i) => {
           const rr = RARITIES[r.rarity]

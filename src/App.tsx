@@ -6,6 +6,7 @@ import { DemoPanel } from './components/layout/DemoPanel'
 import { OpeningProvider } from './components/opening/OpeningProvider'
 import { OnboardingProvider } from './components/onboarding/OnboardingContext'
 import { startFeed } from './lib/feed'
+import { sfx } from './lib/audio'
 import Landing from './pages/Landing'
 
 const Chests = lazy(() => import('./pages/Chests'))
@@ -39,6 +40,14 @@ function VaultSoon() {
 export default function App() {
   useEffect(() => {
     startFeed()
+    // Browsers only allow audio after a gesture; the first tap anywhere arms the sound engine.
+    const arm = () => sfx.unlock()
+    window.addEventListener('pointerdown', arm, { once: true })
+    window.addEventListener('keydown', arm, { once: true })
+    return () => {
+      window.removeEventListener('pointerdown', arm)
+      window.removeEventListener('keydown', arm)
+    }
   }, [])
   return (
     <OpeningProvider>

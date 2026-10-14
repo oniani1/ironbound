@@ -4,8 +4,9 @@ import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import type { ChestTheme } from '../../types'
 import type { ChestAnim } from './animState'
+import { asset } from '../../lib/asset'
 
-const URL = '/models/chest.glb'
+const URL = asset('/models/chest.glb')
 /** Hinge line of the lid in model space (from the source asset, before quantization). */
 const HINGE = new THREE.Vector3(0, 0.4205, -0.2571)
 const LID_OPEN = 1.92

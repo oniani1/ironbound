@@ -6,7 +6,9 @@ import { ChestScene } from '../chest3d/ChestScene'
 import { ChestAnim } from '../chest3d/animState'
 import { applyCharge, introTimeline, revealTimeline, settleReveal, type Phase } from '../chest3d/timeline'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
-import { tellSequence } from '../../lib/gacha'
+import { chestPool, tellSequence } from '../../lib/gacha'
+import { ITEMS } from '../../data/items'
+import { ItemImg } from '../ui/ItemImg'
 import { actions, useStore } from '../../lib/store'
 import { sfx } from '../../lib/audio'
 import { money, shortEra } from '../../lib/format'
@@ -129,6 +131,14 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   }
 
   const canAfford = balance >= chest.price * results.length
+  const tease = useMemo(
+    () =>
+      chestPool(chest, ITEMS)
+        .flatMap((g) => g.items)
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 4),
+    [chest],
+  )
   const rarityHex = RARITIES[best.rarity].hex
   const showClues = !multi && (phase === 'rise' || phase === 'burst')
 
@@ -202,6 +212,31 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
           )}
         </div>
       </div>
+
+      {/* While the seal is intact, a quiet reminder of what could be inside. */}
+      <AnimatePresence>
+        {(phase === 'await' || phase === 'intro') && !trial && (
+          <motion.div
+            className="pointer-events-none absolute left-4 top-[calc(max(1rem,env(safe-area-inset-top))+64px)] sm:left-6"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <p className="eyebrow !text-[10px]">Could be inside</p>
+            <div className="mt-2 flex gap-2">
+              {tease.map((it) => (
+                <div key={it.id} className="w-[58px] text-center">
+                  <div className="h-[58px] rounded-xl border border-bone-100/10 bg-ink-950/60 p-1.5 backdrop-blur">
+                    <ItemImg item={it} className="h-full w-full" />
+                  </div>
+                  <p className="mt-1 text-[10px] font-semibold text-bone-300 tabular">{money(it.value, { compact: true })}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hold to open. */}
       <div className="pointer-events-none absolute inset-x-0 bottom-[max(2.5rem,env(safe-area-inset-bottom))] flex justify-center">
