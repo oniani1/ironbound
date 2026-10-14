@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import { Component, Suspense, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { PerformanceMonitor } from '@react-three/drei'
 import * as THREE from 'three'
@@ -86,7 +86,47 @@ interface Props {
   itemGlow?: number
 }
 
-export function ChestScene({ theme, anim, item, rarityHex = '#ffc94d', parallax, plinth = true, fx = true, className, distance, frameloop = 'always', render = false, itemGlow = 1 }: Props) {
+let webglOk: boolean | null = null
+function hasWebGL() {
+  if (webglOk !== null) return webglOk
+  try {
+    const c = document.createElement('canvas')
+    webglOk = !!(c.getContext('webgl2') || c.getContext('webgl'))
+  } catch {
+    webglOk = false
+  }
+  return webglOk
+}
+
+/** Without WebGL (old devices, locked-down browsers) the page shows the still chest art instead. */
+class SceneBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children
+  }
+}
+
+function StillChest({ theme, className }: { theme: ChestTheme; className?: string }) {
+  return (
+    <div className={`grid place-items-center ${className ?? ''}`} style={{ background: `radial-gradient(50% 40% at 50% 60%, color-mix(in oklch, ${theme.glow} 22%, transparent), transparent)` }}>
+      <div className="h-[46%] w-[min(520px,70%)] animate-pulse-soft rounded-[40%_40%_8px_8px]" style={{ background: `linear-gradient(180deg, ${theme.metal}, ${theme.wood})`, boxShadow: `0 0 80px ${theme.glow}` }} />
+    </div>
+  )
+}
+
+export function ChestScene(props: Props) {
+  if (typeof window !== 'undefined' && !hasWebGL()) return <StillChest theme={props.theme} className={props.className} />
+  return (
+    <SceneBoundary fallback={<StillChest theme={props.theme} className={props.className} />}>
+      <ChestSceneInner {...props} />
+    </SceneBoundary>
+  )
+}
+
+function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, plinth = true, fx = true, className, distance, frameloop = 'always', render = false, itemGlow = 1 }: Props) {
   const bg = useMemo(() => cssColorToHex('--color-ink-950'), [])
   // Start sharp, drop resolution if the device cannot hold the frame rate.
   const [dpr, setDpr] = useState(() => Math.min(typeof window === 'undefined' ? 1 : window.devicePixelRatio, 1.75))

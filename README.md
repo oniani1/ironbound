@@ -1,0 +1,34 @@
+# Ironbound
+
+Open a chest. Keep the steel. A front-end mock of a gacha platform for real arms and armor: swords, daggers, polearms, helmets, shields and armor, vaulted and redeemable.
+
+This is a demo. Every item, price, odds table and payout is simulated. There are no contracts, payments or accounts.
+
+## Run it
+
+```
+pnpm install
+pnpm dev        # http://localhost:5183
+pnpm test       # odds, expected value and roll checks
+pnpm build
+```
+
+Demo controls sit in the corner of every page: force the rarity of the next pull, add credit, or reset.
+
+## What is inside
+
+| Area | Where |
+|---|---|
+| Opening ritual (3D chest, rarity tells, beam, reveal) | `src/components/chest3d`, `src/components/opening` |
+| Chests, odds and expected value | `src/config/chests.ts`, `src/lib/gacha.ts` |
+| Catalog of 187 items | `src/data/items.json`, built by `scripts/assets/catalog.py` |
+| Onboarding | `src/components/onboarding` |
+| Vault, sell-back and shipping | `src/pages/Vault.tsx`, `src/components/vault` |
+| Sound (procedural WebAudio) | `src/lib/audio.ts` |
+| Research | `research/RESEARCH.md`, `research/codex-research.md` |
+
+## Credits
+
+- Item photographs: The Metropolitan Museum of Art, Open Access (CC0), cut out locally.
+- 3D chest: "Treasure Chest" by Rico Cilliers, Poly Haven (CC0).
+- Fonts: Cormorant Garamond, Instrument Sans and Grenze Gotisch (SIL Open Font License).
