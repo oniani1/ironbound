@@ -7,6 +7,7 @@ import { Logo } from './Logo'
 import { Purse } from './Purse'
 import { LiveTicker } from './LiveTicker'
 import { Shield } from '../ui/Heraldry'
+import { DemoToggle } from './DemoPanel'
 import { Button, IconButton } from '../ui/Button'
 import { useGuestCta, useOnboarding } from '../onboarding/OnboardingContext'
 
@@ -62,6 +63,7 @@ export function Header() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          {signedIn && <DemoToggle className="grid h-8 w-8 md:hidden" />}
           <IconButton onClick={() => actions.toggleSound()} className="hidden sm:grid" aria-label={sound ? 'Mute sound' : 'Unmute sound'} title={sound ? 'Sound on' : 'Sound off'}>
             {sound ? <SpeakerHigh size={18} weight="light" /> : <SpeakerSlash size={18} weight="light" />}
           </IconButton>

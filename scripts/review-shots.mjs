@@ -77,7 +77,7 @@ async (mcpPage) => {
       // First visit: landing.
       await fresh(null)
       await page.goto(BASE + '/')
-      await page.waitForTimeout(2600)
+      await page.waitForTimeout(3800)
       await shot(`${tag}-01-landing`)
       await page.mouse.wheel(0, h)
       await page.waitForTimeout(900)
@@ -104,7 +104,7 @@ async (mcpPage) => {
         await page.mouse.up()
         await liftLid()
         await waitPhase('reveal')
-        await page.waitForTimeout(2600)
+        await page.waitForTimeout(3800)
         await shot(`${tag}-07-trial-reveal`)
         const inspect = page.getByRole('button', { name: 'Hide the card and inspect the piece' })
         if (await inspect.count()) {
@@ -155,7 +155,7 @@ async (mcpPage) => {
       await page.waitForTimeout(450)
       await shot(`${tag}-16-open-macro`)
       await waitPhase('reveal')
-      await page.waitForTimeout(2600)
+      await page.waitForTimeout(3800)
       await shot(`${tag}-17-open-reveal`)
       const inspect = page.getByRole('button', { name: 'Hide the card and inspect the piece' })
       if (await inspect.count()) {
@@ -209,7 +209,7 @@ async (mcpPage) => {
       await page.waitForTimeout(1500)
       await shot(`${tag}-21-batch-facedown`)
       await page.getByTestId('reveal-all').click()
-      await page.waitForTimeout(2600)
+      await page.waitForTimeout(3800)
       const sel = page.getByTestId('multi-select')
       if ((await sel.count()) >= 2) {
         await sel.nth(0).click()

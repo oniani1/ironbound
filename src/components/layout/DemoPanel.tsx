@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { SlidersHorizontal } from '@phosphor-icons/react'
@@ -6,16 +6,55 @@ import { actions, useStore } from '../../lib/store'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
 import { sfx } from '../../lib/audio'
 
+// Open state shared by the panel and its toggles (floating on desktop, in the header on phones).
+let isOpen = false
+const listeners = new Set<() => void>()
+function setOpen(next: boolean | ((o: boolean) => boolean)) {
+  isOpen = typeof next === 'function' ? next(isOpen) : next
+  listeners.forEach((l) => l())
+}
+function useOpen() {
+  return useSyncExternalStore(
+    (l) => {
+      listeners.add(l)
+      return () => {
+        listeners.delete(l)
+      }
+    },
+    () => isOpen,
+    () => isOpen,
+  )
+}
+
+/** The small icon that opens the demo controls. Phones carry it in the header, so it never sits on content. */
+export function DemoToggle({ className = '' }: { className?: string }) {
+  const open = useOpen()
+  const force = useStore((s) => s.settings.force)
+  return (
+    <button
+      onClick={() => setOpen((o) => !o)}
+      className={`relative place-items-center rounded-full bg-ink-900/85 text-bone-400 opacity-60 shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_12%,transparent)] backdrop-blur transition-[color,opacity] hover:text-bone-100 hover:opacity-100 ${className}`}
+      title={force ? `Demo controls · next pull ${RARITIES[force].label}` : 'Demo controls'}
+      aria-expanded={open}
+      aria-label="Demo controls"
+      data-testid="demo-toggle"
+    >
+      <SlidersHorizontal size={16} weight="light" aria-hidden />
+      {force && <span className="absolute right-1 top-1 block h-2 w-2 rotate-45" style={{ background: RARITIES[force].cssVar }} aria-hidden />}
+    </button>
+  )
+}
+
 /**
  * Presenter controls for demos: choose the rarity of the next pull, top up the purse or
  * start over. Clearly labeled as a demo tool, never part of the product.
  */
 export function DemoPanel() {
-  const [open, setOpen] = useState(false)
+  const open = useOpen()
   const force = useStore((s) => s.settings.force)
   const navigate = useNavigate()
   return (
-    <div className="fixed bottom-[calc(136px+env(safe-area-inset-bottom))] right-3 z-[35] flex flex-col items-end md:bottom-4 md:left-4 md:right-auto md:items-start">
+    <div className="fixed right-3 top-[calc(var(--header-h)+var(--ticker-h)+8px)] z-[35] flex flex-col items-end md:bottom-4 md:left-4 md:right-auto md:top-auto md:items-start">
       <AnimatePresence>
         {open && (
           <motion.div
@@ -23,7 +62,7 @@ export function DemoPanel() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, transition: { duration: 0.15 } }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="plate mb-2 w-[264px] p-3.5"
+            className="plate w-[264px] p-3.5 md:mb-2"
           >
             <p className="eyebrow !text-[10px]">Demo controls</p>
             <p className="mt-2 text-[12px] text-bone-300">Next pull lands as</p>
@@ -76,17 +115,7 @@ export function DemoPanel() {
           </motion.div>
         )}
       </AnimatePresence>
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="relative grid h-9 w-9 place-items-center rounded-full bg-ink-900/85 text-bone-400 opacity-60 shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_12%,transparent)] backdrop-blur transition-[color,opacity] hover:text-bone-100 hover:opacity-100"
-        title={force ? `Demo controls · next pull ${RARITIES[force].label}` : 'Demo controls'}
-        aria-expanded={open}
-        aria-label="Demo controls"
-        data-testid="demo-toggle"
-      >
-        <SlidersHorizontal size={16} weight="light" aria-hidden />
-        {force && <span className="absolute right-1 top-1 block h-2 w-2 rotate-45" style={{ background: RARITIES[force].cssVar }} aria-hidden />}
-      </button>
+      <DemoToggle className="hidden h-9 w-9 md:grid" />
     </div>
   )
 }
