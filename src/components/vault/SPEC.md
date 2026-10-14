@@ -2,8 +2,20 @@
 
 Status: approved. The user authorized implementation on `codex/vault-onboarding` on 2026-10-14.
 
+## Round 3
+
+Source: the user's Round 3 task on 2026-10-14. Status: approved.
+
+- Show owned value, Estimated gain and Sell-back net. Owned pieces include vaulted, shipping and shipped pulls. Estimated gain is owned value plus sales minus spending. Sell-back net applies each owned pull's chest buyback rate, plus sales minus spending. Missing chest rates make the net unavailable.
+- At 390x844, show the first complete item image and name before scrolling. Use one phone summary row and one Filter control. Put detail identity above a 280px image stage and fixed Sell for $N and Ship buttons above the app tab bar, with safe-area clearance.
+- Rename the claim headline to Claim demo credit. Display whole dollars with `money(n)`.
+- Touch only Vault.tsx, the existing vault files and ClaimStep.tsx. No dependencies. App shell, other review items, store and opening flow are out of scope.
+- Verify with `pnpm typecheck`, `pnpm build`, and one browser pass at 1440x900 and 390x844. Check both ledger formulas, shipping ownership, phone filters, fixed detail actions and the rename. Commit locally, do not push, and stop the port 5190 dev server.
+
+Round 3 verification: main-session review completed. `pnpm typecheck` and `pnpm build` both exited 0. Chrome with Playwright passed 14 browser scenarios at the requested sizes, with no page errors. These cover the hammer's +$15,000 estimated gain and +$13,400 sell-back net, mixed statuses and rates, negative totals, missing rates, filters, sale credit, shipment costs, action focus and the claim headline. At 390x844, the first name ends at 697px, the image stage is 280px, and the fixed action bar ends at 779px above the tab bar at 780px.
+
 ## Scope
-- Build the collection wall and deep-linked inspection at `/vault` and `/vault/:uid`. Calculate vault value from vaulted pulls and profit or loss from vault value plus sold proceeds minus total spending.
+- Build the collection wall and deep-linked inspection at `/vault` and `/vault/:uid`. Calculate owned value, estimated gain and sell-back net as specified in Round 3.
 - Filter by category and status, and sort by date, value or rarity. Show honest empty and missing-item states.
 - Inspect full-length object photos with pointer, wheel, pinch and keyboard zoom controls. Display specifications, provenance, demo valuation comparisons and a demo certificate.
 - Confirm exact sell-back offers before calling the existing store. Collect and review a mock shipping address and insured service cost before saving a shipping request. Keep carrier milestones pending until the stored status changes.

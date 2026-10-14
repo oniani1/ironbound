@@ -66,12 +66,12 @@ export function ShipFlow({ pull, onCancel }: { pull: Pull; onCancel: () => void 
     <h2 id="ship-heading" ref={heading} tabIndex={-1} className="ib-transaction-heading">{review ? 'Review your shipment' : 'Where should your steel go?'}</h2>
     {review ? <>
       <div className="ib-shipment-review"><address>{address.name}<br />{address.street}<br />{address.line2 && <>{address.line2}<br /></>}{address.city}{address.postal ? `, ${address.postal}` : ''}<br />{address.country}</address>
-        <dl><div><dt>{service.label}</dt><dd className="tabular">{money(service.price)}</dd></div><div><dt>Insurance</dt><dd>Included to {money(pull.value)}</dd></div><div><dt>Estimated delivery</dt><dd>{service.days}</dd></div><div><dt>Demo balance after shipping</dt><dd className="tabular">{money(balance - service.price, {})}</dd></div></dl>
+        <dl><div><dt>{service.label}</dt><dd className="tabular">{money(service.price)}</dd></div><div><dt>Insurance</dt><dd>Included to {money(pull.value)}</dd></div><div><dt>Estimated delivery</dt><dd>{service.days}</dd></div><div><dt>Demo balance after shipping</dt><dd className="tabular">{money(balance - service.price)}</dd></div></dl>
       </div>
       <p className="text-sm text-bone-300">{money(service.price)} will be deducted from demo credit. This is a simulated request.</p>
       {error && <p role="alert" className="ib-error">{error}</p>}
       <div className="ib-transaction-buttons"><Button onClick={confirm} disabled={balance < service.price}>Confirm demo shipment</Button><Button variant="ghost" onClick={() => { setReview(false); setError('') }}>Edit address</Button></div>
-      {balance < service.price && <p className="ib-error">You need {money(service.price - balance, {})} more demo credit. Keep this item in the vault or choose another service.</p>}
+      {balance < service.price && <p className="ib-error">You need {money(service.price - balance)} more demo credit. Keep this item in the vault or choose another service.</p>}
       <Button variant="ghost" onClick={onCancel} className="mt-3">Keep in vault</Button>
     </> : <form onSubmit={reviewAddress}>
       <div className="ib-address">
