@@ -42,6 +42,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   const [phase, setPhase] = useState<Phase>('intro')
   const [soldUids, setSoldUids] = useState<Set<string>>(new Set())
   const [tellStep, setTellStep] = useState<RarityId | null>(null)
+  const [cardReady, setCardReady] = useState(false)
   const fast = useStore((s) => s.settings.fast)
   const sound = useStore((s) => s.settings.sound)
   const balance = useStore((s) => s.balance)
@@ -60,8 +61,15 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
 
   const startReveal = useCallback(() => {
     tl.current?.kill()
+    if (reduced) {
+      // Reduced motion: no flight, no flashes. The result fades in.
+      sfx.burst(RARITIES[best.rarity].tier)
+      settleReveal(anim, best.rarity, multi)
+      setPhase('reveal')
+      return
+    }
     tl.current = revealTimeline(anim, { tell, fast: fastRef.current, multi, reducedMotion: reduced, onPhase: setPhase, onTell: setTellStep })
-  }, [anim, tell, multi, reduced])
+  }, [anim, tell, multi, reduced, best.rarity])
 
   // Intro: the chest drops onto the plinth. In fast mode the seal breaks by itself.
   useEffect(() => {
@@ -74,7 +82,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         if (fastRef.current) {
           const o = { p: 0 }
           tl.current = gsap.timeline()
-          tl.current.to(o, { p: 1, duration: 0.35, ease: 'power1.in', onUpdate: () => applyCharge(anim, o.p), onComplete: startReveal })
+          tl.current.to(o, { p: 1, duration: 0.15, ease: 'power1.in', onUpdate: () => applyCharge(anim, o.p), onComplete: startReveal })
         } else setPhase('await')
       },
       fastRef.current,
@@ -102,6 +110,16 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       tl.current = revealTimeline(anim, { tell, fast: false, multi, reducedMotion: reduced, onPhase: setPhase, onTell: setTellStep })
     }, 250)
   }, [anim, tell, multi, reduced])
+
+  // Let the player look at the piece before the receipt slides in.
+  useEffect(() => {
+    if (phase !== 'reveal') {
+      setCardReady(false)
+      return
+    }
+    const t = window.setTimeout(() => setCardReady(true), fastRef.current || reduced || multi ? 0 : 500)
+    return () => window.clearTimeout(t)
+  }, [phase, reduced, multi])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -298,7 +316,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
 
       {/* Reveal. */}
       <AnimatePresence>
-        {phase === 'reveal' && !multi && (
+        {phase === 'reveal' && cardReady && !multi && (
           <div className="pointer-events-none absolute inset-0 flex items-end justify-center md:items-center md:justify-end md:pr-[max(2rem,6vw)]">
             <RevealCard
               draw={first.draw}

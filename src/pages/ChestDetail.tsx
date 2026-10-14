@@ -50,10 +50,10 @@ export default function ChestDetail() {
   }
 
   return (
-    <div className="pb-28 md:pb-20">
+    <div className="pb-44 md:pb-20">
       <div className="mx-auto grid max-w-[1400px] gap-8 px-4 pt-6 sm:px-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(380px,0.85fr)] lg:gap-12">
         {/* Live chest. */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} className="relative -mx-4 h-[360px] overflow-hidden sm:mx-0 sm:h-[460px] sm:rounded-[28px] lg:h-[620px]">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} className="relative -mx-4 h-[250px] overflow-hidden sm:mx-0 sm:h-[460px] sm:rounded-[28px] lg:h-[620px]">
           <ChestScene theme={chest.theme} anim={anim} parallax distance={0.82} className="!absolute inset-0" />
           <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_120px_40px_var(--color-ink-950)] sm:rounded-[28px]" />
           <Link to="/chests" className="absolute left-4 top-4 rounded-full bg-ink-950/60 px-3 py-1.5 text-[12px] text-bone-300 backdrop-blur hover:text-bone-50">
@@ -62,7 +62,7 @@ export default function ChestDetail() {
           {lim && (
             <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-ink-950/70 p-3 backdrop-blur sm:left-6 sm:right-auto sm:w-[320px]">
               <div className="flex justify-between text-[12px]">
-                <span className="font-semibold text-[#ff9a73]">Limited · ends in {lim.endsInHours}h</span>
+                <span className="font-semibold text-[#ff9a73]">Limited · ends in {lim.endsInHours}h · demo stock</span>
                 <span className="text-bone-300 tabular">
                   {lim.remaining}/{lim.total} left
                 </span>
@@ -84,10 +84,14 @@ export default function ChestDetail() {
             <OddsBar chest={chest} height={10} labels />
           </div>
 
-          <dl className="mt-6 grid grid-cols-3 gap-3 border-y border-bone-100/[0.08] py-4 text-[12px]">
+          <dl className="mt-6 grid grid-cols-2 gap-3 border-y border-bone-100/[0.08] py-4 text-[12px] sm:grid-cols-4">
             <div>
-              <dt className="text-bone-400">Expected value</dt>
+              <dt className="text-bone-400">Expected item value</dt>
               <dd className="mt-1 text-[18px] font-semibold text-bone-50 tabular">{money(ev)}</dd>
+            </div>
+            <div>
+              <dt className="text-bone-400">Expected as cash</dt>
+              <dd className="mt-1 text-[18px] font-semibold text-bone-50 tabular">{money(ev * chest.buyback)}</dd>
             </div>
             <div>
               <dt className="text-bone-400">Beats the price</dt>
@@ -99,7 +103,7 @@ export default function ChestDetail() {
             </div>
           </dl>
 
-          <div className="mt-6">
+          <div className="mt-6 hidden md:block">
             <div className="flex items-center justify-between">
               <div className="inline-flex rounded-[12px] bg-ink-900 p-1" role="radiogroup" aria-label="How many chests">
                 {QTY.map((q) => (
@@ -153,6 +157,47 @@ export default function ChestDetail() {
             )}
           </div>
         </motion.div>
+      </div>
+
+      {/* Phones: the purchase stays within thumb reach above the tab bar. */}
+      <div className="fixed inset-x-0 bottom-[calc(57px+env(safe-area-inset-bottom))] z-20 border-t border-bone-100/[0.08] bg-ink-950/95 px-3 py-2.5 backdrop-blur-md md:hidden">
+        {short && (
+          <div className="mb-2 flex items-center justify-between rounded-lg bg-ember-500/10 px-3 py-2 text-[12px]">
+            <span className="text-bone-100">Purse is {money(total - balance)} short.</span>
+            <button className="font-semibold text-brass-300" onClick={() => { actions.addFunds(1000); setShort(false); sfx.coins(8) }}>
+              Add $1,000
+            </button>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-[12px] bg-ink-900 p-1" role="radiogroup" aria-label="How many chests">
+            {QTY.map((q) => (
+              <button
+                key={q}
+                role="radio"
+                aria-checked={qty === q}
+                onClick={() => {
+                  sfx.click()
+                  setQty(q)
+                  setShort(false)
+                }}
+                className={`h-11 w-11 rounded-[9px] text-[14px] font-semibold transition-colors ${qty === q ? 'bg-bone-100 text-ink-950' : 'text-bone-300'}`}
+              >
+                ×{q}
+              </button>
+            ))}
+          </div>
+          <Button size="lg" className="flex-1 !h-[52px]" onClick={onOpen} data-testid="open-chest-mobile">
+            {signedIn ? (
+              <span className="flex w-full items-center justify-between">
+                <span>Open</span>
+                <span className="text-[17px] font-bold tabular">{money(total)}</span>
+              </span>
+            ) : (
+              'Try it free'
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Odds and pool. */}

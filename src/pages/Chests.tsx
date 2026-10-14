@@ -32,13 +32,18 @@ export default function Chests() {
         </p>
       </motion.header>
 
-      {limited && <LimitedBanner chest={limited} />}
-
-      {/* Core chests rise in height with their price, like steps up to the throne. */}
-      <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
-        {core.map((c, i) => (
-          <ChestCard key={c.id} chest={c} index={i} />
-        ))}
+      {/* Phones see the everyday chests first; the event follows. Desktop leads with the event. */}
+      <div className="flex flex-col">
+        {limited && (
+          <div className="order-2 md:order-1">
+            <LimitedBanner chest={limited} />
+          </div>
+        )}
+        <div className="order-1 mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:order-2 md:mt-10 lg:grid-cols-4 lg:items-end">
+          {core.map((c, i) => (
+            <ChestCard key={c.id} chest={c} index={i} />
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -71,16 +76,18 @@ function ChestCard({ chest, index }: { chest: Chest; index: number }) {
           <div className="mt-4">
             <OddsBar chest={chest} />
           </div>
-          <dl className="mt-4 grid grid-cols-2 gap-3 text-[12px]">
+          <dl className="mt-4 grid grid-cols-3 gap-2 text-[12px]">
             <div>
-              <dt className="text-bone-400">Expected value</dt>
-              <dd className="mt-0.5 font-semibold text-bone-100 tabular">
-                {money(ev)} <span className="font-normal text-bone-400">({pct(ev / chest.price, 0)})</span>
-              </dd>
+              <dt className="text-bone-400">Item value</dt>
+              <dd className="mt-0.5 font-semibold text-bone-100 tabular">{money(ev)}</dd>
             </div>
             <div>
-              <dt className="text-bone-400">Beats the price</dt>
-              <dd className="mt-0.5 font-semibold text-bone-100 tabular">{pct(beat, 0)} of pulls</dd>
+              <dt className="text-bone-400">As cash</dt>
+              <dd className="mt-0.5 font-semibold text-bone-100 tabular">{money(ev * chest.buyback)}</dd>
+            </div>
+            <div>
+              <dt className="text-bone-400">Beats price</dt>
+              <dd className="mt-0.5 font-semibold text-bone-100 tabular">{pct(beat, 0)}</dd>
             </div>
           </dl>
           <div className="mt-4 flex items-center gap-2">
@@ -118,11 +125,12 @@ function LimitedBanner({ chest }: { chest: Chest }) {
         className="group relative grid overflow-hidden rounded-[26px] border border-[#ff6a3d]/25 bg-[radial-gradient(90%_120%_at_15%_50%,oklch(28%_0.09_35),oklch(13%_0.015_40)_70%)] p-5 sm:grid-cols-[minmax(240px,380px)_1fr] sm:gap-8 sm:p-8"
       >
         <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#ff6a3d]/10 blur-3xl" />
-        <ChestArt chest={chest} glow={1.6} className="mx-auto h-[200px] w-full max-w-[380px] transition-transform duration-500 group-hover:-translate-y-2 sm:h-[240px]" />
+        <ChestArt chest={chest} glow={1.6} className="mx-auto h-[150px] w-full max-w-[380px] transition-transform duration-500 group-hover:-translate-y-2 sm:h-[240px]" />
         <div className="relative mt-4 flex flex-col justify-center sm:mt-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-[#ff6a3d]/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#ff9a73]">Limited event</span>
             <span className="text-[12px] text-bone-300">Ends in {lim.endsInHours}h</span>
+            <span className="rounded bg-bone-100/[0.06] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-bone-400">Demo stock</span>
           </div>
           <h2 className="font-display mt-3 text-[36px] font-semibold leading-[1] text-bone-50 sm:text-[48px]">{chest.name}</h2>
           <p className="mt-2 max-w-[52ch] text-[14px] text-bone-300">{chest.tagline}</p>

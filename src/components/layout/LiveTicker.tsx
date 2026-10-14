@@ -14,7 +14,8 @@ export function LiveTicker() {
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ember-500 opacity-60" />
           <span className="relative inline-flex h-2 w-2 rounded-full bg-ember-500" />
         </span>
-        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-bone-400">Live pulls</span>
+        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-bone-400">Pulls</span>
+        <span className="rounded bg-bone-100/[0.06] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-bone-400" title="Demo feed. Pulls by other players are simulated.">Simulated</span>
       </div>
       <div className="relative flex-1 overflow-hidden [mask-image:linear-gradient(90deg,black_85%,transparent)]">
         <ul className="flex items-center gap-6 whitespace-nowrap pl-2">

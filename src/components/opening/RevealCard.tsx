@@ -107,7 +107,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
 
       <motion.div {...rise(0.68)} className="relative mt-3 grid grid-cols-[1fr_auto] items-end gap-3 border-t border-bone-100/10 pt-3 sm:mt-5 sm:pt-4">
         <div>
-          <p className="eyebrow !text-[10px]">Estimated value</p>
+          <p className="eyebrow !text-[10px]">Estimated item value</p>
           <p className="mt-1 text-[40px] font-semibold leading-none text-bone-50 sm:text-[46px]">
             <CountUp to={item.value} duration={rarity === 'common' ? 0.7 : 1.4} delay={0.75} ticks onDone={() => setCounted(true)} />
           </p>
@@ -156,7 +156,12 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
             <Button data-testid="keep" variant="primary" size="lg" className="col-span-2" onClick={onKeep}>
               Keep in vault
             </Button>
-            <Button data-testid="sell" variant="secondary" onClick={sellWithCoins} sub={`${Math.round(chest.buyback * 100)}% instant`}>
+            <Button
+              data-testid="sell"
+              variant="secondary"
+              onClick={sellWithCoins}
+              sub={trial ? `${Math.round(chest.buyback * 100)}% instant` : `${Math.round(chest.buyback * 100)}% · ${offer - chest.price >= 0 ? '+' : ''}${money(offer - chest.price)} cash`}
+            >
               Sell for {money(offer)}
             </Button>
             <Button variant="secondary" onClick={onShip} sub={trial ? 'After you claim your purse' : 'Insured courier'} disabled={trial}>

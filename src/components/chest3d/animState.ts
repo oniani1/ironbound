@@ -47,6 +47,8 @@ export class ChestAnim {
   focusY = 1.6
   focusH = 1.2
   focusW = 0.5
+  /** Landing composition: chest and a displayed piece framed together. */
+  hero = false
 
   emit(count: number, color: Color | string, speed = 1) {
     this.bursts.push({ count, color: color instanceof Color ? color.clone() : new Color(color), speed })

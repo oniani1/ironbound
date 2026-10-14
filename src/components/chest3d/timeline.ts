@@ -31,13 +31,16 @@ export function introTimeline(anim: ChestAnim, onDone: () => void, fast = false)
   anim.glow = 0.25
   anim.glowColor.set('#ffb35c')
   const tl = gsap.timeline({ onComplete: onDone })
-  tl.to(anim, { drop: 1, duration: fast ? 0.35 : 0.62, ease: 'power3.in' })
+  if (fast) anim.drop = 1
+  else tl.to(anim, { drop: 1, duration: 0.62, ease: 'power3.in' })
   tl.call(() => {
-    sfx.thud(1)
-    anim.emit(18, '#c9a27a', 0.5)
+    sfx.thud(fast ? 0.5 : 1)
+    if (!fast) anim.emit(18, '#c9a27a', 0.5)
   })
-  tl.to(anim, { shake: 0.9, duration: 0.05 })
-  tl.to(anim, { shake: 0, duration: 0.45, ease: 'power2.out' })
+  if (!fast) {
+    tl.to(anim, { shake: 0.9, duration: 0.05 })
+    tl.to(anim, { shake: 0, duration: 0.45, ease: 'power2.out' })
+  }
   return tl
 }
 
@@ -60,7 +63,7 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   const final = tell[tell.length - 1] ?? 'common'
   const tier = RARITIES[final].tier
   const steps = fast ? [final] : tell
-  const k = fast ? 0.45 : 1
+  const k = fast ? 0.28 : 1
   const shakeK = reducedMotion ? 0 : 1
   const tl = gsap.timeline()
 
@@ -102,9 +105,11 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
     tl.to(anim, { shake: 0, duration: 0.3 }, '>')
   })
 
-  // Burst.
+  // A held breath: the light draws back for a beat before the burst.
   const beamHex = RARITIES[final].hex
-  tl.addLabel('burst', `>+${(tier >= 5 ? 0.6 : 0.35) * k}`)
+  const breath = fast ? 0 : tier >= 5 ? 0.32 : 0.15
+  if (breath) tl.to(anim, { glow: 0.55, lid: 0.04, rattle: 0, duration: breath, ease: 'power2.in' }, `>+${(tier >= 5 ? 0.35 : 0.18) * k}`)
+  tl.addLabel('burst', breath ? '>' : `>+${0.1 * k}`)
   tl.call(() => {
     onPhase('burst')
     anim.beamColor.set(beamHex)
@@ -139,8 +144,8 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
     onPhase('rise')
     sfx.whoosh(0.8 + tier * 0.1)
   }, [], 'rise')
+  tl.to(anim, { frame: 1, duration: riseDur * 0.85, ease: 'power2.inOut' }, `rise-=${0.3 * k}`)
   tl.to(anim, { item: 1, duration: riseDur, ease: 'power2.out' }, 'rise')
-  tl.to(anim, { frame: 1, duration: riseDur * 1.08, ease: 'power2.inOut' }, 'rise')
   tl.to(anim, { beam: tier >= 2 ? 0.38 : 0.22, glow: 1.0, duration: 1.4 }, 'rise+=0.3')
   tl.to(anim, { itemLit: 1, duration: 0.55 * k, ease: 'power2.inOut' }, `rise+=${litAt}`)
   tl.call(() => {

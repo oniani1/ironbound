@@ -84,6 +84,7 @@ interface Props {
   /** Transparent still for card art: no background, floor, plinth or post effects. */
   render?: boolean
   itemGlow?: number
+  heroItem?: boolean
 }
 
 let webglOk: boolean | null = null
@@ -126,14 +127,13 @@ export function ChestScene(props: Props) {
   )
 }
 
-function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, plinth = true, fx = true, className, distance, frameloop = 'always', render = false, itemGlow = 1 }: Props) {
+function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, plinth = true, fx = true, className, distance, frameloop = 'always', render = false, itemGlow = 1, heroItem = false }: Props) {
   const bg = useMemo(() => cssColorToHex('--color-ink-950'), [])
   // Start sharp, drop resolution if the device cannot hold the frame rate.
   const [dpr, setDpr] = useState(() => Math.min(typeof window === 'undefined' ? 1 : window.devicePixelRatio, 1.75))
   return (
     <Canvas
       className={className}
-      shadows
       frameloop={frameloop}
       dpr={render ? 1 : dpr}
       gl={render ? { antialias: true, alpha: true, preserveDrawingBuffer: true, toneMapping: THREE.ACESFilmicToneMapping } : { antialias: false, powerPreference: 'high-performance', toneMapping: THREE.NoToneMapping }}
@@ -152,7 +152,7 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
       </Suspense>
       {item && (
         <Suspense fallback={null}>
-          <ItemRise key={item.id} item={item} anim={anim} color={rarityHex} glow={itemGlow} />
+          <ItemRise key={item.id} item={item} anim={anim} color={rarityHex} glow={itemGlow} hero={heroItem} />
         </Suspense>
       )}
       {!render && <CameraRig anim={anim} parallax={parallax} distance={distance} />}

@@ -12,7 +12,7 @@ export function DemoPanel() {
   const [open, setOpen] = useState(false)
   const force = useStore((s) => s.settings.force)
   return (
-    <div className="fixed bottom-[calc(72px+env(safe-area-inset-bottom))] right-3 z-[35] flex flex-col items-end md:bottom-4 md:left-4 md:right-auto md:items-start">
+    <div className="fixed bottom-[calc(136px+env(safe-area-inset-bottom))] right-3 z-[35] flex flex-col items-end md:bottom-4 md:left-4 md:right-auto md:items-start">
       <AnimatePresence>
         {open && (
           <motion.div

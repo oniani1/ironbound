@@ -49,10 +49,17 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     const revealDist = Math.max(sheet ? 2.6 : 2.9, need)
     const halfH = revealDist * tanHalf
     const revealLook = sheet ? anim.focusY - halfH * 0.44 : anim.focusY
-    const dist = baseDist - dolly * 0.55 + frame * (revealDist - baseDist)
-    const lookY = 0.45 - dolly * 0.03 + frame * (revealLook - 0.45)
-    const height = 1.05 - dolly * 0.12 + frame * (revealLook + 0.25 - 1.05)
+    let dist = baseDist - dolly * 0.55 + frame * (revealDist - baseDist)
+    let lookY = 0.45 - dolly * 0.03 + frame * (revealLook - 0.45)
+    let height = 1.05 - dolly * 0.12 + frame * (revealLook + 0.25 - 1.05)
     const offsetX = wide && !sheet ? frame * Math.min(0.75, halfH * aspect * 0.42) : 0
+    if (anim.hero) {
+      // Chest and displayed piece framed together, from the plinth to the tip of the blade.
+      const top = anim.focusY + anim.focusH / 2
+      lookY = top / 2 + 0.02
+      dist = Math.max(baseDist, (top / 2 + 0.32) / tanHalf, (0.75 + 0.1) / (tanHalf * aspect))
+      height = lookY + 0.42
+    }
     const px = parallax ? pointer.x * 0.25 : 0
     const py = parallax ? pointer.y * 0.12 : 0
     const driftX = Math.sin(t * 0.37) * 0.025 + Math.sin(t * 0.91) * 0.01

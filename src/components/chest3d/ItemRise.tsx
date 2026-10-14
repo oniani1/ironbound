@@ -11,6 +11,8 @@ interface Props {
   color: string
   /** Halo strength, scaled by rarity by the caller. */
   glow?: number
+  /** Landing display: smaller, resting just above the open chest. */
+  hero?: boolean
 }
 
 /** Size of the item plane in world units, normalized by shape so a dagger and a pike both read well. */
@@ -21,7 +23,7 @@ export function itemPlaneSize(aspect: number) {
 
 const VERT = /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`
 
-export function ItemRise({ item, anim, color, glow = 1 }: Props) {
+export function ItemRise({ item, anim, color, glow = 1, hero = false }: Props) {
   const tex = useTexture(item.image)
   const group = useRef<THREE.Group>(null)
   const halo = useRef<THREE.Mesh>(null)
@@ -104,14 +106,15 @@ export function ItemRise({ item, anim, color, glow = 1 }: Props) {
     g.visible = p > 0.001
     const eased = 1 - Math.pow(1 - p, 3)
     const floatY = Math.sin(t * 1.4) * 0.025 * p
-    const restY = 0.32 + 0.62 + size.uprightH * 0.5
+    const s = hero ? 0.62 : 1
+    const restY = hero ? 0.62 + size.uprightH * s * 0.5 : 0.32 + 0.62 + size.uprightH * 0.5
     g.position.y = 0.32 + eased * (restY - 0.32) + floatY
     g.rotation.y = Math.sin(t * 0.6) * 0.2 * p
-    g.scale.setScalar(0.55 + eased * 0.45)
+    g.scale.setScalar((0.55 + eased * 0.45) * s)
     // Tell the camera where the item will rest so it can frame it whole.
     anim.focusY = restY
-    anim.focusH = size.uprightH
-    anim.focusW = size.w
+    anim.focusH = size.uprightH * s
+    anim.focusW = size.w * s
     itemMat.uniforms.uLit!.value = anim.itemLit
     itemMat.uniforms.uGlint!.value = anim.glint
     itemMat.uniforms.uOpacity!.value = Math.min(1, p * 3)

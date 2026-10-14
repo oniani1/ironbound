@@ -45,6 +45,40 @@ function Torch({ position, phase, anim }: { position: [number, number, number]; 
   return <pointLight ref={light} position={position} color="#ff9b4a" distance={7} decay={1.6} />
 }
 
+/** Worn round dais with bevelled edges and an engraved ring that catches the chest's light. */
+function Plinth({ stone, anim }: { stone: THREE.Texture; anim: ChestAnim }) {
+  const geometry = useMemo(() => {
+    const p = (r: number, y: number) => new THREE.Vector2(r, y)
+    const profile = [
+      p(0, -0.36), p(0.98, -0.36), p(1.0, -0.345), p(1.0, -0.11), p(0.985, -0.095), p(0.95, -0.09),
+      p(0.95, -0.05), p(0.935, -0.035), p(0.92, -0.03), p(0.92, -0.012), p(0.905, 0), p(0, 0),
+    ]
+    const g = new THREE.LatheGeometry(profile, 72)
+    g.computeVertexNormals()
+    return g
+  }, [])
+  const ring = useRef<THREE.Mesh>(null)
+  const ringMat = useMemo(() => new THREE.MeshBasicMaterial({ transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }), [])
+  useFrame((state) => {
+    const t = state.clock.elapsedTime
+    ringMat.color.copy(anim.glowColor).multiplyScalar(0.25 + Math.min(anim.glow, 2) * 0.45 + anim.beam * 0.6)
+    ringMat.opacity = 0.18 + anim.glow * 0.12 + anim.beam * 0.35 + Math.sin(t * 1.6) * 0.03
+  })
+  return (
+    <group>
+      <mesh geometry={geometry} receiveShadow>
+        <meshStandardMaterial map={stone} color="#4c443d" roughness={0.96} metalness={0} />
+      </mesh>
+      <mesh ref={ring} position={[0, 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]} material={ringMat}>
+        <ringGeometry args={[0.78, 0.8, 96]} />
+      </mesh>
+      <mesh position={[0, 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]} material={ringMat}>
+        <ringGeometry args={[0.84, 0.845, 96]} />
+      </mesh>
+    </group>
+  )
+}
+
 export function Stage({ anim, plinth = true, floor = true }: { anim: ChestAnim; plinth?: boolean; floor?: boolean }) {
   const stone = useStoneTexture()
   const floorUniforms = useMemo(() => ({ uColor: { value: new THREE.Color('#1a1410') } }), [])
@@ -60,9 +94,6 @@ export function Stage({ anim, plinth = true, floor = true }: { anim: ChestAnim; 
         distance={12}
         decay={1.6}
         color="#ffd6a3"
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0004}
       />
       {/* Cool rim from behind to separate the silhouette from the dark. */}
       <spotLight position={[-2.2, 2.6, -2.8]} angle={0.5} penumbra={1} intensity={16} distance={10} color="#9fb4ff" />
@@ -75,18 +106,7 @@ export function Stage({ anim, plinth = true, floor = true }: { anim: ChestAnim; 
         <Lightformer form="rect" intensity={0.5} color="#8fa6ff" position={[4, 1.5, -2]} rotation-y={-Math.PI / 2} scale={[3, 2, 1]} />
         <Lightformer form="ring" intensity={0.8} color="#ffe2b8" position={[0, 2, 4]} scale={1.5} />
       </Environment>
-      {plinth && (
-        <group position={[0, -0.36, 0]}>
-          <mesh receiveShadow castShadow position={[0, 0.165, 0]}>
-            <cylinderGeometry args={[0.86, 0.94, 0.33, 8, 1]} />
-            <meshStandardMaterial map={stone} color="#5f574f" roughness={0.95} metalness={0} />
-          </mesh>
-          <mesh receiveShadow position={[0, 0.345, 0]}>
-            <cylinderGeometry args={[0.8, 0.86, 0.03, 8, 1]} />
-            <meshStandardMaterial map={stone} color="#6f655b" roughness={0.9} metalness={0} />
-          </mesh>
-        </group>
-      )}
+      {plinth && <Plinth stone={stone} anim={anim} />}
       {/* Floor fades into darkness with a radial falloff. */}
       {floor && (
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, plinth ? -0.36 : 0, 0]} receiveShadow>
@@ -105,7 +125,7 @@ export function Stage({ anim, plinth = true, floor = true }: { anim: ChestAnim; 
         />
       </mesh>
       )}
-      <ContactShadows position={[0, 0.002, 0]} opacity={0.75} scale={2.6} blur={2.4} far={1.2} resolution={512} color="#000000" />
+      <ContactShadows position={[0, 0.002, 0]} opacity={0.62} scale={2.4} blur={3.2} far={1} resolution={512} color="#000000" />
     </>
   )
 }

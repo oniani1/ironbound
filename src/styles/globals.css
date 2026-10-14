@@ -2,10 +2,10 @@
 
 @theme {
   /* Warm iron-black neutrals, tinted toward ember (hue ~55). */
-  --color-ink-950: oklch(11.5% 0.010 55);
-  --color-ink-900: oklch(14.5% 0.012 55);
-  --color-ink-850: oklch(17% 0.013 55);
-  --color-ink-800: oklch(20% 0.014 55);
+  --color-ink-950: oklch(13.2% 0.012 60);
+  --color-ink-900: oklch(16% 0.013 58);
+  --color-ink-850: oklch(18.5% 0.014 57);
+  --color-ink-800: oklch(21.5% 0.015 56);
   --color-ink-700: oklch(26% 0.016 58);
   --color-ink-600: oklch(33% 0.017 60);
   --color-ink-500: oklch(44% 0.018 62);

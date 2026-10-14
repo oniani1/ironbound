@@ -30,47 +30,62 @@ export default function Landing() {
 function Hero() {
   const anim = useMemo(() => {
     const a = new ChestAnim()
-    a.glow = 0.9
-    a.lid = 0.05
+    a.hero = true
+    a.idle = 0
+    a.glow = 1.05
+    a.lid = 0.74
+    a.item = 1
+    a.itemLit = 1
+    a.beam = 0.3
     a.glowColor.set('#ffc46e')
+    a.beamColor.set('#ffc46e')
     return a
   }, [])
+  const featured = useMemo(() => ITEMS.find((i) => i.id === 'knightly-longsword-27458') ?? ITEMS.find((i) => i.category === 'sword' && i.value > 40000) ?? ITEMS[ITEMS.length - 1]!, [])
   const { start } = useOnboarding()
   const signedIn = useStore((s) => s.signedIn)
   const theme = CHEST_BY_ID.king!.theme
   const teaseTimer = useRef(0)
-  const isPhone = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
 
   // Every few seconds the chest strains against its lock, as if something inside wants out.
   useEffect(() => {
     const tease = () => {
-      gsap
-        .timeline()
-        .to(anim, { rattle: 0.4, lid: 0.12, glow: 1.6, duration: 0.16, ease: 'power2.out' })
-        .to(anim, { rattle: 0, lid: 0.05, glow: 0.9, duration: 1.1, ease: 'power3.out' })
-      anim.emit(22, '#ffc46e', 0.7)
-      teaseTimer.current = window.setTimeout(tease, 5200 + Math.random() * 3500)
+      // A slow glint runs down the steel, and the chest exhales a few embers.
+      gsap.fromTo(anim, { glint: 0 }, { glint: 1, duration: 1.1, ease: 'power2.inOut', onComplete: () => void (anim.glint = -1) })
+      gsap.timeline().to(anim, { glow: 1.5, duration: 0.3, ease: 'power2.out' }).to(anim, { glow: 1.05, duration: 1.2, ease: 'power2.out' })
+      anim.emit(16, '#ffc46e', 0.6)
+      teaseTimer.current = window.setTimeout(tease, 4800 + Math.random() * 3000)
     }
     teaseTimer.current = window.setTimeout(tease, 2400)
     return () => window.clearTimeout(teaseTimer.current)
   }, [anim])
 
   const hover = (on: boolean) => {
-    gsap.to(anim, { glow: on ? 1.4 : 0.9, lid: on ? 0.09 : 0.05, rattle: on ? 0.12 : 0, duration: 0.5, ease: 'power2.out' })
+    gsap.to(anim, { glow: on ? 1.45 : 1.05, beam: on ? 0.42 : 0.3, duration: 0.5, ease: 'power2.out' })
     if (on) sfx.rattle(0.2)
   }
 
   return (
     <section className="relative -mt-[calc(var(--header-h)+var(--ticker-h))] min-h-[100svh] overflow-hidden">
       <div
-        className="absolute inset-x-0 bottom-0 top-[46%] [mask-image:linear-gradient(180deg,transparent,black_18%,black_72%,transparent)] md:inset-0 md:left-[30%] md:[mask-image:linear-gradient(180deg,black_70%,transparent)]"
+        className="absolute inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] top-[40%] [mask-image:linear-gradient(180deg,transparent,black_14%,black_80%,transparent)] md:inset-0 md:left-[30%] md:[mask-image:linear-gradient(180deg,black_70%,transparent)]"
         onPointerEnter={() => hover(true)}
         onPointerLeave={() => hover(false)}
       >
-        <ChestScene theme={theme} anim={anim} parallax distance={isPhone ? 0.62 : 0.86} className="!absolute inset-0" />
+        <ChestScene theme={theme} anim={anim} item={featured} heroItem rarityHex="#ffc94d" itemGlow={0.6} parallax className="!absolute inset-0" />
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.4, ease }}
+          className="pointer-events-none absolute bottom-[12%] left-1/2 hidden -translate-x-1/2 items-center gap-3 rounded-full border border-bone-100/10 bg-ink-950/70 py-1.5 pl-2 pr-4 backdrop-blur md:flex"
+        >
+          <span className="rounded-full bg-[color-mix(in_oklch,var(--r-legendary)_16%,transparent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--r-legendary)]">Legendary</span>
+          <span className="font-display text-[16px] text-bone-50">{featured.name}</span>
+          <span className="text-[13px] font-semibold text-bone-200 tabular">{money(featured.value)}</span>
+        </motion.div>
       </div>
       <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(90deg,var(--color-ink-950)_8%,transparent_55%)] md:block" />
-      <div className="pointer-events-none relative mx-auto flex min-h-[100svh] max-w-[1400px] flex-col px-4 pb-[52svh] pt-[calc(var(--header-h)+var(--ticker-h)+1.75rem)] sm:px-6 md:justify-center md:pb-24 md:pt-[calc(var(--header-h)+var(--ticker-h)+2.5rem)]">
+      <div className="pointer-events-none relative mx-auto flex min-h-[100svh] max-w-[1400px] flex-col px-4 pb-[58svh] pt-[calc(var(--header-h)+var(--ticker-h)+1.75rem)] sm:px-6 md:justify-center md:pb-24 md:pt-[calc(var(--header-h)+var(--ticker-h)+2.5rem)]">
         <div className="pointer-events-auto max-w-[620px]">
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2, ease }} className="eyebrow">
             Real arms and armor, sealed in iron
