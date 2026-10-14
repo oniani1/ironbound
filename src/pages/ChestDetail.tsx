@@ -259,7 +259,7 @@ export default function ChestDetail() {
             </li>
             <li>
               <span className="font-display text-[22px] text-brass-300">II.</span>
-              <p className="mt-1">Each draw uses verifiable randomness and leaves a receipt you can check on chain.</p>
+              <p className="mt-1">Each draw uses verifiable randomness and leaves a receipt. In this demo the receipts are simulated.</p>
             </li>
             <li>
               <span className="font-display text-[22px] text-brass-300">III.</span>

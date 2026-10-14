@@ -69,9 +69,12 @@ function ChestCard({ chest, index }: { chest: Chest; index: number }) {
             Sell back <span className="text-bone-200">{Math.round(chest.buyback * 100)}%</span>
           </p>
         </div>
-        <ChestArt chest={chest} className="mx-auto mt-2 h-[170px] w-full transition-transform duration-500 ease-out group-hover:-translate-y-2 group-hover:scale-[1.04]" />
+        <ChestArt chest={chest} className="mx-auto mt-2 h-[130px] w-full transition-transform duration-500 ease-out group-hover:-translate-y-2 group-hover:scale-[1.04] sm:h-[170px]" />
         <div className="mt-auto">
-          <h2 className="font-display text-[30px] font-semibold leading-tight text-bone-50">{chest.name}</h2>
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="font-display text-[30px] font-semibold leading-tight text-bone-50">{chest.name}</h2>
+            <span className="text-[22px] font-bold text-brass-300 tabular sm:hidden">{money(chest.price)}</span>
+          </div>
           <p className="mt-1 line-clamp-2 text-[13px] text-bone-300">{chest.tagline}</p>
           <div className="mt-4">
             <OddsBar chest={chest} />

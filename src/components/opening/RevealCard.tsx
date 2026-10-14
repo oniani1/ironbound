@@ -140,7 +140,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
       <motion.div {...rise(0.5)} className="relative hidden sm:block">
         <ScaleBar length={item.length} color={r.cssVar} delay={0.9} label={['helmet', 'armor', 'shield'].includes(item.category) ? 'Height' : 'Length'} />
       </motion.div>
-      <motion.p {...rise(0.56)} className="font-display relative mt-3 line-clamp-2 text-[15px] italic leading-snug text-bone-300 sm:line-clamp-3 sm:text-[16px]">
+      <motion.p {...rise(0.56)} className="font-display relative mt-3 hidden text-[16px] italic leading-snug text-bone-300 sm:line-clamp-3">
         {item.blurb}
       </motion.p>
 
@@ -187,7 +187,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
       {draw && (
         <motion.p {...rise(0.77)} className="relative mt-3 flex items-center justify-center gap-1.5 text-[10px] text-bone-400" title={`Draw ${draw}`}>
           <span className="block h-1 w-1 rounded-full bg-moss-400" />
-          Draw 0x{draw.slice(0, 6)}…{draw.slice(-4)} · verifiable on Solana (demo)
+          Draw receipt 0x{draw.slice(0, 6)}…{draw.slice(-4)} · simulated in this demo
         </motion.p>
       )}
       {coins && <CoinBurst from={coins.from} to={coins.to} onDone={() => setCoins(null)} />}

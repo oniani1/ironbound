@@ -42,13 +42,13 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     const sheet = size.width < 768
     const tanHalf = Math.tan(((fov * Math.PI) / 180) / 2)
     // Phones: free band between the top bar (about 11%) and the sheet (about 45%).
-    const needH = sheet ? (anim.focusH + 0.1) / (0.62 * tanHalf) : (anim.focusH * 0.78 + 0.16) / tanHalf
+    const needH = sheet ? (anim.focusH + 0.1) / (0.56 * tanHalf) : (anim.focusH * 0.78 + 0.16) / tanHalf
     // Wide pieces must also fit across: the full width on phones, the left 55% beside the card.
     const needW = (anim.focusW * 0.5 + 0.12) / (tanHalf * aspect * (sheet ? 0.92 : 0.55))
     const need = Math.max(needH, needW)
     const revealDist = Math.max(sheet ? 2.6 : 2.9, need)
     const halfH = revealDist * tanHalf
-    const revealLook = sheet ? anim.focusY - halfH * 0.44 : anim.focusY
+    const revealLook = sheet ? anim.focusY - halfH * 0.49 : anim.focusY
     let dist = baseDist - dolly * 0.55 + frame * (revealDist - baseDist)
     let lookY = 0.45 - dolly * 0.03 + frame * (revealLook - 0.45)
     let height = 1.05 - dolly * 0.12 + frame * (revealLook + 0.25 - 1.05)
