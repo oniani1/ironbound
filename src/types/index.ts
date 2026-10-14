@@ -18,10 +18,10 @@ export interface Item {
   value: number
   blurb: string
   image: string
+  /** Small version for grids and lists. */
+  thumb?: string
   /** Natural aspect ratio of the cut-out image (width / height). */
   aspect: number
-  /** Degrees to rotate the photo so blades point up in the loot beam (0, 90, -90, 180). */
-  rotate?: number
   credit: string
   sourceUrl: string
 }
@@ -34,8 +34,14 @@ export interface ChestBand {
 }
 
 export interface ChestTheme {
-  /** Multiplies the wood albedo. */
+  /** Multiplies the wood albedo after desaturation. */
   wood: string
+  /** Wood saturation (0 grey, 1 original). */
+  woodSat?: number
+  /** Wood brightness multiplier. */
+  woodGain?: number
+  /** Wood roughness multiplier; low values read as lacquer. */
+  woodRough?: number
   /** Tint for the iron straps and fittings. */
   metal: string
   metalness: number
@@ -55,6 +61,8 @@ export interface Chest {
   limited?: { total: number; remaining: number; endsInHours: number }
   tagline: string
   hidden?: boolean
+  /** Restricts the pool, e.g. Japanese arms only for the Shōgun box. */
+  filter?: (item: Item) => boolean
 }
 
 export type PullStatus = 'vaulted' | 'sold' | 'shipping' | 'shipped'

@@ -1,0 +1,155 @@
+import { useEffect, useMemo, useRef } from 'react'
+import { Link } from 'react-router-dom'
+import { motion } from 'motion/react'
+import gsap from 'gsap'
+import { ChestScene } from '../components/chest3d/ChestScene'
+import { ChestAnim } from '../components/chest3d/animState'
+import { CHEST_BY_ID } from '../config/chests'
+import { ITEMS } from '../data/items'
+import { money } from '../lib/format'
+import { sfx } from '../lib/audio'
+import { useStore } from '../lib/store'
+import { Button } from '../components/ui/Button'
+import { useOnboarding } from '../components/onboarding/OnboardingContext'
+import { LandingSections } from '../components/landing/sections'
+import { ItemImg } from '../components/ui/ItemImg'
+
+const ease = [0.16, 1, 0.3, 1] as const
+
+export default function Landing() {
+  return (
+    <>
+      <Hero />
+      <Showcase />
+      <LandingSections />
+    </>
+  )
+}
+
+function Hero() {
+  const anim = useMemo(() => {
+    const a = new ChestAnim()
+    a.glow = 0.9
+    a.lid = 0.05
+    a.glowColor.set('#ffc46e')
+    return a
+  }, [])
+  const { start } = useOnboarding()
+  const signedIn = useStore((s) => s.signedIn)
+  const theme = CHEST_BY_ID.king!.theme
+  const teaseTimer = useRef(0)
+
+  // Every few seconds the chest strains against its lock, as if something inside wants out.
+  useEffect(() => {
+    const tease = () => {
+      gsap
+        .timeline()
+        .to(anim, { rattle: 0.4, lid: 0.12, glow: 1.6, duration: 0.16, ease: 'power2.out' })
+        .to(anim, { rattle: 0, lid: 0.05, glow: 0.9, duration: 1.1, ease: 'power3.out' })
+      anim.emit(22, '#ffc46e', 0.7)
+      teaseTimer.current = window.setTimeout(tease, 5200 + Math.random() * 3500)
+    }
+    teaseTimer.current = window.setTimeout(tease, 2400)
+    return () => window.clearTimeout(teaseTimer.current)
+  }, [anim])
+
+  const hover = (on: boolean) => {
+    gsap.to(anim, { glow: on ? 1.4 : 0.9, lid: on ? 0.09 : 0.05, rattle: on ? 0.12 : 0, duration: 0.5, ease: 'power2.out' })
+    if (on) sfx.rattle(0.2)
+  }
+
+  return (
+    <section className="relative -mt-[calc(var(--header-h)+var(--ticker-h))] min-h-[100svh] overflow-hidden">
+      <div
+        className="absolute inset-0 [mask-image:linear-gradient(180deg,black_70%,transparent)] md:left-[30%]"
+        onPointerEnter={() => hover(true)}
+        onPointerLeave={() => hover(false)}
+      >
+        <ChestScene theme={theme} anim={anim} parallax distance={0.86} className="!absolute inset-0" />
+      </div>
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,var(--color-ink-950)_8%,transparent_55%)] max-md:bg-[linear-gradient(180deg,var(--color-ink-950)_18%,transparent_55%)]" />
+      <div className="pointer-events-none relative mx-auto flex min-h-[100svh] max-w-[1400px] flex-col px-4 pb-16 pt-[calc(var(--header-h)+var(--ticker-h)+2.5rem)] sm:px-6 md:justify-center md:pb-24">
+        <div className="pointer-events-auto max-w-[620px]">
+          <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2, ease }} className="eyebrow">
+            Real arms and armor, sealed in iron
+          </motion.p>
+          <h1 className="font-display mt-4 text-[52px] font-semibold leading-[0.92] text-bone-50 sm:text-[84px] lg:text-[100px]">
+            {['Open the chest.', 'Keep the steel.'].map((line, i) => (
+              <motion.span
+                key={line}
+                className="block"
+                initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                transition={{ duration: 0.9, delay: 0.3 + i * 0.15, ease }}
+              >
+                {i === 1 ? <em className="font-medium text-brass-300">{line}</em> : line}
+              </motion.span>
+            ))}
+          </h1>
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.65, ease }} className="mt-6 max-w-[50ch] text-[16px] leading-relaxed text-bone-300 sm:text-[17px]">
+            Every chest holds one real piece of history, from a $20 crossbow bolt to a Gothic armor worth over a million. Authenticated, vaulted and insured. Keep it, ship it home, or sell it back in one tap.
+          </motion.p>
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8, ease }} className="mt-8 flex flex-wrap items-center gap-3">
+            {signedIn ? (
+              <Link to="/chests">
+                <Button size="lg" tabIndex={-1}>
+                  Choose a chest
+                </Button>
+              </Link>
+            ) : (
+              <Button size="lg" onClick={() => start()} data-testid="hero-cta">
+                Open a free chest
+              </Button>
+            )}
+            <Link to="/chests" className="rounded-[14px] px-5 py-4 text-[15px] font-medium text-bone-200 transition-colors hover:bg-bone-100/[0.06] hover:text-bone-50">
+              See the chests →
+            </Link>
+          </motion.div>
+          <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.1 }} className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-[12px] text-bone-400">
+            <li>Odds printed on every chest</li>
+            <li>85 to 92% instant sell-back</li>
+            <li>Insured shipping to your door</li>
+          </motion.ul>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/** A slow river of real items, cheapest to dearest, so the range is felt before it is read. */
+function Showcase() {
+  const items = useMemo(() => [...ITEMS].sort((a, b) => a.value - b.value), [])
+  const loop = [...items, ...items]
+  return (
+    <section className="relative border-y border-bone-100/[0.06] bg-ink-950 py-10" aria-label="Items in the chests">
+      <div className="mx-auto mb-6 flex max-w-[1400px] items-end justify-between px-4 sm:px-6">
+        <div>
+          <p className="eyebrow">In the chests right now</p>
+          <p className="font-display mt-1 text-[28px] font-semibold text-bone-50 sm:text-[34px]">
+            From {money(items[0]?.value ?? 0)} to {money(items[items.length - 1]?.value ?? 0, { compact: true })}
+          </p>
+        </div>
+        <Link to="/chests" className="hidden text-[13px] text-bone-300 hover:text-bone-50 sm:block">
+          Browse every item →
+        </Link>
+      </div>
+      <div className="group relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
+        <div className="flex w-max animate-marquee gap-4 group-hover:[animation-play-state:paused]">
+          {loop.map((it, i) => (
+            <div key={`${it.id}-${i}`} className="w-[180px] shrink-0 rounded-[18px] border border-bone-100/[0.06] bg-ink-900/70 p-3 sm:w-[210px]">
+              <div className="relative aspect-[4/5]">
+                <div className="absolute inset-x-[20%] bottom-[4%] h-[24%] rounded-[50%] bg-brass-500/20 blur-xl" />
+                <ItemImg item={it} alt={it.name} className="relative h-full w-full" />
+              </div>
+              <p className="font-display mt-2 line-clamp-1 text-[16px] font-semibold text-bone-50">{it.name}</p>
+              <p className="flex justify-between text-[12px] text-bone-400">
+                <span className="truncate pr-2">{it.era}</span>
+                <span className="font-semibold text-bone-200 tabular">{money(it.value, { compact: true })}</span>
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}

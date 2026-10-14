@@ -10,7 +10,7 @@ export const CHESTS: Chest[] = [
     tagline: 'Arrowheads, spurs and camp blades, with a long shot at a knight’s sword.',
     price: 50,
     buyback: 0.85,
-    theme: { wood: '#b49880', metal: '#7d838a', metalness: 0.85, roughness: 0.9, glow: '#ffb35c' },
+    theme: { wood: '#e6d2bc', woodSat: 0.45, woodGain: 1.45, metal: '#8d9298', metalness: 0.8, roughness: 1, glow: '#ffb35c' },
     bands: [
       B('common', 0.775, 14, 45),
       B('uncommon', 0.165, 45, 100),
@@ -27,7 +27,7 @@ export const CHESTS: Chest[] = [
     tagline: 'Daggers, axes and sword guards, and a real chance at a blade worth thousands.',
     price: 100,
     buyback: 0.88,
-    theme: { wood: '#9a7a62', metal: '#b9c0c8', metalness: 0.95, roughness: 0.7, glow: '#ffcf8a' },
+    theme: { wood: '#d2a478', woodSat: 0.85, woodGain: 1.25, metal: '#e4e9ef', metalness: 0.95, roughness: 0.55, glow: '#ffcf8a' },
     bands: [
       B('common', 0.72, 30, 90),
       B('uncommon', 0.19, 90, 220),
@@ -44,8 +44,9 @@ export const CHESTS: Chest[] = [
     tagline: 'Sword guards, tantō, katana and kabuto from Japan. 500 boxes only.',
     price: 250,
     buyback: 0.9,
-    theme: { wood: '#5a2a24', metal: '#d8ad55', metalness: 1, roughness: 0.55, glow: '#ff6a3d' },
+    theme: { wood: '#5a1c16', woodSat: 0.6, woodGain: 0.6, woodRough: 0.3, metal: '#f0c066', metalness: 1, roughness: 0.42, glow: '#ff6a3d' },
     limited: { total: 500, remaining: 137, endsInHours: 41 },
+    filter: (item) => item.origin.toLowerCase().includes('japan'),
     bands: [
       B('common', 0.66, 80, 230),
       B('uncommon', 0.22, 230, 480),
@@ -62,7 +63,7 @@ export const CHESTS: Chest[] = [
     tagline: 'Rapiers, sabres, helmets and shields. Every pull is a wall piece.',
     price: 1000,
     buyback: 0.9,
-    theme: { wood: '#4a403a', metal: '#c99a52', metalness: 1, roughness: 0.5, glow: '#ffb347' },
+    theme: { wood: '#4a4038', woodSat: 0.25, woodGain: 0.75, woodRough: 0.85, metal: '#d4924a', metalness: 1, roughness: 0.5, glow: '#ffb347' },
     bands: [
       B('common', 0.64, 380, 950),
       B('uncommon', 0.235, 950, 1900),
@@ -79,7 +80,7 @@ export const CHESTS: Chest[] = [
     tagline: 'Armor, helmets and swords fit for a royal armory. Grails up to $1.2M.',
     price: 5000,
     buyback: 0.92,
-    theme: { wood: '#6e3a35', metal: '#ffd27a', metalness: 1, roughness: 0.38, glow: '#ffe1a3' },
+    theme: { wood: '#b8323a', woodSat: 1.15, woodGain: 0.95, woodRough: 0.6, metal: '#ffd884', metalness: 1, roughness: 0.32, glow: '#ffe1a3' },
     bands: [
       B('common', 0.6, 1800, 4800),
       B('uncommon', 0.25, 4800, 9000),
@@ -97,10 +98,13 @@ export const CHESTS: Chest[] = [
     price: 0,
     buyback: 0.9,
     hidden: true,
-    theme: { wood: '#a77f5d', metal: '#8b9096', metalness: 0.9, roughness: 0.8, glow: '#ffb35c' },
+    theme: { wood: '#e0c6a6', woodSat: 0.6, woodGain: 1.4, metal: '#caa463', metalness: 0.95, roughness: 0.6, glow: '#ffb35c' },
     bands: [B('rare', 1, 150, 900)],
   },
 ]
+
+/** The item every new player receives from the trial chest. */
+export const TRIAL_ITEM_ID = 'fencing-feder-27910'
 
 export const CHEST_BY_ID = Object.fromEntries(CHESTS.map((c) => [c.id, c])) as Record<string, Chest>
 

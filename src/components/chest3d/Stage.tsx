@@ -45,7 +45,7 @@ function Torch({ position, phase, anim }: { position: [number, number, number]; 
   return <pointLight ref={light} position={position} color="#ff9b4a" distance={7} decay={1.6} />
 }
 
-export function Stage({ anim, plinth = true }: { anim: ChestAnim; plinth?: boolean }) {
+export function Stage({ anim, plinth = true, floor = true }: { anim: ChestAnim; plinth?: boolean; floor?: boolean }) {
   const stone = useStoneTexture()
   const floorUniforms = useMemo(() => ({ uColor: { value: new THREE.Color('#1a1410') } }), [])
   return (
@@ -68,8 +68,9 @@ export function Stage({ anim, plinth = true }: { anim: ChestAnim; plinth?: boole
       <spotLight position={[-2.2, 2.6, -2.8]} angle={0.5} penumbra={1} intensity={16} distance={10} color="#9fb4ff" />
       <Torch position={[-2.4, 1.6, -1.2]} phase={0} anim={anim} />
       <Torch position={[2.5, 1.5, -1.4]} phase={2.1} anim={anim} />
-      <Environment resolution={128} frames={1}>
+      <Environment resolution={128} frames={1} environmentIntensity={1.35}>
         <Lightformer form="rect" intensity={1.6} color="#ffcf99" position={[0, 4, 2]} scale={[4, 2, 1]} />
+        <Lightformer form="rect" intensity={0.9} color="#ffe6c4" position={[0.5, 1.6, 4]} scale={[6, 2.5, 1]} />
         <Lightformer form="rect" intensity={0.6} color="#ff8a3d" position={[-4, 1, 0]} rotation-y={Math.PI / 2} scale={[3, 2, 1]} />
         <Lightformer form="rect" intensity={0.5} color="#8fa6ff" position={[4, 1.5, -2]} rotation-y={-Math.PI / 2} scale={[3, 2, 1]} />
         <Lightformer form="ring" intensity={0.8} color="#ffe2b8" position={[0, 2, 4]} scale={1.5} />
@@ -87,6 +88,7 @@ export function Stage({ anim, plinth = true }: { anim: ChestAnim; plinth?: boole
         </group>
       )}
       {/* Floor fades into darkness with a radial falloff. */}
+      {floor && (
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, plinth ? -0.36 : 0, 0]} receiveShadow>
         <circleGeometry args={[9, 64]} />
         <shaderMaterial
@@ -102,6 +104,7 @@ export function Stage({ anim, plinth = true }: { anim: ChestAnim; plinth?: boole
             }`}
         />
       </mesh>
+      )}
       <ContactShadows position={[0, 0.002, 0]} opacity={0.75} scale={2.6} blur={2.4} far={1.2} resolution={512} color="#000000" />
     </>
   )

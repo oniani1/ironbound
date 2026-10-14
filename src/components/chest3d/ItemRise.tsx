@@ -12,13 +12,9 @@ interface Props {
 }
 
 /** Size of the item plane in world units, normalized by shape so a dagger and a pike both read well. */
-export function itemPlaneSize(aspect: number, rot: number) {
-  const sideways = Math.abs(rot) === 90
-  const upright = sideways ? 1 / aspect : aspect
-  const h = upright < 0.35 ? 1.55 : upright < 0.7 ? 1.25 : upright < 1.4 ? 0.95 : 0.8
-  const w = h * upright
-  // Plane is built in the photo's own orientation, then rotated.
-  return sideways ? { w: h, h: w, uprightH: h } : { w, h, uprightH: h }
+export function itemPlaneSize(aspect: number) {
+  const h = aspect < 0.35 ? 1.55 : aspect < 0.7 ? 1.25 : aspect < 1.4 ? 0.95 : 0.8
+  return { w: h * aspect, h, uprightH: h }
 }
 
 const VERT = /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`
@@ -27,8 +23,7 @@ export function ItemRise({ item, anim, color }: Props) {
   const tex = useTexture(item.image)
   const group = useRef<THREE.Group>(null)
   const halo = useRef<THREE.Mesh>(null)
-  const rot = item.rotate ?? 0
-  const size = useMemo(() => itemPlaneSize(item.aspect, rot), [item.aspect, rot])
+  const size = useMemo(() => itemPlaneSize(item.aspect), [item.aspect])
 
   const itemMat = useMemo(() => {
     tex.colorSpace = THREE.SRGBColorSpace
@@ -123,7 +118,7 @@ export function ItemRise({ item, anim, color }: Props) {
       <mesh ref={halo} position={[0, 0, -0.06]} renderOrder={8} material={haloMat}>
         <planeGeometry args={[haloSize, haloSize]} />
       </mesh>
-      <mesh rotation={[0, 0, (rot * Math.PI) / 180]} renderOrder={12} material={itemMat}>
+      <mesh renderOrder={12} material={itemMat}>
         <planeGeometry args={[size.w, size.h]} />
       </mesh>
     </group>

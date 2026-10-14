@@ -20,6 +20,9 @@ function themedMaterial(base: THREE.MeshStandardMaterial, theme: ChestTheme, key
   const m = base.clone()
   const uniforms = {
     uWood: { value: new THREE.Color(theme.wood) },
+    uWoodSat: { value: theme.woodSat ?? 0.8 },
+    uWoodGain: { value: theme.woodGain ?? 1.2 },
+    uWoodRough: { value: theme.woodRough ?? 1 },
     uMetal: { value: new THREE.Color(theme.metal) },
     uMetalness: { value: theme.metalness },
     uRough: { value: theme.roughness },
@@ -31,6 +34,9 @@ function themedMaterial(base: THREE.MeshStandardMaterial, theme: ChestTheme, key
         '#include <common>',
         `#include <common>
 uniform vec3 uWood;
+uniform float uWoodSat;
+uniform float uWoodGain;
+uniform float uWoodRough;
 uniform vec3 uMetal;
 uniform float uMetalness;
 uniform float uRough;`,
@@ -40,11 +46,11 @@ uniform float uRough;`,
         `#include <metalnessmap_fragment>
 float metalMask = smoothstep(0.3, 0.7, metalnessFactor);
 float lum = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
-vec3 woodCol = diffuseColor.rgb * uWood * 1.25;
-vec3 metalCol = uMetal * (0.35 + 1.1 * lum);
+vec3 woodCol = mix(vec3(lum), diffuseColor.rgb, uWoodSat) * uWood * uWoodGain;
+vec3 metalCol = uMetal * (0.5 + 1.1 * lum);
 diffuseColor.rgb = mix(woodCol, metalCol, metalMask);
-metalnessFactor = mix(metalnessFactor * 0.2, uMetalness, metalMask);
-roughnessFactor = mix(roughnessFactor, roughnessFactor * uRough, metalMask);`,
+metalnessFactor = mix(0.0, uMetalness, metalMask);
+roughnessFactor = mix(clamp(roughnessFactor * uWoodRough, 0.08, 1.0), clamp(roughnessFactor * uRough, 0.12, 1.0), metalMask);`,
       )
   }
   m.customProgramCacheKey = () => key
@@ -67,7 +73,7 @@ function rig(scene: THREE.Object3D, theme: ChestTheme) {
     if (o.name === 'treasure_chest_lid') lid = o
     if (o.name === 'treasure_chest_lock') lock = mesh
   })
-  const key = `chest-${theme.wood}-${theme.metal}-${theme.metalness}-${theme.roughness}`
+  const key = `chest-${JSON.stringify(theme)}`
   const mat = baseMat ? themedMaterial(baseMat, theme, key) : new THREE.MeshStandardMaterial()
   const lockMat = themedMaterial(baseMat ?? mat, theme, `${key}-lock`)
   lockMat.emissive = new THREE.Color('#ff5a1a')
@@ -97,6 +103,29 @@ export function ChestModel({ theme, anim }: Props) {
   const rigged = useMemo(() => rig(scene, theme), [scene, theme])
   const heatColor = useMemo(() => new THREE.Color(), [])
   const tmp = useMemo(() => new THREE.Color(), [])
+  // Pool of light inside the chest: radial falloff with a slow shimmer, not a flat card.
+  const innerMat = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        toneMapped: false,
+        uniforms: { uColor: { value: new THREE.Color() }, uA: { value: 0 }, uTime: { value: 0 } },
+        vertexShader: /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+        fragmentShader: /* glsl */ `
+          uniform vec3 uColor; uniform float uA; uniform float uTime; varying vec2 vUv;
+          void main(){
+            vec2 p = (vUv - 0.5) * vec2(1.0, 1.9);
+            float d = length(p) * 2.0;
+            float core = pow(clamp(1.0 - d, 0.0, 1.0), 1.6);
+            float shimmer = 0.85 + 0.15 * sin(uTime * 2.3 + vUv.x * 9.0) * sin(uTime * 1.7 + vUv.y * 7.0);
+            float a = core * uA * shimmer;
+            gl_FragColor = vec4(uColor * (0.9 + core * 0.8), a);
+          }`,
+      }),
+    [],
+  )
 
   useFrame((state) => {
     const t = state.clock.elapsedTime
@@ -134,12 +163,9 @@ export function ChestModel({ theme, anim }: Props) {
       m.color.copy(tmp)
       m.opacity = Math.min(0.85, glow * (0.45 + 0.35 * Math.sin(t * 3.1) ** 2)) * Math.max(0, 1 - open * 2.5)
     }
-    if (inner.current) {
-      const m = inner.current.material as THREE.MeshBasicMaterial
-      tmp.copy(anim.glowColor).multiplyScalar(0.55 + Math.min(glow, 2.4) * 0.75)
-      m.color.copy(tmp)
-      m.opacity = Math.min(0.9, glow * 0.6) * Math.min(1, open * 4 + anim.idle * 0.08)
-    }
+    innerMat.uniforms.uTime!.value = t
+    ;(innerMat.uniforms.uColor!.value as THREE.Color).copy(anim.glowColor).multiplyScalar(0.6 + Math.min(glow, 2.4) * 0.55)
+    innerMat.uniforms.uA!.value = Math.min(1, glow * 0.7) * Math.min(1, open * 3 + anim.idle * 0.05)
   })
 
   return (
@@ -152,9 +178,8 @@ export function ChestModel({ theme, anim }: Props) {
         <meshBasicMaterial transparent toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
       {/* Light pooled inside the open chest. */}
-      <mesh ref={inner} position={[0, 0.4, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.84, 0.44]} />
-        <meshBasicMaterial transparent toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} />
+      <mesh ref={inner} position={[0, 0.39, 0]} rotation={[-Math.PI / 2, 0, 0]} material={innerMat}>
+        <planeGeometry args={[0.86, 0.46]} />
       </mesh>
       <pointLight ref={light} position={[0, 0.52, 0.05]} decay={2} />
     </group>

@@ -77,7 +77,7 @@ def process(sess, src, dst):
     if box is None:
         return False
     rgba = np.dstack([out_rgb, a * 255.0]).astype(np.uint8)
-    Image.fromarray(rgba, mode="RGBA").crop(box).save(dst)
+    Image.fromarray(rgba, mode="RGBA").crop(box).save(dst, compress_level=1)
     return True
 
 

@@ -2,13 +2,19 @@ import type { Chest, ChestBand, Item, RarityId } from '../types'
 import { RARITY_ORDER } from '../config/rarity'
 import { pickOne, pickWeighted, random } from './rng'
 
+/** The items a chest can draw from, after its filter. */
+export function chestItems(chest: Chest, items: readonly Item[]): Item[] {
+  return chest.filter ? items.filter(chest.filter) : [...items]
+}
+
 export function bandItems(band: Pick<ChestBand, 'min' | 'max'>, items: readonly Item[]): Item[] {
   return items.filter((i) => i.value >= band.min && i.value < band.max)
 }
 
 /** Items in a chest's pool, grouped by the rarity they carry in that chest. */
 export function chestPool(chest: Chest, items: readonly Item[]) {
-  return chest.bands.map((band) => ({ band, items: bandItems(band, items).sort((a, b) => b.value - a.value) }))
+  const all = chestItems(chest, items)
+  return chest.bands.map((band) => ({ band, items: bandItems(band, all).sort((a, b) => b.value - a.value) }))
 }
 
 export function rarityInChest(chest: Chest, value: number): RarityId {
@@ -29,19 +35,21 @@ export interface Roll {
 /** Picks a rarity by the chest's odds, then an item inside that band. Empty bands fall back downward. */
 export function rollItem(chest: Chest, items: readonly Item[], r1: number = random(), r2: number = random()): Roll {
   const rarity = rollRarity(chest, r1)
+  const all = chestItems(chest, items)
   const start = chest.bands.findIndex((b) => b.rarity === rarity)
   for (let i = start; i >= 0; i--) {
     const band = chest.bands[i]
     if (!band) continue
-    const pool = bandItems(band, items)
+    const pool = bandItems(band, all)
     if (pool.length) return { item: pickOne(pool, r2), rarity: band.rarity }
   }
   throw new Error(`Chest ${chest.id} has an empty pool`)
 }
 
 export function expectedValue(chest: Chest, items: readonly Item[]): number {
+  const all = chestItems(chest, items)
   return chest.bands.reduce((sum, band) => {
-    const pool = bandItems(band, items)
+    const pool = bandItems(band, all)
     if (!pool.length) return sum
     const mean = pool.reduce((s, i) => s + i.value, 0) / pool.length
     return sum + band.odds * mean
@@ -54,8 +62,9 @@ export function oddsTotal(chest: Chest): number {
 
 /** Chance to pull an item worth more than the chest price. */
 export function chanceToBeatPrice(chest: Chest, items: readonly Item[]): number {
+  const all = chestItems(chest, items)
   return chest.bands.reduce((sum, band) => {
-    const pool = bandItems(band, items)
+    const pool = bandItems(band, all)
     if (!pool.length) return sum
     const winners = pool.filter((i) => i.value > chest.price).length
     return sum + band.odds * (winners / pool.length)
