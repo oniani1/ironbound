@@ -1,5 +1,4 @@
 import type { Chest, ChestBand, Item, RarityId } from '../types'
-import { RARITY_ORDER } from '../config/rarity'
 import { pickOne, pickWeighted, random } from './rng'
 
 /** The items a chest can draw from, after its filter. */
@@ -82,21 +81,6 @@ export function chanceToBeatPrice(chest: Chest, items: readonly Item[]): number 
     const winners = pool.filter((i) => i.value > chest.price).length
     return sum + band.odds * (winners / pool.length)
   }, 0)
-}
-
-/**
- * The colors the chest light shows before the reveal. High rarities start lower and
- * climb, one step at a time, so the player feels each upgrade. Never climbs past the
- * real result and never fakes a downgrade.
- */
-export function tellSequence(rarity: RarityId, r: number = random()): RarityId[] {
-  const idx = RARITY_ORDER.indexOf(rarity)
-  if (idx <= 1) return [rarity]
-  // Rare: sometimes upgrades from uncommon. Epic and above: start at rare, sometimes uncommon.
-  let start: number
-  if (idx === 2) start = r < 0.45 ? 1 : 2
-  else start = r < 0.3 ? 1 : 2
-  return RARITY_ORDER.slice(start, idx + 1)
 }
 
 export function multiplier(value: number, price: number): number {

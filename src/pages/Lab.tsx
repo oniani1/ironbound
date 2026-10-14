@@ -5,7 +5,7 @@ import { ChestAnim } from '../components/chest3d/animState'
 import { applyCharge, introTimeline, revealTimeline, type Phase } from '../components/chest3d/timeline'
 import { CHEST_BY_ID } from '../config/chests'
 import { RARITIES, RARITY_ORDER } from '../config/rarity'
-import { tellSequence } from '../lib/gacha'
+import { revealFacts } from '../lib/facts'
 import type { Item, RarityId } from '../types'
 import { ITEMS, ITEM_BY_ID } from '../data/items'
 
@@ -21,6 +21,7 @@ export default function Lab() {
   const [chestId, setChestId] = useState('knight')
   const tl = useRef<gsap.core.Timeline | null>(null)
   const chest = CHEST_BY_ID[chestId]!
+  const item = pickItem(new URLSearchParams(location.search).get('item'))
 
   useEffect(() => () => void tl.current?.kill(), [])
 
@@ -37,7 +38,7 @@ export default function Lab() {
           ease: 'power1.in',
           onUpdate: () => applyCharge(anim, o.p),
           onComplete: () => {
-            tl.current = revealTimeline(anim, { tell: tellSequence(rarity), fast, onPhase: setPhase })
+            tl.current = revealTimeline(anim, { rarity, fast, onPhase: setPhase, beats: revealFacts(item).length })
           },
         })
       }
@@ -46,7 +47,7 @@ export default function Lab() {
 
   return (
     <div className="fixed inset-0 bg-ink-950">
-      <ChestScene theme={chest.theme} anim={anim} item={pickItem(new URLSearchParams(location.search).get('item'))} rarityHex={RARITIES[rarity].hex} className="!absolute inset-0" />
+      <ChestScene theme={chest.theme} anim={anim} item={item} rarityHex={RARITIES[rarity].hex} className="!absolute inset-0" />
       <div className="absolute left-4 top-4 flex flex-wrap gap-2 text-xs">
         {RARITY_ORDER.map((r) => (
           <button key={r} onClick={() => setRarity(r)} className={`rounded px-2 py-1 ${r === rarity ? 'bg-bone-100 text-ink-950' : 'bg-ink-800'}`}>

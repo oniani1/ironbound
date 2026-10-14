@@ -19,6 +19,7 @@ interface Props {
 export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
   const { camera, size, pointer } = useThree()
   const target = useRef(new THREE.Vector3(0, 0.45, 0))
+  const rolled = useRef(0)
   const pos = useMemo(() => new THREE.Vector3(), [])
   const look = useMemo(() => new THREE.Vector3(), [])
 
@@ -60,15 +61,40 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     let lookY = 0.45 - lift - dolly * 0.03 + frame * (revealLook - 0.45)
     let height = 1.05 - lift - dolly * 0.12 + frame * (revealLook + 0.25 - 1.05)
     let offsetX = wide && !sheet ? frame * anim.cardSide * Math.min(0.75, halfH * aspect * 0.42) : 0
-    // Macro: close on the piece, travelling along it as anim.along runs 0 to 1. Tall pieces
-    // are read top to bottom (hilt or crest first), wide ones left to right.
+    // Macro: an extreme close-up that travels as anim.along runs 0 to 1, so the piece is
+    // never seen whole until the pull back. The move follows the shape: tall pieces are read
+    // top to bottom (hilt or crest first), wide ones left to right, and round or compact ones
+    // (helms, shields, plates) spiral out from their telling detail.
     const m = anim.macro * frame
+    let roll = 0
+    let yaw = 0
     if (m > 0) {
-      const tall = anim.focusH >= anim.focusW * 1.1
-      const reach = 0.42
-      const close = Math.min(1.3, Math.max(0.55, Math.max(anim.focusH, anim.focusW) * 0.75))
-      const macroLook = tall ? anim.focusY + anim.focusH * (reach - anim.along * reach * 2) : anim.focusY
-      const macroX = tall ? 0 : anim.focusW * (-reach + anim.along * reach * 2)
+      const H = anim.focusH
+      const W = anim.focusW
+      const a = anim.along
+      // Distances are set for the desktop lens; wider lenses move in to show the same share.
+      const lens = Math.tan((16 * Math.PI) / 180) / tanHalf
+      let close: number
+      let macroLook = anim.focusY
+      let macroX = 0
+      if (H >= W * 1.35) {
+        close = Math.max(0.42, H * 0.42)
+        macroLook = anim.focusY + H * (0.36 - a * 0.72)
+      } else if (W >= H * 1.35) {
+        close = Math.max(0.42, W * 0.45)
+        macroX = W * (-0.34 + a * 0.68)
+      } else {
+        // Circles the centre once, closing in on it as the camera pulls out.
+        const size = Math.max(H, W)
+        const turn = a * Math.PI * 1.3 + 0.6
+        const r = size * 0.24 * (1 - a)
+        close = size * (0.3 + 0.48 * a)
+        macroLook = anim.focusY + anim.macroBias * H * (1 - a) + Math.sin(turn) * r
+        macroX = Math.cos(turn) * r
+        roll = -0.2 * (1 - a) * m
+        yaw = (-0.22 + 0.3 * a) * m
+      }
+      close *= lens
       dist += (close - dist) * m
       lookY += (macroLook - lookY) * m
       height += (macroLook + 0.04 - height) * m
@@ -104,20 +130,27 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     dist += crane * 1.3
     lookY += crane * 0.12
     pos.set(offsetX + px + driftX + sx, height + py + driftY + sy, dist)
-    // The tease drifts slowly around the chest, which stays at the origin.
-    if (anim.orbit) {
-      const c = Math.cos(anim.orbit)
-      const s = Math.sin(anim.orbit)
+    // The tease drifts slowly around the chest, which stays at the origin, and the spiral
+    // turns around the piece above it.
+    const orbit = anim.orbit + yaw
+    if (orbit) {
+      const c = Math.cos(orbit)
+      const s = Math.sin(orbit)
       const x = pos.x
       pos.x = x * c + pos.z * s
       pos.z = -x * s + pos.z * c
     }
     look.set(offsetX + sx * 0.4, lookY + sy * 0.4, 0)
     // Reduced motion: cut to the framing instead of easing toward it.
-    const k = still ? 1 : 1 - Math.exp(-dt * 4.5)
+    // The close-up follows its path tightly; everything else eases in more softly.
+    const k = still ? 1 : 1 - Math.exp(-dt * (m > 0 ? 7 : 4.5))
     camera.position.lerp(pos, k)
+    // The piece may rise only once the camera is really in close, whatever the frame rate.
+    anim.closeReady = m > 0.99 && camera.position.distanceTo(pos) < Math.max(0.06, dist * 0.25)
     target.current.lerp(look, k)
     camera.lookAt(target.current)
+    rolled.current += (roll - rolled.current) * k
+    if (rolled.current) camera.rotateZ(rolled.current)
   })
   return null
 }

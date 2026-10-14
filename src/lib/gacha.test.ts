@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { CHESTS, VISIBLE_CHESTS } from '../config/chests'
 import { RARITY_ORDER } from '../config/rarity'
 import { ITEMS } from '../data/items'
-import { chestPool, expectedValue, oddsTotal, rollItem, tellSequence } from './gacha'
+import { chestPool, expectedValue, oddsTotal, rollItem } from './gacha'
+import { revealFacts } from './facts'
 
 describe('chest configuration', () => {
   it.each(CHESTS.map((c) => [c.id, c] as const))('%s odds sum to 1', (_, chest) => {
@@ -66,16 +67,24 @@ describe('rolling', () => {
   })
 })
 
-describe('rarity tell', () => {
-  it('climbs one step at a time and ends on the real rarity', () => {
-    for (const rarity of RARITY_ORDER) {
-      for (const r of [0, 0.29, 0.31, 0.44, 0.46, 0.99]) {
-        const seq = tellSequence(rarity, r)
-        expect(seq[seq.length - 1]).toBe(rarity)
-        seq.forEach((s, i) => {
-          if (i > 0) expect(RARITY_ORDER.indexOf(s)).toBe(RARITY_ORDER.indexOf(seq[i - 1]!) + 1)
-        })
-      }
+describe('reveal facts', () => {
+  it('tells origin, type, age and date before anything else, weight last', () => {
+    const antique = ITEMS.find((i) => i.provenance === 'antique' && i.weight && i.era.startsWith('c. '))!
+    expect(revealFacts(antique).map((f) => f.label)).toEqual(['Origin', 'Type', 'Age', 'Made', 'Weight'])
+    expect(revealFacts(antique)[2]!.value).toBe('Antique')
+    expect(revealFacts(antique)[3]!.value).toMatch(/^Around \d/)
+  })
+
+  it('names the maker for new work and skips a missing weight', () => {
+    const forged = ITEMS.find((i) => i.provenance === 'forged' && i.maker)!
+    const facts = revealFacts({ ...forged, weight: undefined })
+    expect(facts.map((f) => f.label)).toEqual(['Origin', 'Type', 'Age', 'Maker'])
+    expect(facts[3]!.value).toBe(forged.maker)
+  })
+
+  it('never gives away the name or the rarity', () => {
+    for (const item of ITEMS) {
+      for (const f of revealFacts(item)) expect(f.value).not.toContain(item.name)
     }
   })
 })

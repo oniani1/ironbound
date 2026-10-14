@@ -271,6 +271,57 @@ function glowFor(anim: ChestAnim) {
   return 0.4 + Math.min(anim.glow, 2) * 0.5
 }
 
+const UNIT: [number, number, number] = [1, 1, 1]
+/** Share of the lock's fall spent in the air; the rest is two short bounces on the stone. */
+const LOCK_AIR = 0.56
+
+/**
+ * The broken lock: knocked off the hasp, it tumbles forward onto the altar and stays there,
+ * lying face up in front of the chest. The path is set in world space (the altar top is
+ * y = 0) and mapped back into the chest's scaled frame, so it lands in the same place on
+ * every chest form and stays put when the chest lifts off for the top tiers.
+ */
+function placeLock(lock: THREE.Mesh, base: THREE.Vector3, u: number, s: [number, number, number], rootPos?: THREE.Vector3) {
+  lock.visible = true
+  if (u <= 0) {
+    lock.position.copy(base)
+    lock.rotation.set(0, 0, 0)
+    return
+  }
+  const [sx, sy, sz] = s
+  const rx = rootPos?.x ?? 0
+  const ry = rootPos?.y ?? 0
+  const x0 = base.x * sx + rx
+  const y0 = base.y * sy + ry
+  const z0 = base.z * sz
+  // Resting point: on the altar, a hand's width in front of the chest, a little off center.
+  const x1 = 0.07
+  const y1 = 0.0058 * sy
+  const z1 = 0.265 * sz + 0.17
+  let x = x1
+  let y = y1
+  let z = z1
+  let tilt = -Math.PI / 2
+  let yaw = 0.5
+  if (u < LOCK_AIR) {
+    const k = u / LOCK_AIR
+    x = x0 + (x1 - x0) * k
+    z = z0 + (z1 - z0) * k
+    // A small hop as it is struck, then it falls faster and faster.
+    y = y0 + (y1 - y0) * k * k + 0.16 * k * (1 - k)
+    // One and a quarter turns forward, landing face up.
+    tilt = -(Math.PI / 2 + Math.PI * 2) * (1 - (1 - k) * (1 - k))
+    yaw = 0.5 * k
+  } else {
+    const k = (u - LOCK_AIR) / (1 - LOCK_AIR)
+    const bounce = k < 0.6 ? Math.sin((Math.PI * k) / 0.6) * 0.026 : Math.sin((Math.PI * (k - 0.6)) / 0.4) * 0.007
+    y = y1 + bounce
+    tilt = -Math.PI / 2 + Math.sin(k * Math.PI * 3) * 0.16 * (1 - k)
+  }
+  lock.position.set((x - rx) / sx, (y - ry) / sy, z / sz)
+  lock.rotation.set(tilt, 0, yaw)
+}
+
 export function ChestModel({ theme, anim }: Props) {
   const scene = INLINE ? use(loadInlineScene()) : useGLTF(URL).scene
   const seam = useRef<THREE.Mesh>(null)
@@ -302,7 +353,7 @@ export function ChestModel({ theme, anim }: Props) {
             float dist = length(d);
             float ang = atan(d.x, d.y + 0.0001);
             float rays = 0.5 + 0.5 * sin(ang * 26.0 + sin(ang * 6.0 + uTime * 0.5) * 2.2);
-            rays = pow(rays, 3.0) * (0.6 + 0.4 * sin(uTime * 1.7 + ang * 3.0));
+            rays = pow(max(rays, 0.0), 3.0) * (0.6 + 0.4 * sin(uTime * 1.7 + ang * 3.0));
             float fall = exp(-dist * 2.4) * smoothstep(0.0, 0.03, p.y);
             float core = exp(-dist * 22.0) * smoothstep(0.0, 0.01, p.y);
             // Rays that run near flat fade out, and so does everything near the plane's edges,
@@ -368,12 +419,7 @@ export function ChestModel({ theme, anim }: Props) {
       ;(rayMat.uniforms.uColor!.value as THREE.Color).copy(anim.glowColor)
       rays.current.visible = rayMat.uniforms.uA!.value > 0.003
     }
-    if (lock) {
-      const off = anim.lockOff
-      lock.position.set(lockBase.x + off * 0.14, lockBase.y - off * off * 1.2, lockBase.z + off * 0.4)
-      lock.rotation.set(off * 2.6, 0, off * -1.4)
-      lock.visible = off < 0.98
-    }
+    if (lock) placeLock(lock, lockBase, anim.lockOff, form?.scale ?? UNIT, root.current?.position)
     const h = anim.heat
     heatColor.setRGB(1, 0.22 + h * 0.6, 0.04 + h * h * 0.75)
     lockMat.emissive.copy(heatColor)
