@@ -144,6 +144,10 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
     onPhase('rise')
     sfx.whoosh(0.8 + tier * 0.1)
   }, [], 'rise')
+  // Rare and above: a macro shot. The camera holds close on the upper third while the
+  // light and a glint run down the steel, then pulls back to show the whole piece.
+  const macro = !fast && !reducedMotion && tier >= 3
+  if (macro) tl.set(anim, { macro: 1 }, `rise-=${0.3 * k}`)
   tl.to(anim, { frame: 1, duration: riseDur * 0.85, ease: 'power2.inOut' }, `rise-=${0.3 * k}`)
   tl.to(anim, { item: 1, duration: riseDur, ease: 'power2.out' }, 'rise')
   tl.to(anim, { beam: tier >= 2 ? 0.38 : 0.22, glow: 1.0, duration: 1.4 }, 'rise+=0.3')
@@ -153,7 +157,12 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   }, [], `rise+=${litAt}`)
   tl.fromTo(anim, { glint: 0 }, { glint: 1, duration: 0.8 * k, ease: 'power2.inOut' }, `rise+=${litAt + 0.15}`)
   tl.set(anim, { glint: -1 }, `rise+=${litAt + 0.15 + 0.8 * k}`)
-  tl.call(() => onPhase('reveal'), [], `rise+=${riseDur * 0.8}`)
+  const pullBack = litAt + 0.55
+  if (macro) {
+    tl.to(anim, { macro: 0, duration: 1.0, ease: 'power3.inOut' }, `rise+=${pullBack}`)
+    tl.call(() => sfx.whoosh(0.45), [], `rise+=${pullBack}`)
+  }
+  tl.call(() => onPhase('reveal'), [], macro ? `rise+=${pullBack + 0.85}` : `rise+=${riseDur * 0.8}`)
   return tl
 }
 
@@ -178,5 +187,6 @@ export function settleReveal(anim: ChestAnim, final: RarityId, multi = false) {
     anim.itemLit = 1
     anim.frame = 1
   }
+  anim.macro = 0
   anim.glint = -1
 }

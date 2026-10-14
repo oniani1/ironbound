@@ -49,6 +49,8 @@ export class ChestAnim {
   focusW = 0.5
   /** Landing composition: chest and a displayed piece framed together. */
   hero = false
+  /** Macro shot 0..1: camera close on the upper third of the item, then pulls back. */
+  macro = 0
 
   emit(count: number, color: Color | string, speed = 1) {
     this.bursts.push({ count, color: color instanceof Color ? color.clone() : new Color(color), speed })
@@ -71,5 +73,6 @@ export class ChestAnim {
     this.aberration = 0
     this.bursts = []
     this.frame = 0
+    this.macro = 0
   }
 }

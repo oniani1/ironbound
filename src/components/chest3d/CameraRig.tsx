@@ -52,7 +52,16 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     let dist = baseDist - dolly * 0.55 + frame * (revealDist - baseDist)
     let lookY = 0.45 - dolly * 0.03 + frame * (revealLook - 0.45)
     let height = 1.05 - dolly * 0.12 + frame * (revealLook + 0.25 - 1.05)
-    const offsetX = wide && !sheet ? frame * Math.min(0.75, halfH * aspect * 0.42) : 0
+    let offsetX = wide && !sheet ? frame * Math.min(0.75, halfH * aspect * 0.42) : 0
+    // Macro: close on the upper third of the piece (hilt, visor, maker's mark), centered.
+    const m = anim.macro * frame
+    if (m > 0) {
+      const macroLook = anim.focusY + anim.focusH * 0.26
+      dist += (Math.max(1.1, revealDist * 0.46) - dist) * m
+      lookY += (macroLook - lookY) * m
+      height += (macroLook + 0.04 - height) * m
+      offsetX *= 1 - m
+    }
     if (anim.hero) {
       // Chest and displayed piece framed together, from the plinth to the tip of the blade.
       const top = anim.focusY + anim.focusH / 2
