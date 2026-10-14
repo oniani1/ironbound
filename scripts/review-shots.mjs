@@ -90,23 +90,30 @@ async (page) => {
         await page.getByRole('button', { name: 'Details' }).click()
         await page.waitForTimeout(500)
       }
+      // Keep lands in the vault with an invitation; setup opens only on request.
       await page.getByTestId('keep').click()
-      await page.waitForTimeout(1500)
-      await shot(`${tag}-09-onboard-banner`)
-      const submit = page.locator('[data-testid="onboarding"] button[type="submit"]').first()
-      if (await submit.count()) await submit.click()
-      await page.waitForTimeout(1500)
-      await shot(`${tag}-10-onboard-claim`)
+      await page.waitForTimeout(1600)
+      await shot(`${tag}-09-trial-kept-vault`)
+      const claim = page.getByTestId('claim-credit')
+      if (await claim.count()) {
+        await claim.click()
+        await page.waitForTimeout(1500)
+        await shot(`${tag}-10-setup-banner`)
+        const submit = page.locator('[data-testid="onboarding"] button[type="submit"]').first()
+        if (await submit.count()) await submit.click()
+        await page.waitForTimeout(1500)
+        await shot(`${tag}-11-setup-claim`)
+      }
     }
 
     // Signed-in flows.
     await fresh(signed({ settings: { sound: false, fast: false, force: 'legendary' } }))
     await page.goto(BASE + '/chests')
     await page.waitForTimeout(2000)
-    await shot(`${tag}-11-chests`)
+    await shot(`${tag}-12-chests`)
     await page.goto(BASE + '/chests/warlord')
     await page.waitForTimeout(2500)
-    await shot(`${tag}-12-detail`)
+    await shot(`${tag}-13-detail`)
     await openFromDetail()
     await waitPhase('await')
     await page.waitForTimeout(300)
@@ -115,21 +122,29 @@ async (page) => {
     await page.waitForTimeout(1300)
     await page.mouse.up()
     await page.waitForTimeout(900)
-    await shot(`${tag}-13-open-tell`)
+    await shot(`${tag}-14-open-tell`)
     await waitPhase('burst')
     await page.waitForTimeout(250)
-    await shot(`${tag}-14-open-burst`)
+    await shot(`${tag}-15-open-burst`)
     await waitPhase('rise')
     await page.waitForTimeout(450)
-    await shot(`${tag}-15-open-macro`)
+    await shot(`${tag}-16-open-macro`)
     await waitPhase('reveal')
     await page.waitForTimeout(2600)
-    await shot(`${tag}-16-open-reveal`)
+    await shot(`${tag}-17-open-reveal`)
     const inspect = page.getByRole('button', { name: 'Hide the card and inspect the piece' })
     if (await inspect.count()) {
       await inspect.click()
       await page.waitForTimeout(1300)
-      await shot(`${tag}-17-open-inspect`)
+      await shot(`${tag}-18-open-inspect`)
+      // Zoom in on the steel.
+      await page.mouse.move(w / 2, h * 0.4)
+      for (let i = 0; i < 5; i++) {
+        await page.mouse.wheel(0, -120)
+        await page.waitForTimeout(40)
+      }
+      await page.waitForTimeout(1300)
+      await shot(`${tag}-19-inspect-zoom`)
     }
     await page.getByLabel('Close').first().click()
     await page.waitForTimeout(600)
@@ -146,7 +161,7 @@ async (page) => {
     await openFromDetail()
     await page.getByTestId('keep').waitFor({ state: 'attached', timeout: 8000 })
     await page.waitForTimeout(250)
-    await shot(`${tag}-18-fast-result`)
+    await shot(`${tag}-20-fast-result`)
     await page.getByLabel('Close').first().click()
     await page.waitForTimeout(500)
 
@@ -166,7 +181,7 @@ async (page) => {
     await hold(1300)
     await waitPhase('reveal')
     await page.waitForTimeout(1500)
-    await shot(`${tag}-19-batch-facedown`)
+    await shot(`${tag}-21-batch-facedown`)
     await page.getByTestId('reveal-all').click()
     await page.waitForTimeout(2600)
     const sel = page.getByTestId('multi-select')
@@ -175,26 +190,26 @@ async (page) => {
       await sel.nth(1).click()
     }
     await page.waitForTimeout(400)
-    await shot(`${tag}-20-batch-selected`)
+    await shot(`${tag}-22-batch-selected`)
     await page.getByRole('button', { name: /^Inspect / }).first().click()
     await page.waitForTimeout(700)
-    await shot(`${tag}-21-batch-inspect`)
+    await shot(`${tag}-23-batch-inspect`)
     await page.keyboard.press('Escape')
     await page.waitForTimeout(400)
     await page.getByTestId('sell-selected').click()
     await page.waitForTimeout(900)
-    await shot(`${tag}-22-batch-sold`)
+    await shot(`${tag}-24-batch-sold`)
     await page.keyboard.press('Escape')
     await page.waitForTimeout(600)
 
     await page.goto(BASE + '/vault')
     await page.waitForTimeout(2000)
-    await shot(`${tag}-23-vault`)
+    await shot(`${tag}-25-vault`)
     const first = page.locator('a[href^="/vault/"]').first()
     if (await first.count()) {
       await first.click()
       await page.waitForTimeout(1800)
-      await shot(`${tag}-24-vault-item`)
+      await shot(`${tag}-26-vault-item`)
     }
   }
   return out
