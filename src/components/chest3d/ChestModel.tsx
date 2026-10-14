@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { use, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
@@ -7,6 +7,13 @@ import type { ChestAnim } from './animState'
 import { asset } from '../../lib/asset'
 
 const URL = asset('/models/chest.glb')
+/** Artifact builds parse an inlined copy of the chest instead of fetching the .glb. */
+const INLINE = import.meta.env.VITE_INLINE_MODEL === '1'
+let inlineScene: Promise<THREE.Object3D> | null = null
+function loadInlineScene() {
+  inlineScene ??= import('./inlineModel').then((m) => m.loadInlineChest()).then((g) => g.scene)
+  return inlineScene
+}
 /** Hinge line of the lid in model space (from the source asset, before quantization). */
 const HINGE = new THREE.Vector3(0, 0.4205, -0.2571)
 const LID_OPEN = 1.92
@@ -261,7 +268,7 @@ function buildOrnament(theme: ChestTheme): THREE.Object3D | null {
 }
 
 export function ChestModel({ theme, anim }: Props) {
-  const { scene } = useGLTF(URL)
+  const scene = INLINE ? use(loadInlineScene()) : useGLTF(URL).scene
   const seam = useRef<THREE.Mesh>(null)
   const inner = useRef<THREE.Mesh>(null)
   const light = useRef<THREE.PointLight>(null)
@@ -357,4 +364,4 @@ export function ChestModel({ theme, anim }: Props) {
   )
 }
 
-useGLTF.preload(URL)
+if (!INLINE) useGLTF.preload(URL)

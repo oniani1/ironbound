@@ -1,14 +1,86 @@
 // Turns the artifact build's index.html into the page fragment the claude.ai Artifact
-// publisher expects (no html, head or body tags) and lists the supporting files in
-// batches small enough for one publish each.
+// publisher expects (no html, head or body tags), repackages the 3D chest for locked-down
+// hosts, and lists the supporting files in batches small enough for one publish each.
 //
 // Usage: node scripts/artifact-page.mjs [dist-artifact]
 // Writes <dir>/ironbound.html and prints the batches as JSON.
-import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 
 const dir = process.argv[2] ?? 'dist-artifact'
 const BATCH = 250
+
+/**
+ * Artifact hosts serve no .glb, block blob: URLs and refuse WebAssembly. The chest model
+ * becomes plain geometry (meshopt decoded here, not in the browser) inside a base64
+ * module, and its embedded textures become .webp files loaded like any photo.
+ */
+async function inlineChest() {
+  const glbPath = join(dir, 'models', 'chest.glb')
+  if (!existsSync(glbPath)) return
+  const b = readFileSync(glbPath)
+  const jsonLen = b.readUInt32LE(12)
+  const json = JSON.parse(b.subarray(20, 20 + jsonLen).toString('utf8'))
+  const binAt = 20 + jsonLen
+  const bin = b.subarray(binAt + 8, binAt + 8 + b.readUInt32LE(binAt))
+  await MeshoptDecoder.ready
+
+  const imageViews = new Set()
+  json.images = json.images.map((img, i) => {
+    const v = json.bufferViews[img.bufferView]
+    const start = v.byteOffset ?? 0
+    imageViews.add(img.bufferView)
+    writeFileSync(join(dir, 'models', `chest-${i}.webp`), bin.subarray(start, start + v.byteLength))
+    return { uri: `chest-${i}.webp`, mimeType: img.mimeType }
+  })
+
+  const fallback = json.buffers.findIndex((buf) => buf.extensions?.EXT_meshopt_compression?.fallback)
+  if (fallback < 0) throw new Error('chest.glb: expected a meshopt fallback buffer')
+  const out = Buffer.alloc(json.buffers[fallback].byteLength)
+  json.bufferViews.forEach((v, i) => {
+    const ext = v.extensions?.EXT_meshopt_compression
+    if (ext) {
+      const start = ext.byteOffset ?? 0
+      const target = new Uint8Array(ext.count * ext.byteStride)
+      MeshoptDecoder.decodeGltfBuffer(target, ext.count, ext.byteStride, bin.subarray(start, start + ext.byteLength), ext.mode, ext.filter ?? 'NONE')
+      out.set(target, v.byteOffset ?? 0)
+      delete v.extensions
+      v.buffer = 0
+    } else if (imageViews.has(i)) {
+      // No longer referenced; any valid range will do.
+      json.bufferViews[i] = { buffer: 0, byteOffset: 0, byteLength: 4 }
+    } else {
+      throw new Error(`chest.glb: buffer view ${i} is neither an image nor meshopt-compressed`)
+    }
+  })
+  json.buffers = [{ byteLength: out.length }]
+  const keep = (list) => list?.filter((e) => e !== 'EXT_meshopt_compression')
+  json.extensionsUsed = keep(json.extensionsUsed)
+  json.extensionsRequired = keep(json.extensionsRequired)
+  if (json.extensionsRequired?.length === 0) delete json.extensionsRequired
+
+  const jsonBuf = Buffer.from(JSON.stringify(json))
+  const jsonPad = (4 - (jsonBuf.length % 4)) % 4
+  const binPad = (4 - (out.length % 4)) % 4
+  const total = 20 + jsonBuf.length + jsonPad + 8 + out.length + binPad
+  const glb = Buffer.alloc(total)
+  glb.write('glTF', 0)
+  glb.writeUInt32LE(2, 4)
+  glb.writeUInt32LE(total, 8)
+  glb.writeUInt32LE(jsonBuf.length + jsonPad, 12)
+  glb.write('JSON', 16)
+  jsonBuf.copy(glb, 20)
+  glb.fill(0x20, 20 + jsonBuf.length, 20 + jsonBuf.length + jsonPad)
+  const at = 20 + jsonBuf.length + jsonPad
+  glb.writeUInt32LE(out.length + binPad, at)
+  glb.write('BIN\0', at + 4)
+  out.copy(glb, at + 8)
+  writeFileSync(join(dir, 'models', 'chest.js'), `export default "${glb.toString('base64')}"\n`)
+  unlinkSync(glbPath)
+}
+
+await inlineChest()
 
 const html = readFileSync(join(dir, 'index.html'), 'utf8')
 const head = html.match(/<head>([\s\S]*?)<\/head>/)?.[1] ?? ''

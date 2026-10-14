@@ -17,11 +17,11 @@ Demo controls sit in the corner of every page: force the rarity of the next pull
 
 ## Build the shareable page
 
-A host-agnostic build (relative paths, hash routes, inlined fonts) for static hosts and claude.ai Artifacts:
+A host-agnostic build (relative paths, hash routes, inlined fonts) for static hosts and claude.ai Artifacts. Artifact hosts serve no .glb and block blob: URLs and WebAssembly, so the script decodes the chest model at build time into a base64 module with separate .webp textures:
 
 ```
-VITE_BASE=./ VITE_HASH_ROUTER=1 node node_modules/vite/bin/vite.js build --outDir dist-artifact
-node scripts/artifact-page.mjs dist-artifact   # writes ironbound.html and lists publish batches
+VITE_BASE=./ VITE_HASH_ROUTER=1 VITE_INLINE_MODEL=1 node node_modules/vite/bin/vite.js build --outDir dist-artifact
+node scripts/artifact-page.mjs dist-artifact   # writes ironbound.html, repackages the chest, lists publish batches
 ```
 
 ## What is inside
