@@ -8,7 +8,7 @@ import { ChestModel } from './ChestModel'
 import { CameraRig } from './CameraRig'
 import { LootBeam, Shockwave, Sparks } from './Effects3D'
 import { DustMotes } from './Atmosphere'
-import { CastleBackdrop } from './Backdrop'
+import { RoyalHall } from './RoyalHall'
 import { ItemRise } from './ItemRise'
 import { PostFX } from './PostFX'
 import { Stage } from './Stage'
@@ -33,9 +33,10 @@ export function cssColorToHex(cssVar: string, fallback = '#0b0806') {
 function DebugHandle({ anim }: { anim: ChestAnim }) {
   const state = useThree()
   useEffect(() => {
-    const w = window as unknown as { __r3f?: unknown; __anim?: unknown }
+    const w = window as unknown as { __r3f?: unknown; __anim?: unknown; __THREE?: unknown }
     w.__r3f = state
     w.__anim = anim
+    w.__THREE = THREE
   }, [state, anim])
   // Frame timing measured inside the loop: CPU cost of each render call plus frame deltas.
   useEffect(() => {
@@ -143,7 +144,9 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
       className={className}
       frameloop={frameloop}
       dpr={render ? 1 : dpr}
-      gl={render ? { antialias: true, alpha: true, preserveDrawingBuffer: true, toneMapping: THREE.ACESFilmicToneMapping } : { antialias: false, powerPreference: 'high-performance', toneMapping: THREE.NoToneMapping }}
+      // preserveDrawingBuffer keeps the last frame for the compositor, so a page effect or a
+      // late composite never shows a cleared (black) buffer.
+      gl={render ? { antialias: true, alpha: true, preserveDrawingBuffer: true, toneMapping: THREE.ACESFilmicToneMapping } : { antialias: false, powerPreference: 'high-performance', preserveDrawingBuffer: true, toneMapping: THREE.NoToneMapping }}
       camera={render ? { fov: 26, position: [1.25, 1.0, 2.75], near: 0.05, far: 40 } : { fov: 32, position: [0, 1.05, 3.15], near: 0.05, far: 40 }}
       onCreated={render ? ({ camera }) => camera.lookAt(0, 0.3, 0) : undefined}
     >
@@ -151,12 +154,13 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
       {!render && <color attach="background" args={[bg]} />}
       {!render && <fog attach="fog" args={[bg, 4.5, 11]} />}
       <Suspense fallback={null}>
-        <Stage anim={anim} plinth={plinth && !render} floor={!render} />
+        {/* The hall brings its own floor. */}
+        <Stage anim={anim} plinth={plinth && !render} floor={false} />
         <ChestModel theme={theme} anim={anim} />
         <LootBeam anim={anim} />
         <Shockwave anim={anim} />
         {!render && <Sparks anim={anim} />}
-        {!render && <CastleBackdrop anim={anim} />}
+        {!render && <RoyalHall anim={anim} />}
         {!render && fx && <DustMotes anim={anim} count={typeof window !== 'undefined' && window.innerWidth < 768 ? 150 : 260} />}
       </Suspense>
       {item && (

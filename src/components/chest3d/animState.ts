@@ -11,7 +11,7 @@ export class ChestAnim {
   rattle = 0
   /** Lock heat 0..1: dark iron to white-hot. */
   heat = 0
-  /** 0 attached, 1 knocked off and gone. */
+  /** 0 attached, 1 knocked off and lying on the altar. */
   lockOff = 0
   /** Interior and seam light. */
   glow = 0.35
@@ -25,6 +25,8 @@ export class ChestAnim {
   item = 0
   /** Item lighting: 0 silhouette, 1 fully lit. */
   itemLit = 0
+  /** Rarity light on the piece: 0 plain torchlight while it is studied, 1 once the rarity is named. */
+  tint = 0
   /** Glint sweep position, -1 hidden, 0..1 sweeping. */
   glint = -1
   /** Camera shake amplitude. */
@@ -55,6 +57,8 @@ export class ChestAnim {
   macroBias = 0.26
   /** The reveal's travel along the piece in the macro shot: 0 at one end, 1 at the other. */
   along = 0
+  /** True once the camera has arrived at the close-up (written by the camera rig). */
+  closeReady = false
   /** Phones: fraction of the screen height covered by the result sheet. */
   sheet = 0.5
   /** Wide screens: 1 while the result card sits on the right, 0 when it is tucked away. */
@@ -92,6 +96,7 @@ export class ChestAnim {
     this.ring = 0
     this.item = 0
     this.itemLit = 0
+    this.tint = 0
     this.glint = -1
     this.shake = 0
     this.dolly = 0

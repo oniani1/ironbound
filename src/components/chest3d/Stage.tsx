@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { ContactShadows, Environment, Lightformer } from '@react-three/drei'
 import * as THREE from 'three'
 import type { ChestAnim } from './animState'
+import { TORCHES } from './RoyalHall'
 
 /** Procedural stone texture so the plinth reads as carved rock without any downloads. */
 function useStoneTexture() {
@@ -109,8 +110,9 @@ export function Stage({ anim, plinth = true, floor = true }: { anim: ChestAnim; 
       />
       {/* Cool rim from behind to separate the silhouette from the dark. */}
       <spotLight ref={rim} position={[-2.2, 2.6, -2.8]} angle={0.5} penumbra={1} intensity={16} distance={10} color="#9fb4ff" />
-      <Torch position={[-2.4, 1.6, -1.2]} phase={0} anim={anim} />
-      <Torch position={[2.5, 1.5, -1.4]} phase={2.1} anim={anim} />
+      {/* The two front torches of the hall cast real light on the chest. */}
+      <Torch position={TORCHES[0]!} phase={0} anim={anim} />
+      <Torch position={TORCHES[1]!} phase={2.1} anim={anim} />
       <Environment resolution={128} frames={1} environmentIntensity={1.35}>
         <Lightformer form="rect" intensity={1.6} color="#ffcf99" position={[0, 4, 2]} scale={[4, 2, 1]} />
         <Lightformer form="rect" intensity={0.9} color="#ffe6c4" position={[0.5, 1.6, 4]} scale={[6, 2.5, 1]} />
