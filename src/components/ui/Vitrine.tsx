@@ -46,6 +46,7 @@ export function ItemVitrine({
           alt={item.name}
           className="relative h-full w-full p-[12%] drop-shadow-[0_18px_22px_oklch(0%_0_0/.55)] transition-transform duration-500 ease-[cubic-bezier(.16,1,.3,1)] group-hover:-translate-y-1"
         />
+        {item.photoExact === false && <span className="absolute bottom-1.5 left-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-bone-400/80">Example photo</span>}
       </div>
       <figcaption className="mt-3 min-w-0">
         {showRarity && rarity && <RarityTag rarity={rarity} size="xs" />}

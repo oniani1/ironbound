@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
 import { ArrowRight } from '@phosphor-icons/react'
@@ -15,6 +15,9 @@ const ease = [0.16, 1, 0.3, 1] as const
  */
 export function MakersSection() {
   const reduced = useReducedMotion()
+  // Phones show the first four makers, then the rest on request, so the ledger does not
+  // push the chests far down the page.
+  const [all, setAll] = useState(false)
   const rows = useMemo(() => {
     return MAKERS.map((m) => {
       const pieces = ITEMS.filter((i) => i.makerId === m.id).sort((a, b) => b.value - a.value)
@@ -34,9 +37,9 @@ export function MakersSection() {
             New work from <em className="font-medium text-brass-300">working makers.</em>
           </h2>
           <p className="mt-5 max-w-[46ch] text-[15px] leading-relaxed text-bone-300">
-            Beside the antiques, the chests hold {count} new pieces from {rows.length} makers: budget display steel, HEMA trainers, Albion swords and signed Japanese blades. Every piece carries its retail price and how well the maker resells.
+            Beside the antiques, the chests hold {count} new pieces from {rows.length} makers: budget display steel, HEMA trainers, Albion swords and signed Japanese blades. Every piece carries its retail price and our view of how well the maker resells.
           </p>
-          <p className="mt-4 text-[12px] text-bone-400">Demo catalog. Prices are retail as researched in October 2026. Many photos show an example of the type. No affiliation with any maker.</p>
+          <p className="mt-4 text-[12px] text-bone-400">Demo catalog. Prices are retail as researched in October 2026. Resale labels are our assessment, not measured returns. Many photos show an example of the type. No affiliation with any maker.</p>
           <Link to="/chests" className="caps group mt-7 inline-flex min-h-11 items-center gap-2 text-brass-300 transition-colors hover:text-brass-300/80">
             Find them in the chests
             <ArrowRight size={15} weight="light" className="transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
@@ -50,7 +53,7 @@ export function MakersSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.45, delay: reduced ? 0 : Math.min(i, 8) * 0.03, ease }}
-              className="grid grid-cols-[56px_minmax(0,1fr)] items-center gap-4 py-4 sm:grid-cols-[64px_minmax(0,1fr)_auto] sm:gap-6"
+              className={`grid grid-cols-[56px_minmax(0,1fr)] items-center gap-4 py-4 sm:grid-cols-[64px_minmax(0,1fr)_auto] sm:gap-6 ${i >= 4 && !all ? 'max-sm:hidden' : ''}`}
             >
               <span className="vitrine block h-14 w-14 rounded-[2px] sm:h-16 sm:w-16" aria-hidden>
                 {pieces[0] && <ItemImg item={pieces[0]} className="h-full w-full p-1.5" />}
@@ -75,6 +78,14 @@ export function MakersSection() {
               </div>
             </motion.li>
           ))}
+          {!all && rows.length > 4 && (
+            <li className="sm:hidden">
+              <button type="button" onClick={() => setAll(true)} className="caps flex min-h-12 w-full items-center justify-between text-bone-200">
+                View all {rows.length} makers
+                <ArrowRight size={15} weight="light" aria-hidden />
+              </button>
+            </li>
+          )}
         </ul>
       </div>
     </section>

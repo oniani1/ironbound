@@ -39,9 +39,10 @@
 .ib-tier-link:hover { color: var(--color-bone-50); }
 .ib-tier-link:hover > svg { transform: translateX(4px); }
 .ib-tier-footnote { color: var(--color-bone-400); font-size: 13px; line-height: 1.7; max-width: 90ch; margin: 24px 0 0; }
-.ib-odds-track { display: flex; gap: 2px; height: 4px; width: 100%; overflow: hidden; }
-.ib-odds-track > div { flex-shrink: 1; }
-.ib-odds-track span { display: block; width: 100%; height: 100%; }
+.ib-odds-track { display: flex; height: 4px; width: 100%; overflow: hidden; }
+.ib-odds-track > div { flex-shrink: 0; }
+.ib-odds-track span { display: block; width: 100%; height: 100%; box-shadow: inset -1px 0 0 var(--color-ink-950); }
+.ib-odds-track > div:last-child span { box-shadow: none; }
 .ib-odds-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; list-style: none; padding: 0; margin: 16px 0 0; }
 .ib-odds-legend li { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; color: var(--color-bone-200); }
 .ib-odds-legend li > span:last-child { margin-left: auto; }

@@ -5,17 +5,20 @@ import { RARITIES } from '../../config/rarity'
 import { pct } from '../../lib/format'
 
 /**
- * Actual rarity proportions as a ledger rule: one segment per rarity, hairline gaps, exact
+ * Actual rarity proportions as a ledger rule: one segment per rarity at its exact share,
  * percentages in an expandable legend. Rarity is named in the legend, never color alone.
  */
 export function OddsBar({ chest, height = 6, defaultExpanded = false }: { chest: Chest; height?: number; defaultExpanded?: boolean }) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const legendId = useId()
+  const total = chest.bands.reduce((sum, b) => sum + b.odds, 0) || 1
   return (
     <div>
-      <div className="flex w-full gap-[2px]" style={{ height }} role="img" aria-label={`Rarity odds: ${chest.bands.map((b) => `${RARITIES[b.rarity].label} ${pct(b.odds, 2)}`).join(', ')}`}>
+      {/* Exact proportions inside one strip: no minimum widths and no gaps, so a 0.01% tier
+          is as thin as it should be. Hairline dividers are drawn inside each segment. */}
+      <div className="flex w-full overflow-hidden rounded-[1px]" style={{ height }} role="img" aria-label={`Rarity odds: ${chest.bands.map((b) => `${RARITIES[b.rarity].label} ${pct(b.odds, 2)}`).join(', ')}`}>
         {chest.bands.map((b) => (
-          <span key={b.rarity} className="block h-full shrink-0 rounded-[1px]" style={{ width: `${b.odds * 100}%`, minWidth: b.odds > 0 ? 3 : 0, background: RARITIES[b.rarity].cssVar }} />
+          <span key={b.rarity} className="block h-full shrink-0 shadow-[inset_-1px_0_0_var(--color-ink-950)] last:shadow-none" style={{ width: `${(b.odds / total) * 100}%`, background: RARITIES[b.rarity].cssVar }} />
         ))}
       </div>
       <button

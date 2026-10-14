@@ -17,7 +17,8 @@ export function LiveTicker() {
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ember-500 opacity-50" />
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-ember-500" />
         </span>
-        <span className="caps text-bone-300">Live</span>
+        <span className="caps text-bone-300 sm:hidden">Demo pulls</span>
+        <span className="caps hidden text-bone-300 sm:inline">Live</span>
         <span className="caps hidden text-bone-400/70 sm:inline">· Simulated</span>
       </div>
       <div className="relative flex-1 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_4%,black_86%,transparent)]">

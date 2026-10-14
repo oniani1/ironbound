@@ -52,3 +52,16 @@ export function provenanceLine(item: Pick<Item, 'provenance' | 'era' | 'origin' 
 export function resaleLabel(r: Item['resale']): string {
   return r === 'strong' ? 'Strong resale' : r === 'medium' ? 'Steady resale' : 'Low resale'
 }
+
+/** When the retail prices of new work were read. */
+export const RETAIL_CHECKED = 'October 2026'
+
+/** "regenyei.com" from a price source URL, for a short link label. */
+export function sourceHost(url?: string): string {
+  if (!url) return ''
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return ''
+  }
+}

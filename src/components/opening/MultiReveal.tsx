@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Check, X } from '@phosphor-icons/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
-import { money, provenanceLine } from '../../lib/format'
+import { money, provenanceLine, resaleLabel } from '../../lib/format'
 import { sfx } from '../../lib/audio'
 import { Button, IconButton } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
@@ -242,12 +242,20 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                 </dd>
               </dl>
             </div>
+            {/* Two equal actions; the sale amount sits on its own line so no label crowds its frame. */}
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <Button ref={keepAllBtn} variant="primary" onClick={onDone}>
+              <Button ref={keepAllBtn} variant="primary" className="!h-14" onClick={onDone}>
                 {unsold.length === 0 ? 'Done' : unsold.length < results.length ? 'Keep the rest' : 'Keep all'}
               </Button>
-              <Button data-testid="sell-selected" variant="secondary" onClick={sellPicked} disabled={picked.length === 0}>
-                {picked.length ? `Sell selected · ${money(pickedSum)}` : 'Select to sell'}
+              <Button
+                data-testid="sell-selected"
+                variant="secondary"
+                className="!h-14 !px-3"
+                onClick={sellPicked}
+                disabled={picked.length === 0}
+                sub={picked.length ? <span className="tabular">{money(pickedSum)} to your purse</span> : undefined}
+              >
+                {picked.length ? 'Sell selected' : 'Select to sell'}
               </Button>
             </div>
             <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3">
@@ -377,10 +385,16 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
           <p className="mt-1 text-[13px] text-bone-300">
             {provenanceLine(item)}
           </p>
+          {item.provenance === 'forged' && (
+            <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <Tag tone={item.resale === 'strong' ? 'moss' : 'bone'}>{resaleLabel(item.resale)}</Tag>
+              <span className="text-[11px] text-bone-400">Our assessment{item.photoExact === false ? ' · Example photo of the type' : ''}</span>
+            </p>
+          )}
         </div>
         <dl className="mt-4 grid grid-cols-2 items-end gap-3 border-t border-bone-100/10 pt-3 tabular">
           <div>
-            <dt className="eyebrow !text-[11px]">Estimated value</dt>
+            <dt className="eyebrow !text-[11px]">{item.provenance === 'forged' ? 'Retail price, new' : 'Estimated value'}</dt>
             <dd className="mt-1 text-[24px] font-semibold text-bone-50">{money(item.value)}</dd>
           </div>
           <div>

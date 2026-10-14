@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, ArrowUpRight } from '@phosphor-icons/react'
 import type { Item, Pull } from '../../types'
 import { CHEST_BY_ID } from '../../config/chests'
 import { actions, getState } from '../../lib/store'
-import { money, resaleLabel } from '../../lib/format'
+import { money, resaleLabel, RETAIL_CHECKED, sourceHost } from '../../lib/format'
 import { sfx } from '../../lib/audio'
 import { Button } from '../ui/Button'
 import { RarityTag, Tag } from '../ui/RarityTag'
@@ -63,12 +63,25 @@ export function ItemDetail({ pull, item }: { pull: Pull; item: Item }) {
       <Reveal className="ib-detail-image"><ImageViewer item={item} rarity={pull.rarity} /><p className="ib-image-credit">{item.provenance === 'forged' ? item.credit : `Photograph: ${item.credit}`} <a className="ib-text-link" href={item.sourceUrl} target="_blank" rel="noreferrer">{item.provenance === 'forged' ? 'View photo source' : 'View museum record'} <ArrowUpRight size={16} weight="light" aria-hidden="true" /></a></p></Reveal>
       <Reveal className="ib-detail-info" delay={0.08}>
         <p className="ib-copy mt-0">{item.blurb}</p>
-        <dl className="ib-specs">{[['Provenance', item.provenance === 'antique' ? 'Antique' : 'New work'], ['Maker', item.maker ?? 'Unrecorded'], ...(item.provenance === 'forged' ? [['Resale', resaleLabel(item.resale)]] : []), ['Era', item.era], ['Origin', item.origin], ['Materials', item.materials], ['Length', item.length ?? 'Not recorded'], ['Weight', item.weight ?? 'Not recorded'], ['Acquired from', chest?.name ?? 'Unrecorded chest']].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+        <dl className="ib-specs">{[['Provenance', item.provenance === 'antique' ? 'Antique' : 'New work'], ['Maker', item.maker ?? 'Unrecorded'], ...(item.provenance === 'forged' ? [['Resale, our assessment', resaleLabel(item.resale)]] : []), ['Era', item.era], ['Origin', item.origin], ['Materials', item.materials], ['Length', item.length ?? 'Not recorded'], ['Weight', item.weight ?? 'Not recorded'], ['Acquired from', chest?.name ?? 'Unrecorded chest']].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
         <section className="ib-valuation" aria-labelledby="valuation-title"><h2 id="valuation-title">Valuation</h2>
-          <dl className="ib-valuation-pair"><div><dt>Estimated value</dt><dd className="tabular">{money(pull.value)}</dd></div><div><dt>{pull.status === 'sold' ? 'Sold for' : 'Sell-back offer'}</dt><dd className="tabular text-brass-300">{pull.status === 'sold' ? money(pull.soldFor ?? 0) : offer === null ? 'Unavailable' : money(offer)}</dd></div></dl>
+          <dl className="ib-valuation-pair"><div><dt>{item.provenance === 'forged' ? 'Retail price, new' : 'Estimated value'}</dt><dd className="tabular">{money(pull.value)}</dd></div><div><dt>{pull.status === 'sold' ? 'Sold for' : 'Sell-back offer'}</dt><dd className="tabular text-brass-300">{pull.status === 'sold' ? money(pull.soldFor ?? 0) : offer === null ? 'Unavailable' : money(offer)}</dd></div></dl>
           <p className="text-sm text-bone-300 mt-3">{chest ? `${Math.round(chest.buyback * 100)}% of estimated value. ${vaulted ? 'Credited instantly to your demo balance.' : 'Sell-back is available only while an item is in the vault.'}` : 'The original chest is missing. A sell-back offer cannot be calculated.'}</p>
-          <p className="ib-kicker mt-6">Simulated comparable sales</p><ul className="ib-comps">{comparableSales(item.id, pull.value).map((sale) => <li key={sale.id}><span>{sale.label} · {sale.date}</span><span className="tabular">{money(sale.value)}</span></li>)}</ul>
-          <small>Valued on {VALUED_ON}. Estimates and comparable sales are mock data.</small>
+          {item.provenance === 'forged' ? (
+            <>
+              <p className="ib-kicker mt-6">Retail basis</p>
+              <ul className="ib-comps">
+                <li><span>{item.maker} list price, new</span><span className="tabular">{money(item.value)}</span></li>
+                {item.priceSource && <li><span>Source</span><a className="ib-text-link" href={item.priceSource} target="_blank" rel="noreferrer">{sourceHost(item.priceSource)} <ArrowUpRight size={14} weight="light" aria-hidden="true" /></a></li>}
+              </ul>
+              <small>Retail price read in {RETAIL_CHECKED}, before shipping and import charges. Resale labels are our assessment, not measured returns. Demo: no purchase or affiliation.</small>
+            </>
+          ) : (
+            <>
+              <p className="ib-kicker mt-6">Simulated comparable sales</p><ul className="ib-comps">{comparableSales(item.id, pull.value).map((sale) => <li key={sale.id}><span>{sale.label} · {sale.date}</span><span className="tabular">{money(sale.value)}</span></li>)}</ul>
+              <small>Valued on {VALUED_ON}. Estimates and comparable sales are mock data.</small>
+            </>
+          )}
         </section>
         <section className="ib-certificate plate" aria-labelledby="certificate-title"><div className="ib-certificate-head"><Seal /><div><p className="ib-kicker">Demo certificate</p><h2 id="certificate-title">Certificate of authenticity</h2></div></div><dl><div><dt>Certificate</dt><dd className="tabular">{certificate}</dd></div><div><dt>Vault location</dt><dd className="tabular">Demo vault · Bay {String(itemHash(item.id) % 24 + 1).padStart(2, '0')}</dd></div><div><dt>Insured value</dt><dd className="tabular">{money(pull.value)}</dd></div><div><dt>Object classification</dt><dd>{item.provenance === 'antique' ? 'Antique' : 'New work'}</dd></div></dl><p className="text-sm text-bone-300 mt-5 mb-0">{item.provenance === 'forged' ? 'A simulated record. The photo may show an example of this type, not this exact piece.' : 'A simulated record. This certificate does not authenticate the pictured museum object.'}</p></section>
         {vaulted && <div className="ib-actions"><div className="ib-detail-inline-actions">{actionButtons}</div><Button variant="ghost" disabled aria-describedby="market-coming-soon">List on market</Button><p id="market-coming-soon" className="ib-actions-note">Marketplace coming soon. Keeping this item in your vault is free.</p></div>}

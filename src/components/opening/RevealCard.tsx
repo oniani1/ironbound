@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { ArrowCounterClockwise, MagnifyingGlass, ShareNetwork } from '@phosphor-icons/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES } from '../../config/rarity'
-import { money, provenanceLine, resaleLabel } from '../../lib/format'
+import { money, provenanceLine, resaleLabel, sourceHost } from '../../lib/format'
 import { sfx } from '../../lib/audio'
 import { Button } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
@@ -177,15 +177,23 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
       {item.provenance === 'forged' && (
         <motion.div {...rise(0.36)} className="relative mt-2 flex items-center gap-4">
           <Tag tone={item.resale === 'strong' ? 'moss' : 'bone'}>{resaleLabel(item.resale)}</Tag>
-          {item.photoExact === false && <span className="text-[11px] text-bone-400">Example photo of the type</span>}
+          <span className="text-[11px] text-bone-400">Our assessment{item.photoExact === false ? ' · Example photo of the type' : ''}</span>
         </motion.div>
       )}
 
       <motion.div {...rise(0.4)} className="relative mt-3 grid grid-cols-[1fr_auto] items-end gap-3 border-t border-bone-100/10 pt-3 sm:mt-5 sm:pt-4">
         <div>
-          <p className="eyebrow !text-[11px]">{item.provenance === 'forged' ? 'Retail price, new' : 'Estimated item value'}</p>
+          <p className="eyebrow !text-[11px]">
+            {item.provenance === 'forged' ? 'Retail price, new' : 'Estimated item value'}
+            {item.provenance === 'forged' && item.priceSource && (
+              <a href={item.priceSource} target="_blank" rel="noreferrer" className="ml-2 normal-case tracking-normal text-bone-300 underline decoration-bone-100/25 underline-offset-2 hover:text-bone-100">
+                {sourceHost(item.priceSource)}
+              </a>
+            )}
+          </p>
           <p className="mt-1 text-[36px] font-semibold leading-none text-bone-50 sm:text-[46px]">
-            <CountUp to={item.value} duration={instant ? 0.01 : rarity === 'common' ? 0.7 : 1.4} delay={instant ? 0 : 0.45} ticks={!instant} onDone={() => setCounted(true)} />
+            {/* The value is stated, not teased: it lands at once below Epic and rolls briefly above. */}
+            <CountUp to={item.value} duration={instant || r.tier < 4 ? 0.01 : 0.8} delay={instant || r.tier < 4 ? 0 : 0.3} ticks={!instant && r.tier >= 4} onDone={() => setCounted(true)} />
           </p>
         </div>
         <motion.div
@@ -209,7 +217,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         </motion.div>
       </motion.div>
 
-      <motion.div {...rise(0.48)} className="relative mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-bone-400 sm:mt-3">
+      <motion.div {...rise(0.48)} className="relative mt-3 hidden flex-wrap gap-x-4 gap-y-1 text-[12px] text-bone-400 sm:flex">
         {item.length && <span>{['helmet', 'armor', 'shield'].includes(item.category) ? 'Height' : 'Length'} <b className="font-medium text-bone-200">{item.length}</b></span>}
         {item.weight && <span>Weight <b className="font-medium text-bone-200">{item.weight}</b></span>}
         <span className="hidden min-w-0 truncate sm:inline">{item.materials}</span>
@@ -223,7 +231,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
       </motion.p>
 
       {trial && sold == null && (
-        <motion.p {...rise(0.62)} className="relative mt-3 flex gap-2.5 border-t border-bone-100/[0.08] pt-3 text-[13px] leading-snug text-bone-200 sm:mt-4">
+        <motion.p {...rise(0.62)} className="relative mt-4 hidden gap-2.5 border-t border-bone-100/[0.08] pt-3 text-[13px] leading-snug text-bone-200 sm:flex">
           <span className="mt-[6px] block h-[5px] w-[5px] shrink-0 rotate-45 bg-brass-400" aria-hidden />
           Added to your demo vault. Every pull ends the same way: keep it, sell it back now or ship it home.
         </motion.p>
@@ -264,7 +272,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         )}
       </motion.div>
       {draw && (
-        <motion.p {...rise(0.77)} className="relative mt-2.5 flex items-center justify-center gap-1.5 text-[11px] text-bone-400 sm:mt-3" title={`Draw ${draw}`}>
+        <motion.p {...rise(0.77)} className="relative mt-3 hidden items-center justify-center gap-1.5 text-[11px] text-bone-400 sm:flex" title={`Draw ${draw}`}>
           <span className="block h-1 w-1 rounded-full bg-moss-400" />
           Simulated draw 0x{draw.slice(0, 6)}…{draw.slice(-4)} · no on-chain transaction
         </motion.p>
