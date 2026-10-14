@@ -1,4 +1,4 @@
-import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTexture } from '@react-three/drei'
 import { CHEST_BY_ID } from '../../config/chests'
 import { ITEM_BY_ID, ITEMS } from '../../data/items'
@@ -45,6 +45,8 @@ export function useOpening() {
 
 export function OpeningProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<OpeningSession | null>(null)
+  // Mirrors the session so close() can run its callback outside a state updater.
+  const current = useRef<OpeningSession | null>(null)
 
   // Warm the overlay code while the browser is idle, so the first opening starts at once.
   useEffect(() => {
@@ -87,15 +89,18 @@ export function OpeningProvider({ children }: { children: ReactNode }) {
     const name = getState().profile?.name ?? 'You'
     results.forEach((r) => pushFeed({ name, itemId: r.item.id, chestId: chest.id, rarity: r.rarity, self: true }, 6500))
     results.forEach((r) => useTexture.preload(r.item.image))
-    setSession({ key: uid(), chest, pulls, results, trial, onClose: opts.onClose })
+    const next: OpeningSession = { key: uid(), chest, pulls, results, trial, onClose: opts.onClose }
+    current.current = next
+    setSession(next)
     return { ok: true }
   }, [])
 
   const close = useCallback(() => {
-    setSession((s) => {
-      s?.onClose?.(s.pulls)
-      return null
-    })
+    const s = current.current
+    if (!s) return
+    current.current = null
+    setSession(null)
+    s.onClose?.(s.pulls)
   }, [])
 
   const value = useMemo(() => ({ open, close, active: !!session }), [open, close, session])
