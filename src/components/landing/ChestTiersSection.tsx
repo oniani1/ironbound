@@ -21,7 +21,7 @@ export default function ChestTiersSection() {
       return <motion.article className="ib-tier" key={chest.id} initial={{ opacity: 0, y: reduced ? 0 : 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: reduced ? 0.1 : 0.45, delay: reduced ? 0 : index * 0.045, ease: EXPO }}>
         <div className="ib-tier-index"><span className="ib-kicker">Chest {String(index + 1).padStart(2, '0')}</span>{chest.limited && <span className="ib-limited">Limited</span>}</div>
         <h3 className="font-display">{chest.name}</h3><p className="ib-tier-epithet">{chest.epithet}</p><p className="ib-tier-price tabular">{money(chest.price)}</p><p className="ib-tier-tagline">{chest.tagline}</p>
-        <dl className="ib-tier-numbers"><div><dt>Expected item value</dt><dd className="tabular">{money(ev, { cents: true })}</dd></div><div><dt>Instant buyback</dt><dd className="tabular">{pct(chest.buyback)} of value</dd></div></dl>
+        <dl className="ib-tier-numbers"><div><dt>Expected item value</dt><dd className="tabular">{money(ev, {})}</dd></div><div><dt>Instant buyback</dt><dd className="tabular">{pct(chest.buyback)} of value</dd></div></dl>
         <OddsBar chest={chest} details />
         {chest.limited && <p className="ib-tier-stock"><strong className="tabular">{remaining} / {chest.limited.total}</strong> remaining in demo stock</p>}
         <Link to={`/chests/${chest.id}`} className="ib-tier-link">Inspect chest <span aria-hidden="true">→</span></Link>

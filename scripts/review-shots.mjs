@@ -71,10 +71,10 @@ async (page) => {
       if (await skip.count()) await skip.first().click()
       await page.waitForTimeout(1200)
       await shot(`${tag}-07-onboard-trial`)
+      const overlayOpen = await page.getByTestId('opening-overlay').count()
       const openTrial = page.getByTestId('open-trial')
-      if (await openTrial.count()) {
-        await openTrial.click()
-        await waitPhase('await')
+      if (!overlayOpen && (await openTrial.count())) await openTrial.click()
+      if (await waitPhase('await', 80)) {
         await page.waitForTimeout(400)
         await shot(`${tag}-08-trial-await`)
         const hold = page.getByTestId('hold-to-open')
@@ -102,7 +102,8 @@ async (page) => {
     await page.goto(BASE + '/chests/warlord')
     await page.waitForTimeout(2500)
     await shot(`${tag}-13-detail`)
-    await page.getByTestId('open-chest').click()
+    const desk = page.getByTestId('open-chest')
+    await ((await desk.isVisible()) ? desk : page.getByTestId('open-chest-mobile')).click()
     await waitPhase('await')
     await page.waitForTimeout(300)
     await page.getByTestId('hold-to-open').hover()
