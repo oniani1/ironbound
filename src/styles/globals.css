@@ -180,7 +180,8 @@ img {
   background: linear-gradient(90deg, transparent, oklch(99% 0.03 90 / 0.5), transparent);
   transition: transform 0.9s var(--ease-out-expo);
 }
-*:hover > .sheen::before {
+*:hover > .sheen::before,
+.sheen-group:hover .sheen::before {
   transform: translateX(330%) skewX(-18deg);
 }
 

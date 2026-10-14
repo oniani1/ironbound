@@ -1,18 +1,20 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
+import { ArrowRight } from '@phosphor-icons/react'
 import gsap from 'gsap'
 import { ChestScene } from '../components/chest3d/ChestScene'
 import { ChestAnim } from '../components/chest3d/animState'
 import { CHEST_BY_ID } from '../config/chests'
 import { ITEMS } from '../data/items'
 import { money, shortEra } from '../lib/format'
+import { RarityTag } from '../components/ui/RarityTag'
+import { ItemVitrine } from '../components/ui/Vitrine'
 import { sfx } from '../lib/audio'
 import { useStore } from '../lib/store'
 import { Button } from '../components/ui/Button'
 import { useGuestCta, useOnboarding } from '../components/onboarding/OnboardingContext'
 import { LandingSections } from '../components/landing/sections'
-import { ItemImg } from '../components/ui/ItemImg'
 import type { Item } from '../types'
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -75,18 +77,21 @@ function Hero() {
         onPointerLeave={() => hover(false)}
       >
         <ChestScene theme={theme} anim={anim} item={featured} heroItem rarityHex="#ffc94d" itemGlow={0.6} parallax className="!absolute inset-0" />
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.4, ease }}
-          className="pointer-events-none absolute bottom-[12%] left-1/2 hidden -translate-x-1/2 items-center gap-3 rounded-full border border-bone-100/10 bg-ink-950/70 py-1.5 pl-2 pr-4 backdrop-blur md:flex"
-        >
-          <span className="rounded-full bg-[color-mix(in_oklch,var(--r-legendary)_16%,transparent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--r-legendary)]">Legendary</span>
-          <span className="font-display text-[16px] text-bone-50">{featured.name}</span>
-          <span className="text-[13px] font-semibold text-bone-200 tabular">{money(featured.value)}</span>
-        </motion.div>
       </div>
       <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(90deg,var(--color-ink-950)_8%,transparent_55%)] md:block" />
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 1.4, ease }}
+        className="pointer-events-none absolute right-[4%] top-[47%] z-10 hidden w-[220px] border-t border-bone-100/15 pt-3 [text-shadow:0_1px_10px_oklch(0%_0_0/.9)] lg:block xl:right-[6%]"
+      >
+        <RarityTag rarity="legendary" size="xs" />
+        <p className="font-display mt-1.5 text-[20px] leading-tight text-bone-50">{featured.name}</p>
+        <p className="mt-1 truncate text-[12px] text-bone-400">
+          {shortEra(featured.era)} · {featured.origin.replace(/\s*\(.*\)$/, '')}
+        </p>
+        <p className="mt-2 text-[15px] font-semibold text-bone-100 tabular">{money(featured.value)}</p>
+      </motion.div>
       <div className="pointer-events-none relative mx-auto flex min-h-[100svh] max-w-[1400px] flex-col px-4 pb-[58svh] pt-[calc(var(--header-h)+var(--ticker-h)+1.75rem)] sm:px-6 md:justify-center md:pb-24 md:pt-[calc(var(--header-h)+var(--ticker-h)+2.5rem)]">
         <div className="pointer-events-auto max-w-[620px]">
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2, ease }} className="eyebrow">
@@ -123,14 +128,18 @@ function Hero() {
                 {guestCta}
               </Button>
             )}
-            <Link to="/chests" className="whitespace-nowrap rounded-[14px] px-4 py-4 text-[15px] font-medium text-bone-200 transition-colors hover:bg-bone-100/[0.06] hover:text-bone-50 sm:px-5">
-              See the chests →
+            <Link to="/chests" className="caps group flex min-h-14 items-center gap-2.5 whitespace-nowrap px-4 text-bone-200 transition-colors hover:text-bone-50 sm:px-5">
+              See the chests
+              <ArrowRight size={16} weight="light" className="transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
             </Link>
           </motion.div>
-          <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.1 }} className="mt-10 hidden flex-wrap gap-x-6 gap-y-2 text-[12px] text-bone-400 md:flex">
-            <li>Odds printed on every chest</li>
-            <li>85 to 92% instant sell-back</li>
-            <li>Insured shipping to your door</li>
+          <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.1 }} className="mt-12 hidden flex-wrap gap-x-7 gap-y-2 md:flex">
+            {['Odds on every chest', '85 to 92% sell-back', 'Insured shipping'].map((t) => (
+              <li key={t} className="caps flex items-center gap-2 text-bone-400">
+                <span className="block h-[5px] w-[5px] rotate-45 bg-brass-500" aria-hidden />
+                {t}
+              </li>
+            ))}
           </motion.ul>
         </div>
       </div>
@@ -159,48 +168,29 @@ function Showcase() {
   }, [])
   const loop = [...items, ...items]
   return (
-    <section className="relative border-y border-bone-100/[0.06] bg-ink-950 py-10" aria-label="Items in the chests">
-      <div className="mx-auto mb-6 flex max-w-[1400px] items-end justify-between px-4 sm:px-6">
+    <section className="relative border-y border-bone-100/[0.06] bg-ink-950 py-14 sm:py-20" aria-label="Items in the chests">
+      <div className="mx-auto mb-8 flex max-w-[1400px] items-end justify-between gap-6 px-4 sm:mb-10 sm:px-6">
         <div>
           <p className="eyebrow">In the chests right now</p>
-          <p className="font-display mt-1 text-[28px] font-semibold text-bone-50 sm:text-[34px]">
+          <p className="font-display mt-2 text-[32px] font-semibold leading-tight text-bone-50 sm:text-[44px]">
             From {money(range.min)} to {money(range.max, { compact: true })}
           </p>
         </div>
-        <Link to="/chests" className="hidden text-[13px] text-bone-300 hover:text-bone-50 sm:block">
-          Browse every item →
+        <Link to="/chests" className="caps group hidden items-center gap-2 text-bone-300 transition-colors hover:text-bone-50 sm:flex">
+          Browse every chest
+          <ArrowRight size={15} weight="light" className="transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
         </Link>
       </div>
       {/* Phones swipe through snap cards; larger screens get a slow drifting river. */}
       <div className="hide-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 md:hidden">
         {items.map((it) => (
-          <div key={it.id} className="w-[64vw] shrink-0 snap-center rounded-[18px] border border-bone-100/[0.06] bg-ink-900/70 p-3">
-            <div className="relative aspect-[4/5]">
-              <div className="absolute inset-x-[20%] bottom-[4%] h-[24%] rounded-[50%] bg-brass-500/20 blur-xl" />
-              <ItemImg item={it} alt={it.name} className="relative h-full w-full" />
-            </div>
-            <p className="font-display mt-2 line-clamp-1 text-[17px] font-semibold text-bone-50">{it.name}</p>
-            <p className="flex justify-between text-[12px] text-bone-400">
-              <span className="truncate pr-2">{shortEra(it.era)}</span>
-              <span className="font-semibold text-bone-200 tabular">{money(it.value, { compact: true })}</span>
-            </p>
-          </div>
+          <ItemVitrine key={it.id} item={it} aspect="aspect-[4/5]" className="w-[58vw] shrink-0 snap-center" />
         ))}
       </div>
       <div className="group relative hidden overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)] md:block">
-        <div className="flex w-max animate-marquee gap-4 group-hover:[animation-play-state:paused]">
+        <div className="flex w-max animate-marquee gap-8 group-hover:[animation-play-state:paused]">
           {loop.map((it, i) => (
-            <div key={`${it.id}-${i}`} className="w-[180px] shrink-0 rounded-[18px] border border-bone-100/[0.06] bg-ink-900/70 p-3 sm:w-[210px]">
-              <div className="relative aspect-[4/5]">
-                <div className="absolute inset-x-[20%] bottom-[4%] h-[24%] rounded-[50%] bg-brass-500/20 blur-xl" />
-                <ItemImg item={it} alt={it.name} className="relative h-full w-full" />
-              </div>
-              <p className="font-display mt-2 line-clamp-1 text-[16px] font-semibold text-bone-50">{it.name}</p>
-              <p className="flex justify-between text-[12px] text-bone-400">
-                <span className="truncate pr-2">{shortEra(it.era)}</span>
-                <span className="font-semibold text-bone-200 tabular">{money(it.value, { compact: true })}</span>
-              </p>
-            </div>
+            <ItemVitrine key={`${it.id}-${i}`} item={it} aspect="aspect-[4/5]" className="w-[200px] shrink-0 sm:w-[220px]" />
           ))}
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
+import { SlidersHorizontal } from '@phosphor-icons/react'
 import { actions, useStore } from '../../lib/store'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
 import { sfx } from '../../lib/audio'
@@ -22,14 +23,14 @@ export function DemoPanel() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, transition: { duration: 0.15 } }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="plate mb-2 w-[260px] rounded-[16px] p-3"
+            className="plate mb-2 w-[264px] p-3.5"
           >
             <p className="eyebrow !text-[10px]">Demo controls</p>
             <p className="mt-2 text-[12px] text-bone-300">Next pull lands as</p>
             <div className="mt-2 grid grid-cols-3 gap-1.5">
               <button
                 onClick={() => actions.setForce(null)}
-                className={`rounded-lg px-2 py-1.5 text-[11px] font-semibold ${force === null ? 'bg-bone-100 text-ink-950' : 'bg-ink-800 text-bone-300 hover:text-bone-50'}`}
+                className={`rounded-[4px] px-2 py-1.5 text-[11px] font-semibold ${force === null ? 'bg-bone-100 text-ink-950' : 'bg-ink-800 text-bone-300 hover:text-bone-50'}`}
               >
                 Odds
               </button>
@@ -40,7 +41,7 @@ export function DemoPanel() {
                     actions.setForce(r)
                     sfx.click()
                   }}
-                  className="rounded-lg px-2 py-1.5 text-[11px] font-semibold transition-colors"
+                  className="rounded-[4px] px-2 py-1.5 text-[11px] font-semibold transition-colors"
                   style={
                     force === r
                       ? { background: RARITIES[r].cssVar, color: 'var(--color-ink-950)' }
@@ -57,7 +58,7 @@ export function DemoPanel() {
                   actions.addFunds(1000)
                   sfx.coins(6)
                 }}
-                className="rounded-lg bg-ink-800 px-2 py-1.5 text-[11px] font-semibold text-bone-200 hover:text-bone-50"
+                className="rounded-[4px] bg-ink-800 px-2 py-1.5 text-[11px] font-semibold text-bone-200 hover:text-bone-50"
               >
                 + $1,000
               </button>
@@ -67,7 +68,7 @@ export function DemoPanel() {
                   setOpen(false)
                   navigate('/')
                 }}
-                className="rounded-lg bg-ink-800 px-2 py-1.5 text-[11px] font-semibold text-bone-200 hover:text-ember-400"
+                className="rounded-[4px] bg-ink-800 px-2 py-1.5 text-[11px] font-semibold text-bone-200 hover:text-ember-400"
               >
                 Reset demo
               </button>
@@ -77,13 +78,14 @@ export function DemoPanel() {
       </AnimatePresence>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex h-7 min-w-7 items-center justify-center gap-1.5 rounded-full border border-bone-100/10 bg-ink-900/85 px-2 text-[10px] font-semibold text-bone-400 opacity-60 backdrop-blur transition-[color,opacity] hover:text-bone-100 hover:opacity-100 md:h-auto md:px-3 md:py-1.5 md:text-[11px] md:opacity-70"
+        className="relative grid h-9 w-9 place-items-center rounded-full bg-ink-900/85 text-bone-400 opacity-60 shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_12%,transparent)] backdrop-blur transition-[color,opacity] hover:text-bone-100 hover:opacity-100"
+        title={force ? `Demo controls · next pull ${RARITIES[force].label}` : 'Demo controls'}
         aria-expanded={open}
         aria-label="Demo controls"
         data-testid="demo-toggle"
       >
-        <span className="block h-1.5 w-1.5 rounded-full" style={{ background: force ? RARITIES[force].cssVar : 'var(--color-bone-400)' }} />
-        <span className="sr-only md:not-sr-only">Demo{force ? ` · ${RARITIES[force].label}` : ''}</span>
+        <SlidersHorizontal size={16} weight="light" aria-hidden />
+        {force && <span className="absolute right-1 top-1 block h-2 w-2 rotate-45" style={{ background: RARITIES[force].cssVar }} aria-hidden />}
       </button>
     </div>
   )

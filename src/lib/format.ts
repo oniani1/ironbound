@@ -19,7 +19,7 @@ export function pct(p: number, digits?: number): string {
 
 /** "1 in 2,000" style odds for small probabilities. */
 export function oneIn(p: number): string {
-  if (p <= 0) return '—'
+  if (p <= 0) return 'None'
   const n = Math.round(1 / p)
   return `1 in ${n.toLocaleString('en-US')}`
 }

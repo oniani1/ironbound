@@ -33,6 +33,14 @@ const variants: Record<Variant, string> = {
   danger: 'text-bone-50 bg-blood-500/90 hover:bg-blood-500 shadow-[inset_0_1px_0_oklch(100%_0_0/.15)]',
 }
 
+const base =
+  'relative isolate inline-flex select-none items-center justify-center whitespace-nowrap rounded-[6px] font-semibold uppercase tracking-[0.14em] transition-[transform,filter,background-color,box-shadow,color] duration-200 ease-out'
+
+/** The button look for a non-button element, such as the visible face of a card-wide link. */
+export function buttonClass(variant: Variant = 'primary', size: Size = 'md') {
+  return `${base} ${sizes[size]} ${variants[variant]}`
+}
+
 export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
   { variant = 'primary', size = 'md', icon, sub, className = '', children, silent, onClick, onMouseEnter, ...rest },
   ref,
@@ -40,7 +48,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
   return (
     <button
       ref={ref}
-      className={`relative isolate inline-flex select-none items-center justify-center whitespace-nowrap rounded-[6px] font-semibold uppercase tracking-[0.14em] transition-[transform,filter,background-color,box-shadow,color] duration-200 ease-out active:translate-y-px disabled:pointer-events-none disabled:opacity-40 ${sizes[size]} ${variants[variant]} ${className}`}
+      className={`${base} active:translate-y-px disabled:pointer-events-none disabled:opacity-40 ${sizes[size]} ${variants[variant]} ${className}`}
       onMouseEnter={(e) => {
         if (!silent) sfx.hover()
         onMouseEnter?.(e)
