@@ -10,9 +10,13 @@ async (mcpPage) => {
     args: ['--enable-gpu', '--use-angle=d3d11', '--ignore-gpu-blocklist'],
   })
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+  // A missing control fails the run after 20 s instead of waiting forever.
+  page.setDefaultTimeout(20000)
+  // To shoot one size only, write a copy with the marker replaced by 'd' or 'm'.
+  const ONLY = /*ONLY*/null
+  const out = []
   try {
     const BASE = 'http://localhost:5183'
-    const out = []
     const shot = async (name, opts = {}) => {
       await page.screenshot({ path: `.playwright-mcp/review/${name}.png`, ...opts })
       out.push(name)
@@ -50,14 +54,6 @@ async (mcpPage) => {
       await page.waitForTimeout(ms)
       await page.mouse.up()
     }
-    // Single openings pause with the lid hanging open until the player lifts it.
-    const liftLid = async (tag) => {
-      if (!(await waitPhase('lift', 200))) return false
-      await page.waitForTimeout(600)
-      if (tag) await shot(tag)
-      await page.getByTestId('lift-surface').click()
-      return true
-    }
     const openFromDetail = async () => {
       const button = page.locator('[data-testid="open-chest"]:visible, [data-testid="open-chest-mobile"]:visible').first()
       try {
@@ -71,7 +67,7 @@ async (mcpPage) => {
     for (const [w, h, tag] of [
       [1440, 900, 'd'],
       [390, 844, 'm'],
-    ]) {
+    ].filter(([, , t]) => !ONLY || t === ONLY)) {
       await page.setViewportSize({ width: w, height: h })
 
       // First visit: landing.
@@ -102,8 +98,7 @@ async (mcpPage) => {
         await shot(`${tag}-06-trial-charging`)
         await page.waitForTimeout(700)
         await page.mouse.up()
-        await liftLid()
-        await waitPhase('reveal')
+        await waitPhase('reveal', 260)
         await page.waitForTimeout(3800)
         await shot(`${tag}-07-trial-reveal`)
         const inspect = page.getByRole('button', { name: 'Hide the card and inspect the piece' })
@@ -147,14 +142,16 @@ async (mcpPage) => {
       await page.mouse.up()
       await page.waitForTimeout(900)
       await shot(`${tag}-14-open-tell`)
-      await liftLid(`${tag}-14b-open-lift`)
+      // The lid opens by itself; the camera dives close and travels along the piece while
+      // the facts come one by one; the rarity is named last.
+      await waitPhase('rise', 120)
+      await page.waitForTimeout(2300)
+      await shot(`${tag}-15-open-closeup`)
+      await page.waitForTimeout(2600)
+      await shot(`${tag}-16-open-facts`)
       await waitPhase('burst', 200)
-      await page.waitForTimeout(250)
-      await shot(`${tag}-15-open-burst`)
-      await waitPhase('rise')
-      // Mid-travel: the camera dives first, then moves along the piece.
-      await page.waitForTimeout(2200)
-      await shot(`${tag}-16-open-macro`)
+      await page.waitForTimeout(350)
+      await shot(`${tag}-16b-open-rarity`)
       await waitPhase('reveal')
       await page.waitForTimeout(3800)
       await shot(`${tag}-17-open-reveal`)
@@ -205,7 +202,6 @@ async (mcpPage) => {
       await waitPhase('await')
       await page.waitForTimeout(300)
       await hold(1300)
-      await liftLid()
       await waitPhase('reveal', 200)
       await page.waitForTimeout(1500)
       await shot(`${tag}-21-batch-facedown`)
@@ -240,6 +236,9 @@ async (mcpPage) => {
       }
     }
     return out
+  } catch (e) {
+    await page.screenshot({ path: '.playwright-mcp/review/zz-failed.png' }).catch(() => {})
+    return { failed: String(e).slice(0, 500), out }
   } finally {
     await browser.close()
   }

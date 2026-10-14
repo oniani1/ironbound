@@ -4,8 +4,10 @@
 // closes it at the end. To change the chest, rarity or size, write a copy with the CFG
 // marker replaced, e.g.
 //   sed "s|/\*CFG\*/{}|{ chest: 'squire', force: 'common' }|" scripts/opening-frames.mjs > .playwright-mcp/run-frames.mjs
+// To film one piece, pass item: '<id>': the run watches its opening from the item page.
+// every: ms between frames once the seal breaks. dir: subfolder of .playwright-mcp/frames.
 async (mcpPage) => {
-  const cfg = { chest: 'warlord', force: 'legendary', width: 1440, height: 900, lift: 'drag', ...(/*CFG*/{}) }
+  const cfg = { chest: 'warlord', force: 'legendary', width: 1440, height: 900, every: 450, dir: 'run', ...(/*CFG*/{}) }
   const browser = await mcpPage.context().browser().browserType().launch({
     channel: 'chrome',
     headless: true,
@@ -37,7 +39,7 @@ async (mcpPage) => {
       },
       { force: cfg.force, fast: !!cfg.fast },
     )
-    await page.goto(`http://localhost:5183/chests/${cfg.chest}`)
+    await page.goto(cfg.item ? `http://localhost:5183/item/${cfg.item}` : `http://localhost:5183/chests/${cfg.chest}`)
     await page.waitForTimeout(2000)
     const phase = () => page.getByTestId('opening-overlay').getAttribute('data-phase').catch(() => null)
     const t0 = Date.now()
@@ -45,7 +47,7 @@ async (mcpPage) => {
     let last = null
     let n = 0
     const shot = async (tag) => {
-      await page.screenshot({ path: `.playwright-mcp/frames/${String(n++).padStart(2, '0')}-${tag}.png` })
+      await page.screenshot({ path: `.playwright-mcp/frames/${cfg.dir}/${String(n++).padStart(2, '0')}-${tag}.png` })
     }
     const mark = async () => {
       const p = await phase()
@@ -63,8 +65,11 @@ async (mcpPage) => {
       }
       return false
     }
-    const desk = page.getByTestId('open-chest')
-    await ((await desk.isVisible()) ? desk : page.getByTestId('open-chest-mobile')).click()
+    if (cfg.item) await page.getByTestId('watch-pull').click()
+    else {
+      const desk = page.getByTestId('open-chest')
+      await ((await desk.isVisible()) ? desk : page.getByTestId('open-chest-mobile')).click()
+    }
     for (const at of [250, 800, 1400, 2000]) {
       while (Date.now() - t0 < at) {
         await mark()
@@ -72,44 +77,26 @@ async (mcpPage) => {
       }
       await shot(`intro-${at}`)
     }
-    if (!(await waitFor('await', 8000))) return { stuck: 'await', marks, errors }
-    await page.waitForTimeout(300)
-    await shot('await')
-    await page.getByTestId('hold-to-open').hover()
-    await page.mouse.down()
-    await page.waitForTimeout(900)
-    await shot('charging')
-    await page.waitForTimeout(800)
-    await page.mouse.up()
-    // The tease: a frame every 450 ms until the lid hangs open.
-    const tellEnd = Date.now() + 16000
-    while (Date.now() < tellEnd) {
-      const p = await mark()
-      if (p === 'lift' || p === 'burst' || p === 'rise' || p === 'reveal') break
-      await shot('tell')
-      await page.waitForTimeout(450)
+    if (!cfg.item) {
+      if (!(await waitFor('await', 8000))) return { stuck: 'await', marks, errors }
+      await page.waitForTimeout(300)
+      await shot('await')
+      await page.getByTestId('hold-to-open').hover()
+      await page.mouse.down()
+      await page.waitForTimeout(900)
+      await shot('charging')
+      await page.waitForTimeout(800)
+      await page.mouse.up()
     }
-    if (await waitFor('lift', 3000)) {
-      await page.waitForTimeout(700)
-      await shot('lift')
-      if (cfg.lift === 'drag') {
-        await page.mouse.move(cfg.width / 2, cfg.height * 0.72)
-        await page.mouse.down()
-        await page.mouse.move(cfg.width / 2, cfg.height * 0.62, { steps: 6 })
-        await page.waitForTimeout(120)
-        await shot('lift-drag')
-        await page.mouse.move(cfg.width / 2, cfg.height * 0.48, { steps: 6 })
-        await page.mouse.up()
-      } else if (cfg.lift === 'key') {
-        await page.keyboard.press('Space')
-      }
-    }
-    const end = Date.now() + 12000
+    // From the broken seal to the rarity: a frame every cfg.every ms.
+    const end = Date.now() + 22000
     while (Date.now() < end) {
       const p = await mark()
       if (p === 'reveal') break
-      await shot(p ?? 'none')
-      await page.waitForTimeout(350)
+      // No auto-wait here: the facts are absent for most of the run.
+      const facts = await page.evaluate(() => document.querySelector('[data-testid="reveal-facts"]')?.getAttribute('data-beat') ?? null)
+      await shot(`${p ?? 'none'}${facts !== null ? '-f' + facts : ''}`)
+      await page.waitForTimeout(cfg.every)
     }
     if (!(await waitFor('reveal', 4000))) return { stuck: 'reveal', marks, errors }
     await page.waitForTimeout(450)
