@@ -10,7 +10,6 @@ import { ITEMS } from '../data/items'
 import { money, shortEra } from '../lib/format'
 import { RarityTag } from '../components/ui/RarityTag'
 import { ItemVitrine } from '../components/ui/Vitrine'
-import { sfx } from '../lib/audio'
 import { useStore } from '../lib/store'
 import { Button } from '../components/ui/Button'
 import { useGuestCta, useOnboarding } from '../components/onboarding/OnboardingContext'
@@ -58,7 +57,7 @@ function Hero() {
     const tease = () => {
       // A slow glint runs down the steel, and the chest exhales a few embers.
       gsap.fromTo(anim, { glint: 0 }, { glint: 1, duration: 1.1, ease: 'power2.inOut', onComplete: () => void (anim.glint = -1) })
-      gsap.timeline().to(anim, { glow: 1.5, duration: 0.3, ease: 'power2.out' }).to(anim, { glow: 1.05, duration: 1.2, ease: 'power2.out' })
+      gsap.timeline().to(anim, { glow: 1.5, duration: 0.3, ease: 'power2.out', overwrite: 'auto' }).to(anim, { glow: 1.05, duration: 1.2, ease: 'power2.out' })
       anim.emit(16, '#ffc46e', 0.6)
       teaseTimer.current = window.setTimeout(tease, 4800 + Math.random() * 3000)
     }
@@ -67,8 +66,8 @@ function Hero() {
   }, [anim])
 
   const hover = (on: boolean) => {
-    gsap.to(anim, { glow: on ? 1.45 : 1.05, beam: on ? 0.42 : 0.3, duration: 0.5, ease: 'power2.out' })
-    if (on) sfx.rattle(0.2)
+    // One tween at a time: quick passes in and out must not leave tweens fighting over the light.
+    gsap.to(anim, { glow: on ? 1.45 : 1.05, beam: on ? 0.42 : 0.3, duration: 0.5, ease: 'power2.out', overwrite: 'auto' })
   }
 
   return (
@@ -80,7 +79,8 @@ function Hero() {
       >
         <ChestScene theme={theme} anim={anim} item={featured} heroItem rarityHex="#ffc94d" itemGlow={0.6} parallax className="!absolute inset-0" />
       </div>
-      <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(90deg,var(--color-ink-950)_8%,transparent_55%)] md:block" />
+      {/* Solid ink up to where the scene begins, so its left edge never shows, then a soft fade. */}
+      <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(90deg,var(--color-ink-950)_31%,color-mix(in_oklch,var(--color-ink-950)_65%,transparent)_42%,transparent_62%)] md:block" />
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -186,13 +186,13 @@ function Showcase() {
       {/* Phones swipe through snap cards; larger screens get a slow drifting river. */}
       <div className="hide-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 md:hidden">
         {items.map((it) => (
-          <ItemVitrine key={it.id} item={it} aspect="aspect-[4/5]" className="w-[58vw] shrink-0 snap-center" />
+          <ItemVitrine key={it.id} item={it} aspect="aspect-[4/5]" className="w-[58vw] shrink-0 snap-center" to={`/item/${it.id}`} />
         ))}
       </div>
       <div className="group relative hidden overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)] md:block">
         <div className="flex w-max animate-marquee gap-8 group-hover:[animation-play-state:paused]">
           {loop.map((it, i) => (
-            <ItemVitrine key={`${it.id}-${i}`} item={it} aspect="aspect-[4/5]" className="w-[200px] shrink-0 sm:w-[220px]" />
+            <ItemVitrine key={`${it.id}-${i}`} item={it} aspect="aspect-[4/5]" className="w-[200px] shrink-0 sm:w-[220px]" to={`/item/${it.id}`} />
           ))}
         </div>
       </div>

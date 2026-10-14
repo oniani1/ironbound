@@ -33,20 +33,17 @@ export function LootBeam({ anim }: { anim: ChestAnim }) {
           varying vec2 vUv;
           varying vec3 vNormalW;
           varying vec3 vViewDir;
-          float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-          float noise(vec2 p) {
-            vec2 i = floor(p), f = fract(p);
-            float a = hash(i), b = hash(i + vec2(1.0, 0.0)), c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));
-            vec2 u = f * f * (3.0 - 2.0 * f);
-            return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
-          }
+          const float TAU = 6.2831853;
           void main() {
             float facing = abs(dot(normalize(vNormalW), normalize(vViewDir)));
             float core = pow(facing, 3.2);
             float v = vUv.y;
             float fadeUp = pow(1.0 - v, 1.8);
             float fadeBase = smoothstep(0.0, 0.04, v);
-            float streaks = noise(vec2(vUv.x * 22.0, v * 3.0 - uTime * 1.6)) * 0.6 + noise(vec2(vUv.x * 7.0, v * 1.5 - uTime * 0.7)) * 0.6;
+            // Whole numbers of waves around the cylinder: the streaks meet themselves at the
+            // UV seam, so no line shows where the geometry closes.
+            float a1 = vUv.x * TAU;
+            float streaks = 0.5 + 0.25 * sin(a1 * 9.0 + v * 4.0 - uTime * 1.3) + 0.15 * sin(a1 * 17.0 - v * 6.0 + uTime * 0.9) + 0.1 * sin(a1 * 5.0 + uTime * 0.5);
             float a = core * fadeUp * fadeBase * (0.12 + streaks * 0.85) * uStrength * 0.75;
             vec3 col = mix(uColor, vec3(1.0, 0.97, 0.9), core * 0.22) * (0.75 + core * 0.7);
             gl_FragColor = vec4(col, a);

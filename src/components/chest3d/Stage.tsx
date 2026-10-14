@@ -40,7 +40,7 @@ function Torch({ position, phase, anim }: { position: [number, number, number]; 
   useFrame((state) => {
     const t = state.clock.elapsedTime + phase
     const flicker = 0.82 + Math.sin(t * 9.3) * 0.06 + Math.sin(t * 23.1) * 0.05 + Math.sin(t * 3.7) * 0.07
-    if (light.current) light.current.intensity = 5.5 * flicker * (1 - anim.beam * 0.35) * anim.room
+    if (light.current) light.current.intensity = 5.5 * flicker * (1 - anim.beam * 0.35) * anim.room * (1 + anim.flare * 0.45)
   })
   return <pointLight ref={light} position={position} color="#ff9b4a" distance={7} decay={1.6} />
 }

@@ -7,7 +7,8 @@ import type { ChestAnim } from './animState'
 import { ChestModel } from './ChestModel'
 import { CameraRig } from './CameraRig'
 import { LootBeam, Shockwave, Sparks } from './Effects3D'
-import { Candles, DustMotes } from './Atmosphere'
+import { DustMotes } from './Atmosphere'
+import { CastleBackdrop } from './Backdrop'
 import { ItemRise } from './ItemRise'
 import { PostFX } from './PostFX'
 import { Stage } from './Stage'
@@ -130,10 +131,13 @@ export function ChestScene(props: Props) {
 
 function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, plinth = true, fx = true, className, distance, frameloop = 'always', render = false, itemGlow = 1, heroItem = false }: Props) {
   const bg = useMemo(() => cssColorToHex('--color-ink-950'), [])
-  // Start sharp, drop resolution if the device cannot hold the frame rate.
+  // Start sharp; if the device cannot hold the frame rate, step down once and stay there.
+  // Stepping back up on every recovery resized the canvas and the effect buffers, which
+  // flashed black frames whenever the pointer moved fast over the hero.
   const [dpr, setDpr] = useState(() => Math.min(typeof window === 'undefined' ? 1 : window.devicePixelRatio, 1.75))
-  // Low-density screens alias on the gold trim, so they get 4x MSAA until the frame rate drops.
-  const [msaa, setMsaa] = useState(() => (typeof window !== 'undefined' && window.devicePixelRatio < 1.5 ? 4 : 0))
+  // Low-density screens alias on the gold trim, so they get 4x MSAA. Fixed at mount: changing
+  // it rebuilds the composer.
+  const [msaa] = useState(() => (typeof window !== 'undefined' && window.devicePixelRatio < 1.5 ? 4 : 0))
   return (
     <Canvas
       className={className}
@@ -143,13 +147,7 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
       camera={render ? { fov: 26, position: [1.25, 1.0, 2.75], near: 0.05, far: 40 } : { fov: 32, position: [0, 1.05, 3.15], near: 0.05, far: 40 }}
       onCreated={render ? ({ camera }) => camera.lookAt(0, 0.3, 0) : undefined}
     >
-      {!render && <PerformanceMonitor
-          onDecline={() => {
-            setDpr(1)
-            setMsaa(0)
-          }}
-          onIncline={() => setDpr(Math.min(window.devicePixelRatio, 1.75))}
-        />}
+      {!render && <PerformanceMonitor onDecline={() => setDpr(1)} />}
       {!render && <color attach="background" args={[bg]} />}
       {!render && <fog attach="fog" args={[bg, 4.5, 11]} />}
       <Suspense fallback={null}>
@@ -158,7 +156,7 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
         <LootBeam anim={anim} />
         <Shockwave anim={anim} />
         {!render && <Sparks anim={anim} />}
-        {!render && plinth && <Candles anim={anim} />}
+        {!render && <CastleBackdrop anim={anim} />}
         {!render && fx && <DustMotes anim={anim} count={typeof window !== 'undefined' && window.innerWidth < 768 ? 150 : 260} />}
       </Suspense>
       {item && (
