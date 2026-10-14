@@ -29,6 +29,7 @@ export default function ChestDetail() {
   const [short, setShort] = useState(false)
   const balance = useStore((s) => s.balance)
   const signedIn = useStore((s) => s.signedIn)
+  const hasTrialPull = useStore((s) => s.pulls.some((p) => p.chestId === 'trial'))
   const fast = useStore((s) => s.settings.fast)
   const feed = useFeed()
   const { open } = useOpening()
@@ -81,7 +82,7 @@ export default function ChestDetail() {
           <p className="mt-3 max-w-[48ch] text-[15px] text-bone-300">{chest.tagline}</p>
 
           <div className="mt-7">
-            <OddsBar chest={chest} height={10} labels />
+            <OddsBar chest={chest} height={10} defaultExpanded />
           </div>
 
           <dl className="mt-6 grid grid-cols-2 gap-3 border-y border-bone-100/[0.08] py-4 text-[12px] sm:grid-cols-4">
@@ -90,7 +91,7 @@ export default function ChestDetail() {
               <dd className="mt-1 text-[18px] font-semibold text-bone-50 tabular">{money(ev)}</dd>
             </div>
             <div>
-              <dt className="text-bone-400">Expected as cash</dt>
+              <dt className="text-bone-400">Expected sell-back</dt>
               <dd className="mt-1 text-[18px] font-semibold text-bone-50 tabular">{money(ev * chest.buyback)}</dd>
             </div>
             <div>
@@ -134,7 +135,7 @@ export default function ChestDetail() {
                   <span className="text-[20px] font-bold tabular">{money(total)}</span>
                 </span>
               ) : (
-                'Open a free chest first'
+                hasTrialPull ? 'Claim demo credit' : 'Open a free chest'
               )}
             </Button>
             <div className="mt-3 flex items-center justify-between text-[12px] text-bone-400">
@@ -145,7 +146,7 @@ export default function ChestDetail() {
               ) : (
                 <span>No sign-up needed to try it.</span>
               )}
-              <span>Items are vaulted and insured the moment you pull them.</span>
+              <span>Inventory and insurance are simulated.</span>
             </div>
             {short && (
               <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mt-3 flex items-center justify-between rounded-xl border border-ember-500/30 bg-ember-500/10 px-4 py-3 text-[13px]">
@@ -194,7 +195,7 @@ export default function ChestDetail() {
                 <span className="text-[17px] font-bold tabular">{money(total)}</span>
               </span>
             ) : (
-              'Open a free chest'
+              hasTrialPull ? 'Claim demo credit' : 'Open a free chest'
             )}
           </Button>
         </div>
@@ -208,7 +209,7 @@ export default function ChestDetail() {
             <h2 className="font-display mt-1 text-[34px] font-semibold text-bone-50 sm:text-[42px]">Every item, every chance</h2>
           </div>
           <p className="max-w-[46ch] text-[13px] text-bone-400">
-            Values come from recent auction results and maker list prices for the same type and condition. Valued {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.
+            Sample valuations · 14 Oct 2026. No live appraisal.
           </p>
         </div>
         <div className="mt-8 space-y-10">
@@ -259,11 +260,11 @@ export default function ChestDetail() {
             </li>
             <li>
               <span className="font-display text-[22px] text-brass-300">II.</span>
-              <p className="mt-1">Each draw uses verifiable randomness and leaves a receipt. In this demo the receipts are simulated.</p>
+              <p className="mt-1">Demo draws use browser randomness. No on-chain proof.</p>
             </li>
             <li>
               <span className="font-display text-[22px] text-brass-300">III.</span>
-              <p className="mt-1">The item is already in our insured vault. What you pull is the exact piece you own.</p>
+              <p className="mt-1">Inventory and insurance are simulated.</p>
             </li>
           </ol>
         </div>
