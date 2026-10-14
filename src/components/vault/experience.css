@@ -84,3 +84,17 @@
 .ib-credit-moment > span:last-child { font-size: 1rem; }
 @media (min-width: 768px) { .ib-shell { width: min(100% - 96px, 1248px); } .ib-step { padding: 48px 40px 56px; } }
 @media (min-width: 768px) { .ib-arms-layout { grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); gap: 48px; } .ib-arms-preview { min-height: 520px; } .ib-arms-controls { gap: 16px; } .ib-large-shield { width: 220px; height: 264px; } .ib-story-illustration { min-height: 330px; } .ib-story-illustration .ib-artwork { height: 300px; } }
+
+/* Phones: keep the banner preview compact and the confirm button within thumb reach. */
+@media (max-width: 767px) {
+  .ib-arms-preview { min-height: 200px; padding: 16px; gap: 10px; }
+  .ib-arms-layout { gap: 20px; margin-top: 16px; }
+  .ib-arms-layout .ib-step-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-top: 8px;
+    padding: 14px 0 calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, transparent, var(--color-ink-950) 32%);
+  }
+}
