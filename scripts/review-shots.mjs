@@ -59,8 +59,13 @@ async (mcpPage) => {
       return true
     }
     const openFromDetail = async () => {
-      const desk = page.getByTestId('open-chest')
-      await ((await desk.isVisible()) ? desk : page.getByTestId('open-chest-mobile')).click()
+      const button = page.locator('[data-testid="open-chest"]:visible, [data-testid="open-chest-mobile"]:visible').first()
+      try {
+        await button.click({ timeout: 15000 })
+      } catch (e) {
+        await page.screenshot({ path: '.playwright-mcp/review/zz-failed-open.png' })
+        throw e
+      }
     }
 
     for (const [w, h, tag] of [
