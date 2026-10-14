@@ -21,6 +21,13 @@ export function pickOne<T>(entries: readonly T[], r: number = random()): T {
   return entries[Math.min(entries.length - 1, Math.floor(r * entries.length))] as T
 }
 
+/** A 32-byte hex string, used as a mock verifiable draw receipt. */
+export function drawId(): string {
+  const buf = new Uint8Array(32)
+  crypto.getRandomValues(buf)
+  return Array.from(buf, (b) => b.toString(16).padStart(2, '0')).join('')
+}
+
 export function uid(): string {
   const buf = new Uint8Array(8)
   crypto.getRandomValues(buf)

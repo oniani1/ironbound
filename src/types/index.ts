@@ -76,6 +76,8 @@ export interface Pull {
   value: number
   at: number
   status: PullStatus
+  /** Mock verifiable-randomness receipt for the draw. */
+  draw?: string
   soldFor?: number
   shipment?: { name: string; city: string; country: string; method: 'standard' | 'express'; eta: string; tracking: string }
 }

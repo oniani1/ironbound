@@ -3,7 +3,7 @@ import { useTexture } from '@react-three/drei'
 import { CHEST_BY_ID } from '../../config/chests'
 import { ITEM_BY_ID, ITEMS } from '../../data/items'
 import { rollItem, rollItemIn } from '../../lib/gacha'
-import { uid } from '../../lib/rng'
+import { drawId, uid } from '../../lib/rng'
 import { actions, getState } from '../../lib/store'
 import { pushFeed } from '../../lib/feed'
 import type { Chest, Pull } from '../../types'
@@ -61,7 +61,7 @@ export function OpeningProvider({ children }: { children: ReactNode }) {
         : force && i === count - 1
           ? rollItemIn(chest, ITEMS, force)
           : rollItem(chest, ITEMS)
-      results.push({ uid: uid(), item: roll.item, rarity: roll.rarity })
+      results.push({ uid: uid(), item: roll.item, rarity: roll.rarity, draw: drawId() })
     }
     if (force) actions.setForce(null)
     const pulls: Pull[] = results.map((r, i) => ({
@@ -73,6 +73,7 @@ export function OpeningProvider({ children }: { children: ReactNode }) {
       value: r.item.value,
       at: now + i,
       status: 'vaulted',
+      draw: r.draw,
     }))
     actions.addPulls(pulls)
     const name = getState().profile?.name ?? 'You'

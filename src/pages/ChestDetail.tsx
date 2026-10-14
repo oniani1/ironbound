@@ -201,6 +201,29 @@ export default function ChestDetail() {
         </div>
       </section>
 
+      <section className="mx-auto mt-16 max-w-[1400px] px-4 sm:px-6">
+        <div className="grid gap-6 rounded-[22px] border border-bone-100/[0.07] bg-ink-900/60 p-6 sm:grid-cols-[1fr_1.4fr] sm:p-8">
+          <div>
+            <p className="eyebrow">Fair by construction</p>
+            <h2 className="font-display mt-1 text-[30px] font-semibold leading-tight text-bone-50">How every draw is made</h2>
+          </div>
+          <ol className="grid gap-4 text-[14px] text-bone-300 sm:grid-cols-3">
+            <li>
+              <span className="font-display text-[22px] text-brass-300">I.</span>
+              <p className="mt-1">The odds above are fixed before you open. They never change with your history or your balance.</p>
+            </li>
+            <li>
+              <span className="font-display text-[22px] text-brass-300">II.</span>
+              <p className="mt-1">Each draw uses verifiable randomness and leaves a receipt you can check on chain.</p>
+            </li>
+            <li>
+              <span className="font-display text-[22px] text-brass-300">III.</span>
+              <p className="mt-1">The item is already in our insured vault. What you pull is the exact piece you own.</p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
       {recent.length > 0 && (
         <section className="mx-auto mt-16 max-w-[1400px] px-4 sm:px-6">
           <p className="eyebrow">Recent pulls from this chest</p>

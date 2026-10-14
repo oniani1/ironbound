@@ -13,6 +13,7 @@ export interface MultiResult {
   uid: string
   item: Item
   rarity: RarityId
+  draw: string
 }
 
 interface Props {

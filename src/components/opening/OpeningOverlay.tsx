@@ -301,6 +301,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         {phase === 'reveal' && !multi && (
           <div className="pointer-events-none absolute inset-0 flex items-end justify-center md:items-center md:justify-end md:pr-[max(2rem,6vw)]">
             <RevealCard
+              draw={first.draw}
               item={first.item}
               rarity={first.rarity}
               chest={chest}

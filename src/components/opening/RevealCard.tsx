@@ -10,6 +10,7 @@ import { Pips } from '../ui/RarityTag'
 import { CoinBurst } from '../ui/CoinBurst'
 
 interface Props {
+  draw?: string
   item: Item
   rarity: RarityId
   chest: Chest
@@ -34,7 +35,7 @@ const CATEGORY_LABEL: Record<Item['category'], string> = {
   fitting: 'Fitting',
 }
 
-export function RevealCard({ item, rarity, chest, sold, onKeep, onSell, onShip, onAgain, onReplay, canAfford, trial }: Props) {
+export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, onShip, onAgain, onReplay, canAfford, trial }: Props) {
   const r = RARITIES[rarity]
   const offer = Math.round(item.value * chest.buyback)
   const delta = item.value - chest.price
@@ -169,6 +170,12 @@ export function RevealCard({ item, rarity, chest, sold, onKeep, onSell, onShip, 
           </Button>
         )}
       </motion.div>
+      {draw && (
+        <motion.p {...rise(1.05)} className="relative mt-3 flex items-center justify-center gap-1.5 text-[10px] text-bone-400" title={`Draw ${draw}`}>
+          <span className="block h-1 w-1 rounded-full bg-moss-400" />
+          Draw 0x{draw.slice(0, 6)}…{draw.slice(-4)} · verifiable on Solana (demo)
+        </motion.p>
+      )}
       {coins && <CoinBurst from={coins.from} to={coins.to} onDone={() => setCoins(null)} />}
     </motion.aside>
   )
