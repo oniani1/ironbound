@@ -67,12 +67,12 @@ export function sourceHost(url?: string): string {
   }
 }
 
-const LICENSE_DEEDS: Record<string, string> = {
-  CC0: 'https://creativecommons.org/publicdomain/zero/1.0/',
-  'CC BY 2.0': 'https://creativecommons.org/licenses/by/2.0/',
-  'CC BY 4.0': 'https://creativecommons.org/licenses/by/4.0/',
-  'CC BY-SA 3.0': 'https://creativecommons.org/licenses/by-sa/3.0/',
-  'CC BY-SA 4.0': 'https://creativecommons.org/licenses/by-sa/4.0/',
+/** The deed for a license as credited: "CC BY-SA 3.0", a ported "CC BY-SA 2.0 FR", CC0 or a public domain mark. */
+function licenseDeed(license: string): string | null {
+  if (license === 'CC0') return 'https://creativecommons.org/publicdomain/zero/1.0/'
+  if (license === 'Public domain') return 'https://creativecommons.org/publicdomain/mark/1.0/'
+  const m = license.match(/^CC (BY(?:-SA)?) (\d\.\d)(?: ([A-Z]{2}))?$/)
+  return m ? `https://creativecommons.org/licenses/${m[1]!.toLowerCase()}/${m[2]}/${m[3] ? `${m[3].toLowerCase()}/` : ''}` : null
 }
 
 export interface PhotoCreditParts {
@@ -94,15 +94,15 @@ export interface PhotoCreditParts {
  */
 export function photoCredit(item: Pick<Item, 'credit' | 'provenance' | 'photoExact'>): PhotoCreditParts {
   const text = item.credit.replace(/^(Example photo|Photo): /, '')
-  const match = text.match(/^(.*?)[,(]?\s*\(?(CC0|CC BY(?:-SA)? \d\.\d)\)?$/)
+  const match = text.match(/^(.*?)[,(]?\s*\(?(CC0|CC BY(?:-SA)? \d\.\d(?: [A-Z]{2})?|Public domain)\)?$/)
   const license = match?.[2] ?? null
   const shareAlike = !!license?.includes('-SA')
   return {
     label: item.provenance === 'antique' ? 'Photograph' : item.photoExact === false ? 'Example photo' : 'Photo',
     by: (match?.[1] ?? text).replace(/[,\s]+$/, ''),
     license,
-    licenseUrl: license ? (LICENSE_DEEDS[license] ?? null) : null,
-    publicDomain: license === 'CC0',
+    licenseUrl: license ? licenseDeed(license) : null,
+    publicDomain: license === 'CC0' || license === 'Public domain',
     changes: shareAlike ? 'Cut out from the original photo; the cutout is shared under the same license.' : 'Cut out from the original photo.',
   }
 }

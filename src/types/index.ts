@@ -1,6 +1,7 @@
 export type RarityId = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'relic'
 
-export type Category = 'sword' | 'dagger' | 'polearm' | 'axe' | 'helmet' | 'shield' | 'armor' | 'crossbow' | 'fitting'
+/** 'fitting' is kept for archived pulls; the catalog holds none. */
+export type Category = 'sword' | 'dagger' | 'polearm' | 'axe' | 'helmet' | 'shield' | 'armor' | 'bow' | 'crossbow' | 'fitting'
 
 export type Provenance = 'antique' | 'forged'
 

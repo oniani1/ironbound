@@ -111,7 +111,7 @@ export default function ChestDetail() {
             ].map(([label, value]) => (
               <div key={label}>
                 <dt className="text-[12px] text-bone-400">{label}</dt>
-                <dd className="mt-1.5 text-[20px] font-semibold leading-none text-bone-50 tabular">{value}</dd>
+                <dd className="ib-money mt-1.5 text-[26px] leading-none text-bone-50">{value}</dd>
               </div>
             ))}
           </dl>
@@ -161,7 +161,7 @@ export default function ChestDetail() {
       </div>
 
       {/* Phones: the purchase stays within thumb reach above the tab bar. */}
-      <div className="fixed inset-x-0 bottom-[calc(57px+env(safe-area-inset-bottom))] z-20 border-t border-bone-100/[0.08] bg-ink-950/95 px-3 py-2.5 md:hidden">
+      <div className="fixed inset-x-0 bottom-[calc(57px+env(safe-area-inset-bottom))] z-20 border-t border-bone-100/[0.08] bg-ink-950 px-3 py-2.5 md:hidden">
         {short && (
           <div className="mb-2 flex items-center justify-between px-1 py-1 text-[12px]">
             <span className="text-bone-100">Purse is {money(total - balance)} short.</span>

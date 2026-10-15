@@ -32,9 +32,8 @@ export function MakersSection() {
     <section className="border-t border-bone-100/[0.06] bg-ink-950 py-16 sm:py-24" aria-labelledby="makers-title">
       <div className="mx-auto grid max-w-[1400px] gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)] lg:gap-16">
         <div className="lg:sticky lg:top-28 lg:self-start">
-          <p className="eyebrow">From the forge</p>
           <h2 id="makers-title" className="font-display mt-3 text-[38px] font-semibold leading-[1.02] text-bone-50 sm:text-[52px]">
-            Newly forged by <em className="font-medium text-brass-300">working makers.</em>
+            Newly forged by working makers.
           </h2>
           <p className="mt-5 max-w-[46ch] text-[15px] leading-relaxed text-bone-300">
             The chests hold {count} newly forged pieces from {rows.length} makers, alongside the antiques: budget display steel and HEMA trainers, Albion swords, signed Japanese blades. Every piece carries its retail price and our view of how well the maker resells.

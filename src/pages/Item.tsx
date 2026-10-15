@@ -100,7 +100,7 @@ export default function ItemPage() {
           <div className="mt-6 flex flex-wrap items-end gap-x-10 gap-y-4">
             <div>
               <p className="text-[12px] text-bone-400">{isNew ? 'Retail price, new' : 'Estimated value'}</p>
-              <p className="mt-1 text-[34px] font-semibold leading-none text-bone-50 tabular">{money(item.value)}</p>
+              <p className="ib-money mt-1 text-[40px] leading-none text-bone-50">{money(item.value)}</p>
               {isNew && item.priceSource && (
                 <a href={item.priceSource} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-[12px] text-bone-300 underline decoration-bone-100/25 underline-offset-2 hover:text-bone-100">
                   {sourceHost(item.priceSource)}, read {RETAIL_CHECKED}

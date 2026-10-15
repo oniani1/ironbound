@@ -10,8 +10,8 @@ import { asset } from '../../lib/asset'
  * The room around the altar: a royal hall in late afternoon, built in code. Tall lancet
  * windows in the left wall let the low sun in. Sheets of light with dust in them cross the
  * hall and land behind the altar, the columns throw long shadows across the floor, and
- * everything the sun does not reach stays in deep shadow. Crimson banners with a gold crown
- * hang in an arched niche on the back wall. The sun stays a neutral warm white: color in
+ * everything the sun does not reach stays in deep shadow. A crimson banner with a crown
+ * embroidered in gold hangs in an arched niche on the back wall. The sun stays a neutral warm white: color in
  * this room belongs to rarity, which reaches the hall from the chest once it is named. The
  * whole room dims with the room light, so a blackout takes the sun away too.
  */
@@ -72,133 +72,203 @@ function repeated(tex: THREE.Texture, x: number, y: number, color = false) {
 }
 
 // ---------------------------------------------------------------------------------------
-// Cloth: banners and the runner are painted on canvases, so nothing has to be downloaded.
+// Cloth: the banner and the runner are painted on canvases, so nothing has to be downloaded.
 
-/** The crown: five points with the tallest in the middle, deep valleys, pearls, a jeweled
- * band. Drawn in a 320 by 200 box and mirrored about its center line, so it is symmetric. */
-function crownPath() {
+/**
+ * The banner is painted twice from one drawing: once in color, and once as a material mask
+ * whose green channel is roughness and blue channel metalness, so the gold thread catches the
+ * light like gilt embroidery while the silk around it stays matte.
+ */
+type Paint = 'color' | 'mask'
+const MASK = {
+  /** Gold thread and cord: metal, fairly smooth. */
+  gold: 'rgb(0,95,255)',
+  /** Stones and pearls: polished, not metal. */
+  stone: 'rgb(0,40,0)',
+  pearl: 'rgb(0,70,0)',
+  /** Silk. */
+  cloth: 'rgb(0,224,0)',
+}
+
+/** A fleur-de-lis standing on y = 0, 100 units tall, centred on x = 0: petals and foot. */
+const FLEUR =
+  // Central petal: a spearhead rising from the tie.
+  'M 0 -100 C 10 -84 16 -64 13 -46 C 11 -40 8 -36 6 -33 L -6 -33 C -8 -36 -11 -40 -13 -46 C -16 -64 -10 -84 0 -100 Z ' +
+  // Side petals: horns that rise from the tie, curl over and hook down and out to a point.
+  'M -6 -34 C -10 -52 -16 -68 -26 -76 C -36 -84 -50 -76 -48 -58 C -46 -66 -40 -70 -34 -66 C -28 -58 -24 -40 -16 -27 Z ' +
+  'M 6 -34 C 10 -52 16 -68 26 -76 C 36 -84 50 -76 48 -58 C 46 -66 40 -70 34 -66 C 28 -58 24 -40 16 -27 Z ' +
+  // A short foot under the tie.
+  'M -6 -25 C -6 -14 -3 -6 0 0 C 3 -6 6 -14 6 -25 Z'
+/** The tie that binds the petals, drawn over them. */
+const TIE = 'M -22 -35 L 22 -35 Q 24 -30 22 -25 L -22 -25 Q -24 -30 -22 -35 Z'
+
+function placed(d: string, x: number, y: number, kx: number, ky: number) {
   const p = new Path2D()
-  p.moveTo(14, 140)
-  p.lineTo(22, 60)
-  p.quadraticCurveTo(34, 104, 56, 118)
-  p.quadraticCurveTo(78, 100, 88, 46)
-  p.quadraticCurveTo(100, 100, 124, 118)
-  p.quadraticCurveTo(146, 96, 160, 22)
-  p.quadraticCurveTo(174, 96, 196, 118)
-  p.quadraticCurveTo(220, 100, 232, 46)
-  p.quadraticCurveTo(242, 100, 264, 118)
-  p.quadraticCurveTo(286, 104, 298, 60)
-  p.lineTo(306, 140)
-  p.closePath()
+  p.addPath(new Path2D(d), new DOMMatrix([kx, 0, 0, ky, x, y]))
   return p
 }
 
-function drawCrown(g: CanvasRenderingContext2D, cx: number, top: number, width: number) {
-  const s = width / 320
+/** Gold thread laid in parallel rows and clipped to a motif: a satin stitch at an angle. */
+function stitch(g: CanvasRenderingContext2D, path: Path2D, angle: number, cx: number, cy: number, r: number) {
   g.save()
-  g.translate(cx - 160 * s, top + 16 * s)
-  g.scale(s, s)
-  const gold = g.createLinearGradient(0, -16, 0, 200)
-  gold.addColorStop(0, '#f9e4a3')
-  gold.addColorStop(0.38, '#dcb15a')
-  gold.addColorStop(0.72, '#b0802f')
-  gold.addColorStop(1, '#7a531b')
-  const ink = '#36210a'
-  const outline = (path: Path2D, width = 3.2) => {
-    g.lineJoin = 'round'
-    g.lineWidth = width
-    g.strokeStyle = ink
-    g.stroke(path)
+  g.clip(path)
+  g.translate(cx, cy)
+  g.rotate(angle)
+  g.lineWidth = 1.1
+  for (let i = -r, n = 0; i < r; i += 2.2, n++) {
+    g.strokeStyle = n % 2 ? 'rgba(255,240,200,0.18)' : 'rgba(70,40,10,0.16)'
+    g.beginPath()
+    g.moveTo(-r, i)
+    g.lineTo(r, i)
+    g.stroke()
   }
-  const fill = (path: Path2D) => {
-    g.fillStyle = gold
-    g.fill(path)
-  }
-  // Points.
-  const points = crownPath()
-  fill(points)
-  outline(points)
-  // Band, bowed slightly at the bottom.
-  const band = new Path2D()
-  band.moveTo(10, 138)
-  band.lineTo(310, 138)
-  band.lineTo(310, 186)
-  band.quadraticCurveTo(160, 202, 10, 186)
-  band.closePath()
-  fill(band)
-  outline(band)
-  g.strokeStyle = 'rgba(54,33,10,0.55)'
-  g.lineWidth = 1.6
-  g.beginPath()
-  g.moveTo(14, 148)
-  g.lineTo(306, 148)
-  g.moveTo(14, 178)
-  g.quadraticCurveTo(160, 192, 306, 178)
-  g.stroke()
-  // Pearls on the four outer points; an orb and a cross on the middle one.
-  for (const [x, y] of [
-    [22, 52],
-    [298, 52],
-    [88, 38],
-    [232, 38],
-  ] as const) {
-    const pearl = new Path2D()
-    pearl.arc(x, y, 9, 0, Math.PI * 2)
-    g.fillStyle = '#efe4c8'
-    g.fill(pearl)
-    outline(pearl, 2.4)
-  }
-  const orb = new Path2D()
-  orb.arc(160, 16, 11, 0, Math.PI * 2)
-  fill(orb)
-  outline(orb, 2.6)
-  const cross = new Path2D()
-  cross.rect(155, -22, 10, 30)
-  cross.rect(147, -14, 26, 9)
-  fill(cross)
-  outline(cross, 2.2)
-  // Jewels on the band: a garnet in the middle, lozenges either side, pearls at the ends.
-  const jewel = (path: Path2D) => {
-    g.fillStyle = '#7d0d1b'
-    g.fill(path)
-    outline(path, 2.2)
-  }
-  const garnet = new Path2D()
-  garnet.ellipse(160, 164, 15, 11, 0, 0, Math.PI * 2)
-  jewel(garnet)
-  for (const x of [96, 224]) {
-    const lozenge = new Path2D()
-    lozenge.moveTo(x, 152)
-    lozenge.lineTo(x + 9, 164)
-    lozenge.lineTo(x, 176)
-    lozenge.lineTo(x - 9, 164)
-    lozenge.closePath()
-    jewel(lozenge)
-  }
-  for (const x of [46, 274]) {
-    const pearl = new Path2D()
-    pearl.arc(x, 164, 6, 0, Math.PI * 2)
-    g.fillStyle = '#efe4c8'
-    g.fill(pearl)
-    outline(pearl, 1.8)
-  }
-  // A soft highlight on the jewels.
-  g.fillStyle = 'rgba(255,230,230,0.5)'
-  g.beginPath()
-  g.ellipse(155, 160, 4, 3, -0.5, 0, Math.PI * 2)
-  g.fill()
   g.restore()
 }
 
-/** A crimson banner with a gold border and a swallowtail hem; the emblem is a crown or a lozenge. */
-function bannerTexture(emblem: 'crown' | 'lozenge') {
-  const W = 512
-  const H = 1408
+/** The couched gold cord that outlines each motif, over a dark line that lifts it off the silk. */
+function cord(g: CanvasRenderingContext2D, path: Path2D, paint: Paint, width = 2.4) {
+  g.lineJoin = 'round'
+  g.lineCap = 'round'
+  if (paint === 'mask') {
+    g.strokeStyle = MASK.gold
+    g.lineWidth = width
+    g.stroke(path)
+    return
+  }
+  g.strokeStyle = 'rgba(40,18,6,0.85)'
+  g.lineWidth = width + 2.2
+  g.stroke(path)
+  g.strokeStyle = '#d7aa52'
+  g.lineWidth = width
+  g.stroke(path)
+  g.strokeStyle = 'rgba(255,236,180,0.55)'
+  g.lineWidth = width * 0.35
+  g.stroke(path)
+}
+
+function pearl(g: CanvasRenderingContext2D, x: number, y: number, r: number, paint: Paint) {
+  const p = new Path2D()
+  p.arc(x, y, r, 0, Math.PI * 2)
+  if (paint === 'mask') {
+    g.fillStyle = MASK.pearl
+    g.fill(p)
+    return
+  }
+  const shine = g.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r)
+  shine.addColorStop(0, '#fffaf0')
+  shine.addColorStop(0.55, '#e9dfc8')
+  shine.addColorStop(1, '#9d8e74')
+  g.fillStyle = shine
+  g.fill(p)
+  g.strokeStyle = 'rgba(40,18,6,0.8)'
+  g.lineWidth = 1.6
+  g.stroke(p)
+}
+
+/** A cabochon in a gold collet, with a highlight. */
+function jewel(g: CanvasRenderingContext2D, path: Path2D, cx: number, cy: number, r: number, base: string, deep: string, paint: Paint) {
+  if (paint === 'mask') {
+    g.fillStyle = MASK.stone
+    g.fill(path)
+    g.strokeStyle = MASK.gold
+    g.lineWidth = 1.8
+    g.stroke(path)
+    return
+  }
+  const fire = g.createRadialGradient(cx - r * 0.3, cy - r * 0.35, r * 0.1, cx, cy, r * 1.1)
+  fire.addColorStop(0, base)
+  fire.addColorStop(1, deep)
+  g.fillStyle = fire
+  g.fill(path)
+  g.strokeStyle = '#2c1406'
+  g.lineWidth = 3.4
+  g.stroke(path)
+  g.strokeStyle = '#d9ab52'
+  g.lineWidth = 1.8
+  g.stroke(path)
+  g.fillStyle = 'rgba(255,240,235,0.55)'
+  g.beginPath()
+  g.ellipse(cx - r * 0.35, cy - r * 0.35, r * 0.28, r * 0.18, -0.6, 0, Math.PI * 2)
+  g.fill()
+}
+
+/**
+ * The crown, embroidered in gold thread: a jeweled circlet with three fleurs-de-lis and a
+ * pearled point between each. The side fleurs turn with the ring, so they read narrower.
+ * No cross. Drawn in a 360 by 240 box.
+ */
+function drawCrown(g: CanvasRenderingContext2D, cx: number, top: number, width: number, paint: Paint) {
+  const s = width / 360
+  g.save()
+  g.translate(cx - 180 * s, top)
+  g.scale(s, s)
+  const RIM = 168
+  const band = new Path2D('M 40 168 Q 180 186 320 168 L 316 212 Q 180 232 44 212 Z')
+  const fleurs = [
+    { x: 180, y: RIM + 20, kx: 1.15, ky: 1.15 },
+    { x: 70, y: RIM + 12, kx: 0.62, ky: 0.86 },
+    { x: 290, y: RIM + 12, kx: 0.62, ky: 0.86 },
+  ]
+  const petals = fleurs.map((f) => placed(FLEUR, f.x, f.y, f.kx, f.ky))
+  const ties = fleurs.map((f) => placed(TIE, f.x, f.y, f.kx, f.ky))
+  const PX = [113, 247]
+  const points = PX.map((x) => new Path2D(`M ${x - 8} ${RIM + 8} Q ${x - 3} ${RIM - 22} ${x} ${RIM - 40} Q ${x + 3} ${RIM - 22} ${x + 8} ${RIM + 8} Z`))
+  if (paint === 'color') {
+    // A soft shadow under the raised work.
+    g.save()
+    g.shadowColor = 'rgba(10,2,2,0.65)'
+    g.shadowBlur = 10
+    g.shadowOffsetY = 4
+    g.fillStyle = '#7c5420'
+    for (const p of [...points, ...petals, ...ties, band]) g.fill(p)
+    g.restore()
+  }
+  // Each motif in turn, so a later one lies over the cords of an earlier one: gold, stitched
+  // (the petals run upward, the ties and the band across), then outlined in cord.
+  const work = (p: Path2D, angle: number, x: number, y: number, r: number) => {
+    if (paint === 'mask') {
+      g.fillStyle = MASK.gold
+      g.fill(p)
+    } else {
+      const thread = g.createLinearGradient(0, 40, 0, 230)
+      thread.addColorStop(0, '#fbe7a6')
+      thread.addColorStop(0.35, '#e2b75c')
+      thread.addColorStop(0.7, '#b9873a')
+      thread.addColorStop(1, '#7c5420')
+      g.fillStyle = thread
+      g.fill(p)
+      stitch(g, p, angle, x, y, r)
+    }
+    cord(g, p, paint)
+  }
+  points.forEach((p, i) => work(p, -1.45, PX[i]!, RIM - 20, 60))
+  petals.forEach((p, i) => work(p, -1.35, fleurs[i]!.x, fleurs[i]!.y - 60, 100))
+  ties.forEach((p, i) => work(p, 0.05, fleurs[i]!.x, fleurs[i]!.y - 30, 40))
+  work(band, 0.08, 180, 195, 170)
+  PX.forEach((x) => pearl(g, x, RIM - 46, 8, paint))
+  // The band's stones: a garnet at the front, sapphires either side, pearls between.
+  const garnet = new Path2D()
+  garnet.ellipse(180, 194, 17, 12, 0, 0, Math.PI * 2)
+  jewel(g, garnet, 180, 194, 16, '#d0283a', '#4a0510', paint)
+  for (const x of [112, 248]) jewel(g, new Path2D(`M ${x} 181 L ${x + 11} 193 L ${x} 205 L ${x - 11} 193 Z`), x, 193, 11, '#3d5fbf', '#0c1640', paint)
+  for (const x of [66, 146, 214, 294]) pearl(g, x, 192, 5.5, paint)
+  // Beads along both edges of the band, following its curve.
+  g.fillStyle = paint === 'mask' ? MASK.gold : '#f3dfa8'
+  for (let i = 0; i <= 28; i++) {
+    const t = i / 28
+    const bow = (1 - (2 * t - 1) ** 2) * 0.62
+    for (const y of [172 + 18 * bow, 207 + 20 * bow]) {
+      g.beginPath()
+      g.arc(46 + t * 268, y, 1.7, 0, Math.PI * 2)
+      g.fill()
+    }
+  }
+  g.restore()
+}
+
+/** The crimson banner in the niche: silk damask, a gold border, a swallowtail hem, the crown. */
+function paintBanner(g: CanvasRenderingContext2D, W: number, H: number, paint: Paint) {
   const NOTCH = 150
-  const c = document.createElement('canvas')
-  c.width = W
-  c.height = H
-  const g = c.getContext('2d')!
   const outline = new Path2D()
   outline.moveTo(0, 0)
   outline.lineTo(W, 0)
@@ -208,15 +278,38 @@ function bannerTexture(emblem: 'crown' | 'lozenge') {
   outline.closePath()
   g.save()
   g.clip(outline)
-  const cloth = g.createLinearGradient(0, 0, W, 0)
-  cloth.addColorStop(0, '#3a0509')
-  cloth.addColorStop(0.5, '#6c0d14')
-  cloth.addColorStop(1, '#3a0509')
-  g.fillStyle = cloth
-  g.fillRect(0, 0, W, H)
-  // The sleeve around the rod.
-  g.fillStyle = 'rgba(20,2,4,0.45)'
-  g.fillRect(0, 0, W, 46)
+  if (paint === 'mask') {
+    g.fillStyle = MASK.cloth
+    g.fillRect(0, 0, W, H)
+  } else {
+    const silk = g.createLinearGradient(0, 0, W, 0)
+    silk.addColorStop(0, '#3a0509')
+    silk.addColorStop(0.5, '#6c0d14')
+    silk.addColorStop(1, '#3a0509')
+    g.fillStyle = silk
+    g.fillRect(0, 0, W, H)
+    // Damask: a quiet diaper of lozenges with a dot in each, woven tone on tone.
+    g.strokeStyle = 'rgba(255,170,150,0.07)'
+    g.fillStyle = 'rgba(255,170,150,0.08)'
+    g.lineWidth = 2
+    for (let y = 60, row = 0; y < H; y += 56, row++) {
+      for (let x = row % 2 ? 0 : 28; x < W + 28; x += 56) {
+        g.beginPath()
+        g.moveTo(x, y - 22)
+        g.lineTo(x + 22, y)
+        g.lineTo(x, y + 22)
+        g.lineTo(x - 22, y)
+        g.closePath()
+        g.stroke()
+        g.beginPath()
+        g.arc(x, y, 3, 0, Math.PI * 2)
+        g.fill()
+      }
+    }
+    // The sleeve around the rod.
+    g.fillStyle = 'rgba(20,2,4,0.45)'
+    g.fillRect(0, 0, W, 46)
+  }
   // Gold border, following the hem.
   const inset = (d: number) => {
     const p = new Path2D()
@@ -228,44 +321,42 @@ function bannerTexture(emblem: 'crown' | 'lozenge') {
     p.closePath()
     return p
   }
-  g.strokeStyle = '#c9963f'
+  g.strokeStyle = paint === 'mask' ? MASK.gold : '#c9963f'
   g.lineWidth = 7
   g.stroke(inset(30))
   g.lineWidth = 2
-  g.strokeStyle = '#a7782f'
+  g.strokeStyle = paint === 'mask' ? MASK.gold : '#a7782f'
   g.stroke(inset(46))
-  g.fillStyle = '#c9963f'
+  g.fillStyle = paint === 'mask' ? MASK.gold : '#c9963f'
   g.fillRect(0, 44, W, 4)
-  if (emblem === 'crown') {
-    drawCrown(g, W / 2, 300, 330)
-    // A rule with a lozenge under the crown.
-    g.fillStyle = '#c9963f'
-    g.fillRect(W / 2 - 90, 560, 180, 3)
-    g.beginPath()
-    g.moveTo(W / 2, 548)
-    g.lineTo(W / 2 + 12, 561)
-    g.lineTo(W / 2, 574)
-    g.lineTo(W / 2 - 12, 561)
-    g.closePath()
-    g.fill()
-  } else {
-    g.fillStyle = '#c9963f'
-    g.beginPath()
-    g.moveTo(W / 2, 330)
-    g.lineTo(W / 2 + 46, 420)
-    g.lineTo(W / 2, 510)
-    g.lineTo(W / 2 - 46, 420)
-    g.closePath()
-    g.fill()
-    g.strokeStyle = '#36210a'
-    g.lineWidth = 3
-    g.stroke()
-  }
+  drawCrown(g, W / 2, 250, 400, paint)
+  // A rule under the crown with a small lozenge at its middle.
+  g.fillStyle = paint === 'mask' ? MASK.gold : '#c9963f'
+  g.fillRect(W / 2 - 96, 520, 192, 3)
+  g.beginPath()
+  g.moveTo(W / 2, 508)
+  g.lineTo(W / 2 + 12, 521)
+  g.lineTo(W / 2, 534)
+  g.lineTo(W / 2 - 12, 521)
+  g.closePath()
+  g.fill()
   g.restore()
-  const tex = new THREE.CanvasTexture(c)
-  tex.colorSpace = THREE.SRGBColorSpace
-  tex.anisotropy = 8
-  return tex
+}
+
+function bannerTextures() {
+  const W = 512
+  const H = 1408
+  const make = (paint: Paint) => {
+    const c = document.createElement('canvas')
+    c.width = W
+    c.height = H
+    paintBanner(c.getContext('2d')!, W, H, paint)
+    const tex = new THREE.CanvasTexture(c)
+    tex.colorSpace = paint === 'color' ? THREE.SRGBColorSpace : THREE.NoColorSpace
+    tex.anisotropy = 8
+    return tex
+  }
+  return { map: make('color'), mask: make('mask') }
 }
 
 /** The runner: crimson wool with a gold border and a quiet lozenge pattern. */
@@ -550,17 +641,20 @@ export function RoyalHall({ anim }: { anim: ChestAnim }) {
       polygonOffset: true,
       polygonOffsetFactor: -2,
     })
-    const banner = (emblem: 'crown' | 'lozenge') =>
-      new THREE.MeshStandardMaterial({
-        map: bannerTexture(emblem),
-        normalMap: repeated(tex.velvetNor, 2, 5),
-        normalScale: new THREE.Vector2(0.3, 0.3),
-        roughness: 0.86,
-        metalness: 0,
-        alphaTest: 0.5,
-        side: THREE.DoubleSide,
-        envMapIntensity: 0.1,
-      })
+    // Silk with gold thread: the mask makes the embroidery metal and the silk matte.
+    const cloth = bannerTextures()
+    const banner = new THREE.MeshStandardMaterial({
+      map: cloth.map,
+      roughnessMap: cloth.mask,
+      metalnessMap: cloth.mask,
+      normalMap: repeated(tex.velvetNor, 2, 5),
+      normalScale: new THREE.Vector2(0.3, 0.3),
+      roughness: 1,
+      metalness: 1,
+      alphaTest: 0.5,
+      side: THREE.DoubleSide,
+      envMapIntensity: 0.5,
+    })
     const brass = new THREE.MeshStandardMaterial({ color: '#b98a42', metalness: 1, roughness: 0.38, envMapIntensity: 0.6 })
     const sky = new THREE.MeshBasicMaterial({ map: skyTexture(), toneMapped: false, fog: false })
     return {
@@ -573,8 +667,7 @@ export function RoyalHall({ anim }: { anim: ChestAnim }) {
       lintel: stone(1.5, 0.3, '#8f8174', 0.25),
       floor,
       carpet,
-      crown: banner('crown'),
-      lozenge: banner('lozenge'),
+      banner,
       brass,
       sky,
     }
@@ -600,8 +693,7 @@ export function RoyalHall({ anim }: { anim: ChestAnim }) {
       nicheWall: nicheWallGeometry(),
       beam: new THREE.PlaneGeometry(1, 1, 1, 12),
       motes: moteGeometry(BEAMS, LOW ? 48 : 96),
-      bigBanner: bannerGeo(1.2, 3.3),
-      smallBanner: bannerGeo(0.86, 2.5),
+      banner: bannerGeo(1.2, 3.3),
       ...parts,
     }
   }, [])
@@ -682,7 +774,7 @@ export function RoyalHall({ anim }: { anim: ChestAnim }) {
     o.position.set(0, 1.6, BACK_Z - NICHE.depth)
     return o
   }, [])
-  const banners = useRef<(THREE.Group | null)[]>([])
+  const bannerRef = useRef<THREE.Group>(null)
   const beamRefs = useRef<(THREE.Mesh | null)[]>([])
   const skyBase = useMemo(() => new THREE.Color(1.45, 1.38, 1.25), [])
   const { axis, center, view, side, normal, basis } = useMemo(
@@ -789,10 +881,8 @@ export function RoyalHall({ anim }: { anim: ChestAnim }) {
       mesh.quaternion.setFromRotationMatrix(basis)
       mesh.scale.set(BEAM_W, len, 1)
     })
-    // The banners stir in a draft.
-    banners.current.forEach((b, i) => {
-      if (b) b.rotation.x = anim.still ? 0 : Math.sin(t * 0.45 + i * 1.9) * 0.012
-    })
+    // The banner stirs in a draft.
+    if (bannerRef.current) bannerRef.current.rotation.x = anim.still ? 0 : Math.sin(t * 0.45) * 0.012
   })
 
   const depth = FRONT_Z - BACK_Z
@@ -844,28 +934,22 @@ export function RoyalHall({ anim }: { anim: ChestAnim }) {
         </mesh>
       ))}
 
-      {/* Banners: the crowned one in the niche, a smaller one either side. */}
-      {(
-        [
-          { x: 0, y: 3.55, z: BACK_Z - NICHE.depth + 0.12, w: 1.2, big: true },
-          { x: -2.85, y: 4.1, z: BACK_Z + 0.08, w: 0.86, big: false },
-          { x: 2.85, y: 4.1, z: BACK_Z + 0.08, w: 0.86, big: false },
-        ] as const
-      ).map((b, i) => (
-        <group key={i} position={[b.x, b.y, b.z]}>
-          <group ref={(g) => void (banners.current[i] = g)}>
-            <mesh geometry={b.big ? geometry.bigBanner : geometry.smallBanner} material={b.big ? materials.crown : materials.lozenge} receiveShadow />
-          </group>
-          <mesh rotation={[0, 0, Math.PI / 2]} position={[0, 0.03, 0.02]} material={materials.brass}>
-            <cylinderGeometry args={[0.022, 0.022, b.w + 0.24, 12]} />
-          </mesh>
-          {[-1, 1].map((s) => (
-            <mesh key={s} position={[s * (b.w / 2 + 0.14), 0.03, 0.02]} material={materials.brass}>
-              <sphereGeometry args={[0.04, 14, 10]} />
-            </mesh>
-          ))}
+      {/* The banner in the niche. The two that hung either side of it are gone: from the
+          reveal's camera the columns stood in front of them, so only the ends of their rods
+          showed, as if stuck in the wall (the founder, fourth review). */}
+      <group position={[0, 3.55, BACK_Z - NICHE.depth + 0.12]}>
+        <group ref={bannerRef}>
+          <mesh geometry={geometry.banner} material={materials.banner} receiveShadow />
         </group>
-      ))}
+        <mesh rotation={[0, 0, Math.PI / 2]} position={[0, 0.03, 0.02]} material={materials.brass}>
+          <cylinderGeometry args={[0.022, 0.022, 1.2 + 0.24, 12]} />
+        </mesh>
+        {[-1, 1].map((side) => (
+          <mesh key={side} position={[side * (1.2 / 2 + 0.14), 0.03, 0.02]} material={materials.brass}>
+            <sphereGeometry args={[0.04, 14, 10]} />
+          </mesh>
+        ))}
+      </group>
 
       {/* Sunlight in the air, and the dust that shows it. */}
       {BEAMS.map((_, i) => (

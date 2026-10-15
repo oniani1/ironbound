@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CHESTS, VISIBLE_CHESTS } from '../config/chests'
+import { CHESTS, TRIAL_ITEM_ID, VISIBLE_CHESTS } from '../config/chests'
 import { RARITIES, RARITY_ORDER } from '../config/rarity'
 import { ARCHIVE_BY_ID, ITEM_BY_ID, ITEMS } from '../data/items'
 import { buybackOffer, chestPool, expectedValue, oddsTotal, rollItem } from './gacha'
@@ -10,16 +10,22 @@ describe('chest configuration', () => {
     expect(oddsTotal(chest)).toBeCloseTo(1, 6)
   })
 
-  it.each(VISIBLE_CHESTS.map((c) => [c.id, c] as const))('%s has at least two items in every band', (_, chest) => {
+  it.each(VISIBLE_CHESTS.map((c) => [c.id, c] as const))('%s has three pieces in Common and Uncommon and two in every other band', (_, chest) => {
     for (const { band, items } of chestPool(chest, ITEMS)) {
-      expect(items.length, `${chest.id} ${band.rarity}`).toBeGreaterThanOrEqual(2)
+      expect(items.length, `${chest.id} ${band.rarity}`).toBeGreaterThanOrEqual(band.rarity === 'common' || band.rarity === 'uncommon' ? 3 : 2)
     }
   })
 
-  it.each(VISIBLE_CHESTS.map((c) => [c.id, c] as const))('%s expected value is 85 to 95 percent of price', (_, chest) => {
+  it.each(VISIBLE_CHESTS.map((c) => [c.id, c] as const))('%s expected value is 88 to 92 percent of price', (_, chest) => {
     const ratio = expectedValue(chest, ITEMS) / chest.price
-    expect(ratio).toBeGreaterThanOrEqual(0.85)
-    expect(ratio).toBeLessThanOrEqual(0.95)
+    expect(ratio).toBeGreaterThanOrEqual(0.88)
+    expect(ratio).toBeLessThanOrEqual(0.92)
+  })
+
+  it('the trial chest draws a piece, and the piece every new player receives is in the catalog', () => {
+    const trial = CHESTS.find((c) => c.id === 'trial')!
+    expect(chestPool(trial, ITEMS)[0]!.items.length).toBeGreaterThan(0)
+    expect(ITEM_BY_ID[TRIAL_ITEM_ID]).toBeDefined()
   })
 
   // The founder's third review: not always a Common. Uncommon and better come up about half the time.
@@ -98,6 +104,18 @@ describe('reveal facts', () => {
         expect(`${f.label} ${f.value}`).not.toMatch(rarityWord)
       }
     }
+  })
+})
+
+describe('catalog', () => {
+  // Whole pieces only (founder, fourth review). Pulled fittings live on as archived records.
+  it('holds no fittings', () => {
+    expect(ITEMS.filter((i) => i.category === 'fitting').map((i) => i.id)).toEqual([])
+  })
+
+  it('names every piece once and keeps ids apart from the archive', () => {
+    const ids = ITEMS.map((i) => i.id)
+    expect(new Set(ids).size).toBe(ids.length)
   })
 })
 

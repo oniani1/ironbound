@@ -28,7 +28,7 @@ export function Purse() {
         onClick={() => {
           actions.addFunds(500)
         }}
-        className="group flex h-10 items-center gap-2 rounded-[6px] px-2.5 text-[14px] font-semibold text-bone-50 transition-colors hover:bg-bone-100/[0.05]"
+        className="group flex h-11 items-center gap-2 rounded-[2px] px-2.5 text-[14px] font-semibold text-bone-50 transition-colors hover:bg-bone-100/[0.05]"
         title="Add $500 demo credit"
         aria-label="Purse. Add $500 demo credit"
         data-testid="purse"

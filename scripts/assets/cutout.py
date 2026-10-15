@@ -57,6 +57,38 @@ def refine(rgb, alpha):
     return out_rgb, a
 
 
+def backdrop(rgb, alpha, step=8, degree=5):
+    """The studio backdrop behind a piece as a smooth gradient (dark at the top, or a pale glow
+    behind compact pieces), fit as a low-order polynomial to the pixels the matte leaves out."""
+    h, w, _ = rgb.shape
+    small = rgb[::step, ::step]
+    ys, xs = np.mgrid[0:small.shape[0], 0:small.shape[1]]
+    X, Y = xs / small.shape[1], ys / small.shape[0]
+    terms = np.stack([X ** i * Y ** j for i in range(degree + 1) for j in range(degree + 1 - i)], axis=-1)
+    free = alpha[::step, ::step] < 0.02
+    coef = np.linalg.lstsq(terms[free], small[free], rcond=None)[0]
+    model = np.clip(terms @ coef, 0, 255).astype(np.uint8)
+    return np.asarray(Image.fromarray(model).resize((w, h), Image.Resampling.BILINEAR)).astype(np.float32)
+
+
+def unmix(rgb, a, bg):
+    """refine's edge decontamination against a backdrop given per pixel."""
+    a3 = a[..., None]
+    fg = np.clip((rgb - (1.0 - a3) * bg) / np.maximum(a3, 0.08), 0, 255)
+    mix = np.clip((1.0 - a3) * 3.0, 0.0, 1.0)
+    return rgb * (1 - mix) + fg * mix
+
+
+def save_cut(rgb, a, dst):
+    """Crops an RGB image and its matte to the piece and writes the RGBA cutout."""
+    box = crop_box(a)
+    if box is None:
+        return False
+    rgba = np.dstack([rgb, a * 255.0]).astype(np.uint8)
+    Image.fromarray(rgba, mode="RGBA").crop(box).save(dst, compress_level=1)
+    return True
+
+
 def crop_box(alpha, pad=0.04):
     ys, xs = np.where(alpha > 0.05)
     if len(xs) == 0:

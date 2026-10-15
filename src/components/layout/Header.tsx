@@ -39,7 +39,7 @@ export function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-30 transition-[background-color,box-shadow] duration-500 ${solid ? 'bg-ink-950/95 shadow-[0_1px_0_color-mix(in_oklch,var(--color-bone-100)_7%,transparent)]' : 'bg-transparent'}`}
+      className={`sticky top-0 z-30 transition-[background-color,box-shadow] duration-500 ${solid ? 'bg-ink-950 shadow-[0_1px_0_color-mix(in_oklch,var(--color-bone-100)_7%,transparent)]' : 'bg-transparent'}`}
     >
       <div className="mx-auto flex h-[var(--header-h)] max-w-[1400px] items-center gap-10 px-4 sm:px-6">
         <Logo />
@@ -61,7 +61,7 @@ export function Header() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          {signedIn && <DemoToggle className="grid h-8 w-8 md:hidden" />}
+          {signedIn && <DemoToggle className="grid h-11 w-11 md:hidden" />}
           {signedIn ? (
             <>
               <Purse />

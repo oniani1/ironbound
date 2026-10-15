@@ -4,18 +4,18 @@
 import { readFileSync } from 'node:fs'
 
 const antiques = JSON.parse(readFileSync(new URL('../src/data/items.json', import.meta.url), 'utf8'))
+const cleveland = JSON.parse(readFileSync(new URL('../src/data/cleveland.json', import.meta.url), 'utf8'))
 const modern = JSON.parse(readFileSync(new URL('../src/data/modern.json', import.meta.url), 'utf8')).items
-const ITEMS = [...antiques, ...modern]
+const ITEMS = [...antiques, ...cleveland, ...modern]
 
 const japan = (i) => i.origin.toLowerCase().includes('japan')
 const CHESTS = [
-  { id: 'squire', price: 50 },
-  { id: 'knight', price: 100 },
-  // The Japanese pool has few cheap pieces, so the limited box is tried at several prices.
-  { id: 'shogun', price: 250, filter: japan },
-  { id: 'shogun', price: 500, filter: japan },
-  { id: 'shogun', price: 1000, filter: japan },
+  { id: 'squire', price: 100 },
+  { id: 'knight', price: 250 },
   { id: 'warlord', price: 1000 },
+  // The Japanese pool has few cheap pieces, so the limited box is tried at several prices.
+  { id: 'shogun', price: 1900, filter: japan },
+  { id: 'shogun', price: 2500, filter: japan },
   // The King's top band reaches the grails, the field armor included.
   { id: 'king', price: 5000, top: 1250000 },
 ]

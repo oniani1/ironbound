@@ -1,0 +1,225 @@
+{
+ "makers": [
+  {
+   "id": "istvan-toth",
+   "name": "István Tóth",
+   "country": "Hungary",
+   "city": "Kercaszomor",
+   "founded": null,
+   "specialty": "Traditional Hungarian and other Eurasian horse bows.",
+   "priceRange": "$178 to $364",
+   "reputation": "His horse bows are distributed in the United States by exclusive importer Seven Meadows Archery.",
+   "resale": "low",
+   "website": "https://sevenmeadowsarchery.com/"
+  },
+  {
+   "id": "daylite-archery",
+   "name": "Daylite Archery",
+   "country": "South Korea",
+   "city": null,
+   "founded": null,
+   "specialty": "Korean traditional bows with carbon, fiberglass and wood construction.",
+   "priceRange": "$185 to $295",
+   "reputation": "Korean manufacturer selling its Korean, Turkish and Tatar bow models internationally.",
+   "resale": "low",
+   "website": "https://daylitebow.com/"
+  },
+  {
+   "id": "grozer-archery",
+   "name": "Grózer Archery",
+   "country": "Hungary",
+   "city": "Feketeerdő",
+   "founded": null,
+   "specialty": "Historical Eurasian bows in glass, carbon, biocomposite and horn construction.",
+   "priceRange": "$308 to $1,400",
+   "reputation": "Csaba Grózer's workshop makes traditional recurve bows and developed its own biocomposite construction.",
+   "resale": "medium",
+   "website": "https://www.grozerarchery.com/en/"
+  },
+  {
+   "id": "adrian-hayes-longbows",
+   "name": "Adrian Hayes Longbows",
+   "country": "United Kingdom",
+   "city": null,
+   "founded": null,
+   "specialty": "Custom English longbows with laminated wood and bamboo construction.",
+   "priceRange": "$383 to $990",
+   "reputation": "Makes longbows individually to the buyer's length and draw weight requirements.",
+   "resale": "medium",
+   "website": "https://www.adrianhayeslongbows.com/"
+  },
+  {
+   "id": "koyama-kyugu",
+   "name": "Koyama Kyugu",
+   "country": "Japan",
+   "city": "Tokyo",
+   "founded": 1780,
+   "specialty": "Japanese yumi in fiberglass, carbon fiber and bamboo.",
+   "priceRange": "$264 to $660",
+   "reputation": "Hereditary Ogasawara bow maker; developed the Renshin and Jikishin fiberglass bows.",
+   "resale": "medium",
+   "website": "https://koyama-kyugu.co.jp/"
+  },
+  {
+   "id": "minosaka",
+   "name": "Minosaka",
+   "country": "Japan",
+   "city": "Kakamigahara",
+   "founded": 1919,
+   "specialty": "Cast alloy iaito assembled and finished in its Gifu workshop.",
+   "priceRange": "$554 to $673",
+   "reputation": "Founded as the Kokon Tozai Sword Research Institute; makes swords for iaido practice.",
+   "resale": "medium",
+   "website": "https://www.minosaka.co.jp/top_en/"
+  }
+ ],
+ "items": [
+  {
+   "id": "toth-attila",
+   "makerId": "istvan-toth",
+   "name": "Attila Hungarian Horse Bow",
+   "category": "bow",
+   "priceUsd": 178.08,
+   "priceSource": "https://recurvebowshop.com/hungarian-revurve-bow-attila/",
+   "length": "145 cm unstrung; 136 cm strung; draw weights 35 to 55 lb at 28 in",
+   "weight": "0.703 kg",
+   "materials": "fiberglass, wood, genuine leather, ash siyahs, horn-reinforced tips",
+   "blurb": "A Hungarian horse bow with ash siyahs, horn tips and leather-covered limbs.",
+   "image": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Hungarian_bow.png",
+    "page": "https://commons.wikimedia.org/wiki/File:Hungarian_bow.png",
+    "author": "Hatala Branislav",
+    "license": "CC0 1.0 Universal Public Domain Dedication",
+    "exact": false
+   }
+  },
+  {
+   "id": "daylite-phoenix",
+   "makerId": "daylite-archery",
+   "name": "Phoenix Korean Bow",
+   "category": "bow",
+   "priceUsd": 185,
+   "priceSource": "https://daylitebow.com/products/phoenix",
+   "length": "48, 50 or 53 in; draw weights 30 to 60 lb at 30 in",
+   "materials": "carbon fiber, fiberglass, Canadian hard maple, leather grip, BCY string",
+   "blurb": "A compact Korean bow with carbon and glass limbs over hard maple.",
+   "image": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Gak_gung.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:Gak_gung.jpg",
+    "author": "Historiographer",
+    "license": "Creative Commons Attribution-Share Alike 3.0 Unported",
+    "exact": false
+   }
+  },
+  {
+   "id": "koyama-renshin-nisun",
+   "makerId": "koyama-kyugu",
+   "name": "Renshin Glass Yumi, Nisun-nobi",
+   "category": "bow",
+   "priceUsd": 264,
+   "priceSource": "https://suizanmiyabi.com/SHOP/120712.html",
+   "length": "227 cm; draw weights 6 to 20 kg",
+   "materials": "fiberglass sheet, wood, deerskin grip, rattan bindings",
+   "blurb": "A black fiberglass yumi with a wood core and three rattan bindings.",
+   "image": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Yumi01.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:Yumi01.jpg",
+    "author": "Nuage fou",
+    "license": "Public domain",
+    "exact": false
+   }
+  },
+  {
+   "id": "grozer-turkish-laminated",
+   "makerId": "grozer-archery",
+   "name": "Turkish Laminated Bow",
+   "category": "bow",
+   "priceUsd": 308,
+   "priceSource": "https://www.grozerarchery.com/en/webshop/turkish-laminated-bow/turkish-laminated-bow/",
+   "length": "50.5 in total; 45.5 in strung; draw weights 25 to 75 lb; maximum draw 30 in",
+   "materials": "fiberglass-reinforced resin, wood or bamboo core",
+   "blurb": "A Turkish bow with laminated glass limbs and a compact recurved profile.",
+   "image": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/f/f4/%C4%B0stanbul_-_Topkap%C4%B1_Saray%C4%B1_1172.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:%C4%B0stanbul_-_Topkap%C4%B1_Saray%C4%B1_1172.jpg",
+    "author": "Phyrexian",
+    "license": "Creative Commons Attribution-Share Alike 4.0 International",
+    "exact": false
+   }
+  },
+  {
+   "id": "koyama-kokushin-namisun",
+   "makerId": "koyama-kyugu",
+   "name": "Kokushin Arch Carbon Yumi, Namisun",
+   "category": "bow",
+   "priceUsd": 660,
+   "priceSource": "https://www.koyama-kyugu.com/products/detail/346",
+   "length": "221 cm; draw weights 12 to 18 kg at 85 cm",
+   "materials": "arched carbon fiber, fiberglass, wood, deerskin grip, rattan bindings",
+   "blurb": "An asymmetric yumi with arched carbon layers over a laminated wood core.",
+   "image": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Yumi01.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:Yumi01.jpg",
+    "author": "Nuage fou",
+    "license": "Public domain",
+    "exact": false
+   }
+  },
+  {
+   "id": "adrian-hayes-three-laminate-osage",
+   "makerId": "adrian-hayes-longbows",
+   "name": "3 Laminate Osage Longbow",
+   "category": "bow",
+   "priceUsd": 712.8,
+   "priceSource": "https://www.adrianhayeslongbows.com/custom-bows",
+   "length": "Custom length and draw weight, specified when ordering",
+   "materials": "bamboo back, padauk core, osage belly, horn nocks, leather or braid grip",
+   "blurb": "An English longbow with bamboo backing, a padauk core and an osage belly.",
+   "image": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Englishlongbow.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:Englishlongbow.jpg",
+    "author": "Hitchhiker89 at English Wikipedia",
+    "license": "Public domain",
+    "exact": false
+   }
+  },
+  {
+   "id": "minosaka-tokusei-iaito",
+   "makerId": "minosaka",
+   "name": "Tokusei Iaito",
+   "category": "sword",
+   "priceUsd": 554.4,
+   "priceSource": "https://www.ninecircles.co.uk/iaido/iaido-swords-iaito/minosaka-iaito/minosaka-iaito-tokusei/",
+   "length": "2.20 to 2.45 shaku blade, approximately 66.7 to 74.2 cm",
+   "weight": "0.70 to 0.75 kg",
+   "materials": "reinforced alloy blade, steel guard, cotton grip wrap, black lacquered scabbard",
+   "blurb": "A light alloy training katana with plain fittings and a black matt scabbard.",
+   "image": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Iaito-6.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:Iaito-6.jpg",
+    "author": "Soutce: https://www.flickr.com/photos/fotnmc/ Falling Outside The Normal Moral Constraints\nDerivative: User:MathKnight",
+    "license": "Creative Commons Attribution 2.5 Generic",
+    "exact": false
+   }
+  },
+  {
+   "id": "minosaka-jidai-koshirae-iaito",
+   "makerId": "minosaka",
+   "name": "Jidai Koshirae Iaito",
+   "category": "sword",
+   "priceUsd": 673.2,
+   "priceSource": "https://www.ninecircles.co.uk/iaido/iaido-swords-iaito/minosaka-iaito/minosaka-jidai-koshirae-iaito/",
+   "length": "2.40 to 2.55 shaku blade, approximately 72.7 to 77.3 cm",
+   "weight": "0.79 to 0.86 kg",
+   "materials": "reinforced alloy blade, steel guard, cotton grip wrap, black lacquered scabbard",
+   "blurb": "An alloy training katana with a solid steel guard and gloss black scabbard.",
+   "image": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Iaito-6.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:Iaito-6.jpg",
+    "author": "Soutce: https://www.flickr.com/photos/fotnmc/ Falling Outside The Normal Moral Constraints\nDerivative: User:MathKnight",
+    "license": "Creative Commons Attribution 2.5 Generic",
+    "exact": false
+   }
+  }
+ ]
+}

@@ -154,7 +154,9 @@ export function OpeningProvider({ children }: { children: ReactNode }) {
       </div>
       {/* The room darkens at once and the overlay fades in over it, never over the page. */}
       {session && <div className="fixed inset-0 z-50 animate-[ib-fade-in_.3s_ease-out_both] bg-ink-950" aria-hidden />}
-      {session && Overlay && <Overlay key={session.key} session={session} />}
+      {/* One overlay for a run of openings: Open another hands it the next session and keeps
+          its scene, so nothing is rebuilt between chests. */}
+      {session && Overlay && <Overlay session={session} />}
     </OpeningContext.Provider>
   )
 }

@@ -21,8 +21,11 @@ CATS = {
     "axe": ["axe", "mace", "hammer", "flail", "club", "war hammer"],
     "helmet": ["helmet", "sallet", "armet", "burgonet", "morion", "bascinet", "helm", "kabuto", "cabasset", "close helmet", "barbute", "zischagge", "spangenhelm", "khula khud"],
     "shield": ["shield", "buckler", "targe", "pavise", "rondache", "dhal"],
-    "armor": ["armor", "armour", "breastplate", "cuirass", "gauntlet", "vambrace", "pauldron", "gorget", "mail", "cuisse", "greave", "tasset", "brigandine", "harness", "haubergeon"],
-    "fitting": ["tsuba", "spur", "stirrup", "arrowhead", "arrow", "bolt", "kozuka", "menuki", "fuchi", "kashira", "pommel", "crossbow", "bit"],
+    "armor": ["armor", "armour", "breastplate", "cuirass", "gauntlet", "vambrace", "pauldron", "gorget", "mail", "cuisse", "greave", "tasset", "brigandine", "harness", "haubergeon", "couter", "elbow"],
+    # Crossbow before bow: the first category whose word is in the title wins.
+    "crossbow": ["crossbow", "arbalest"],
+    "bow": ["bow", "yumi"],
+    "fitting": ["tsuba", "spur", "stirrup", "arrowhead", "arrow", "bolt", "kozuka", "menuki", "fuchi", "kashira", "pommel", "bit"],
 }
 
 

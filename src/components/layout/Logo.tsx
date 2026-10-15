@@ -22,11 +22,19 @@ export function Emblem({ size = 28, className = '' }: { size?: number; className
   )
 }
 
+/**
+ * The name in the gothic face. Its capital I comes from a one-letter font drawn from the face's
+ * own capital stem (see globals.css): the face's I reads as a D.
+ */
+export function Wordmark({ className = '' }: { className?: string }) {
+  return <span className={`font-gothic whitespace-nowrap ${className}`}>Ironbound</span>
+}
+
 export function Logo({ compact = false }: { compact?: boolean }) {
   return (
-    <Link to="/" className="group flex items-center gap-2.5" aria-label="Ironbound home">
+    <Link to="/" className="group flex min-h-11 items-center gap-2.5" aria-label="Ironbound home">
       <Emblem className="transition-transform duration-300 group-hover:-rotate-6" />
-      {!compact && <span className="font-gothic text-[26px] leading-none tracking-[0.01em] text-bone-50">Ironbound</span>}
+      {!compact && <Wordmark className="text-[26px] leading-none tracking-[0.01em] text-bone-50" />}
     </Link>
   )
 }

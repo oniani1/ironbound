@@ -112,7 +112,7 @@ function ChestColumn({ chest, index }: { chest: Chest; index: number }) {
             <p className="caps truncate text-bone-400">{chest.epithet}</p>
             <h2 className="font-display mt-1 truncate text-[26px] font-semibold leading-tight text-bone-50">{chest.name}</h2>
             <p className="mt-1 flex items-baseline gap-3">
-              <span className="text-[22px] font-semibold text-bone-50 tabular">{money(chest.price)}</span>
+              <span className="ib-money text-[26px] text-bone-50">{money(chest.price)}</span>
               <span className="text-[12px] text-bone-400">Sell back {Math.round(chest.buyback * 100)}%</span>
             </p>
           </div>
@@ -166,7 +166,7 @@ function ChestColumn({ chest, index }: { chest: Chest; index: number }) {
         </div>
         <div className="mt-auto pt-7">
           <div className="flex items-end justify-between gap-3 border-t border-bone-100/[0.08] pt-5">
-            <span className="text-[30px] font-semibold leading-none text-bone-50 tabular">{money(chest.price)}</span>
+            <span className="ib-money text-[36px] leading-none text-bone-50">{money(chest.price)}</span>
             <span className="caps flex items-center gap-2 pb-0.5 text-brass-300">
               View
               <ArrowRight size={16} weight="light" className="transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
@@ -190,7 +190,7 @@ function LimitedFeature({ chest }: { chest: Chest }) {
       initial={{ opacity: 0, y: reduced ? 0 : 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.05, ease }}
-      className="sheen-group group relative mt-10 overflow-hidden rounded-[10px] border border-ember-500/20 bg-ink-900 md:mt-12"
+      className="ib-ledger group mt-10 overflow-hidden md:mt-12"
       aria-label={`${chest.name}, limited event`}
     >
       <Link
@@ -198,7 +198,7 @@ function LimitedFeature({ chest }: { chest: Chest }) {
         data-testid={`chest-card-${chest.id}`}
         aria-label={`View ${chest.name}, ${money(chest.price)}`}
         className="absolute inset-0 z-10"
-        style={{ outlineOffset: -3, borderRadius: 'inherit' }}
+        style={{ outlineOffset: -3 }}
       />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_90%_at_22%_60%,oklch(30%_0.08_38/.55),transparent_70%)]" aria-hidden />
       <div className="pointer-events-none relative grid gap-6 p-6 sm:p-10 md:grid-cols-[minmax(260px,420px)_1fr] md:gap-12">
@@ -237,8 +237,7 @@ function LimitedFeature({ chest }: { chest: Chest }) {
               <Figure label="Expected value" value={money(ev)} />
               <Figure label="Top pull" value={best[0] ? money(best[0].value, { compact: true }) : 'None yet'} />
             </dl>
-            <span className={`${buttonClass('primary', 'lg')} ml-auto group-hover:brightness-[1.06]`}>
-              <span className="sheen" aria-hidden />
+            <span className={`${buttonClass('primary', 'lg')} ml-auto group-hover:bg-brass-400`}>
               View chest
               <span className="ml-3 text-[16px] tracking-normal tabular">{money(chest.price)}</span>
             </span>

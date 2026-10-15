@@ -32,12 +32,11 @@ const TONES = {
   relic: 'var(--r-relic)',
 } as const
 
-/** A status label: small caps behind a diamond in the meaning color. Replaces pills. */
+/** A status label: small caps in the meaning color, in words. The diamond belongs to rarity alone. */
 export function Tag({ children, tone = 'bone', className = '', title }: { children: ReactNode; tone?: keyof typeof TONES; className?: string; title?: string }) {
   const color = TONES[tone]
   return (
-    <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] ${className}`} style={{ color }} title={title}>
-      <span className="block h-[5px] w-[5px] rotate-45" style={{ background: color }} aria-hidden />
+    <span className={`inline-flex items-center text-[11px] font-semibold uppercase tracking-[0.18em] ${className}`} style={{ color }} title={title}>
       {children}
     </span>
   )

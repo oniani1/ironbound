@@ -42,8 +42,22 @@ function AppRoutes() {
   }
   return (
     <div className="grain min-h-[100dvh]">
+      {/* Keyboard users go straight to the page, past the header and the recent pulls. */}
+      <a
+        href="#main"
+        onClick={(e) => {
+          // Moves focus itself: a hash would change the route in hash-router builds, and the smooth
+          // scroller would carry the page past it.
+          e.preventDefault()
+          document.getElementById('main')?.focus({ preventScroll: true })
+          scrollToTop()
+        }}
+        className="caps sr-only z-[60] bg-ink-950 px-4 py-3 text-bone-50 focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        Skip to the page
+      </a>
       <Header />
-      <main>
+      <main id="main" tabIndex={-1} className="outline-none">
         <GuestInvite />
         <AnimatePresence mode="wait" initial={false} onExitComplete={scrollToTop}>
           <motion.div

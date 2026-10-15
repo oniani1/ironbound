@@ -29,15 +29,11 @@ export function NotablePulls({ limit = 6, className = '', chestId }: { limit?: n
     <section className={className} aria-labelledby="wall-title">
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
         <div>
-          <p className="eyebrow">The wall</p>
-          <h2 id="wall-title" className="font-display mt-1 text-[34px] font-semibold leading-tight text-bone-50 sm:text-[44px]">
+          <h2 id="wall-title" className="font-display text-[34px] font-semibold leading-tight text-bone-50 sm:text-[44px]">
             Notable pulls
           </h2>
         </div>
         <p className="caps flex items-center gap-2 text-bone-400">
-          <span className="relative block h-1.5 w-1.5 rounded-full bg-ember-500" aria-hidden>
-            {!reduced && <span className="absolute inset-0 animate-ping rounded-full bg-ember-500/70" />}
-          </span>
           Rare and up · simulated
         </p>
       </div>

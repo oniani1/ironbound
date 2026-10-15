@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useIsPresent } from 'motion/react'
 import { Check, X } from '@phosphor-icons/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
@@ -8,7 +8,7 @@ import { PhotoCredit } from '../ui/PhotoCredit'
 import { buybackOffer } from '../../lib/gacha'
 import { Button, IconButton } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
-import { RarityTag, Tag } from '../ui/RarityTag'
+import { Pips, RarityTag, Tag } from '../ui/RarityTag'
 import { ItemImg } from '../ui/ItemImg'
 
 export interface MultiResult {
@@ -39,6 +39,8 @@ const ease = [0.16, 1, 0.3, 1] as const
  */
 export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain, canAfford, fast }: Props) {
   const reduced = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches, [])
+  // Leaving after Open another: the next batch is already open, so these cards take no clicks.
+  const present = useIsPresent()
   const instant = fast || reduced
   const [flipped, setFlipped] = useState<Set<string>>(() => new Set(instant ? results.map((r) => r.uid) : []))
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -98,7 +100,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
   }
 
   return (
-    <div className="pointer-events-auto mx-auto flex w-full max-w-[1100px] flex-col items-center gap-6 px-4">
+    <div className="pointer-events-auto mx-auto flex w-full max-w-[1100px] flex-col items-center gap-6 px-4" inert={!present}>
       <div className="flex w-full flex-wrap justify-center gap-3 sm:gap-4" style={{ perspective: 1400 }}>
         {results.map((r, i) => {
           const rr = RARITIES[r.rarity]
@@ -133,7 +135,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                       if (document.activeElement === back || document.activeElement === document.body) faces.current.get(r.uid)?.focus({ preventScroll: true })
                     }, instant ? 0 : 650))
                   }}
-                  className="absolute inset-0 overflow-hidden rounded-[10px] border outline-none focus-visible:ring-2 focus-visible:ring-brass-300"
+                  className="absolute inset-0 overflow-hidden rounded-[2px] border outline-none focus-visible:ring-2 focus-visible:ring-brass-300"
                   style={{
                     backfaceVisibility: 'hidden',
                     pointerEvents: isUp ? 'none' : 'auto',
@@ -145,19 +147,25 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                   aria-hidden={isUp}
                   aria-label={`Flip face-down card, ${rr.label}`}
                 >
-                  <span className="absolute inset-3 rounded-[6px] border border-bone-100/10" />
+                  <span className="absolute inset-3 rounded-[2px] border border-bone-100/10" />
+                  {/* Still sealed: the wax of the ritual, and the tier stamped at the foot, so the
+                      rarity is read in pips as well as in light. */}
                   <span className="absolute inset-0 grid place-items-center">
-                    <svg viewBox="0 0 64 80" className="h-16 w-14 opacity-70 transition-transform duration-300 group-hover:scale-110" aria-hidden>
-                      <path d="M4 4 H60 V36 C60 56 46 70 32 76 C18 70 4 56 4 36 Z" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: rr.cssVar }} />
-                      <path d="M32 14 L34 46 L32 52 L30 46 Z M24 46 H40 V49 H24 Z" fill="currentColor" style={{ color: rr.cssVar }} />
+                    <svg viewBox="0 0 48 48" className="h-12 w-12 transition-transform duration-300 group-hover:scale-105" aria-hidden>
+                      <circle cx="24" cy="24" r="17" fill="#8e2a22" />
+                      <circle cx="24" cy="24" r="13" fill="none" stroke="#c4473a" strokeWidth="1.5" />
+                      <path d="M24 13 L26.5 21.5 L35 24 L26.5 26.5 L24 35 L21.5 26.5 L13 24 L21.5 21.5 Z" fill="#e7b46a" opacity="0.9" />
                     </svg>
                   </span>
-                  <span className="absolute inset-x-0 bottom-0 h-1/2 animate-pulse-soft" style={{ background: `linear-gradient(0deg, color-mix(in oklch, ${rr.cssVar} 30%, transparent), transparent)` }} />
+                  <span className="absolute inset-x-0 bottom-0 h-1/2" style={{ background: `linear-gradient(0deg, color-mix(in oklch, ${rr.cssVar} 24%, transparent), transparent)` }} />
+                  <span className="absolute inset-x-0 bottom-5 flex justify-center">
+                    <Pips tier={rr.tier} color={rr.cssVar} />
+                  </span>
                 </button>
 
                 {/* Front: the item, an Inspect target and a select control. */}
                 <div
-                  className={`absolute inset-0 flex flex-col overflow-hidden rounded-[10px] border bg-ink-900 transition-[box-shadow,border-color] duration-200 ${isSold ? 'opacity-70' : ''}`}
+                  className={`absolute inset-0 flex flex-col overflow-hidden rounded-[2px] border bg-ink-900 transition-[box-shadow,border-color] duration-200 ${isSold ? 'opacity-70' : ''}`}
                   style={{
                     backfaceVisibility: 'hidden',
                     transform: 'rotateY(180deg)',
@@ -182,7 +190,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                     aria-label={`Inspect ${r.item.name}, ${rr.label}, ${money(r.item.value)}`}
                   >
                     <ItemImg item={r.item} eager className="absolute inset-2 h-[calc(100%-16px)] w-[calc(100%-16px)] drop-shadow-[0_10px_18px_oklch(0%_0_0/.6)]" />
-                    {r.item.photoExact === false && <span className="absolute bottom-1.5 left-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-bone-400">Example photo</span>}
+                    {r.item.photoExact === false && <span className="absolute bottom-1.5 left-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-bone-300">Example photo</span>}
                   </button>
                   {isSold ? (
                     <span className="absolute inset-x-0 top-0 flex justify-center bg-ink-950/80 py-1.5">
@@ -233,25 +241,29 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
             initial={{ opacity: 0, y: instant ? 0 : 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: instant ? 0.2 : 0.5, ease }}
-            className="plate w-full p-4 sm:p-5"
+            className="ib-ledger w-full p-4 sm:p-5"
             data-testid="multi-summary"
           >
-            <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
-              <div>
-                <p className="eyebrow !text-[11px]">Spoils · item value</p>
-                <p className="mt-1 text-[30px] font-semibold leading-none text-bone-50">{instant ? <span className="tabular">{money(total)}</span> : <CountUp to={total} duration={1} />}</p>
-              </div>
-              <dl className="grid grid-cols-3 gap-x-4 text-right text-[12px] tabular">
-                <dt className="text-bone-400">Cost</dt>
-                <dt className="text-bone-400">Offers left</dt>
-                <dt className="text-bone-400">Credited</dt>
-                <dd className="font-semibold text-bone-100">{money(cost)}</dd>
-                <dd className="font-semibold text-bone-100">{money(offersLeft)}</dd>
-                <dd className={`font-semibold ${credited > 0 ? 'text-moss-400' : 'text-bone-300'}`}>
-                  {credited > 0 ? '+' : ''}
-                  {money(credited)}
-                </dd>
-              </dl>
+            {/* The batch, entered like the receipt: what it is worth, and what that means against
+                what it cost, so no one has to do the sum. */}
+            <p className="receipt-value-line">
+              <span className="receipt-value-label">Item value</span>
+              <span className="receipt-leader" aria-hidden />
+              <span className="receipt-value-number">{instant ? money(total) : <CountUp to={total} duration={1} />}</span>
+            </p>
+            <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-[13px] text-bone-300 tabular">
+              <span>
+                {total - cost >= 0 ? '+' : ''}
+                {money(total - cost)} against {money(cost)} paid
+              </span>
+              <span>
+                Sell-back left <b className="font-semibold text-bone-100">{money(offersLeft)}</b>
+                {credited > 0 && (
+                  <>
+                    {' · '}Credited <b className="font-semibold text-moss-400">+{money(credited)}</b>
+                  </>
+                )}
+              </span>
             </div>
             {/* Two equal actions; the sale amount sits on its own line so no label crowds its frame. */}
             <div className="mt-4 grid grid-cols-2 gap-2">
@@ -322,6 +334,8 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
 
 /** One piece from a batch, large, with its own sell-back offer. */
 function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }: { result: MultiResult; chest: Chest; sold: boolean; instant: boolean; onSell: () => void; onKeep: () => void; onClose: () => void }) {
+  // Closing after a sale or a keep, the sheet takes no more clicks while it fades.
+  const present = useIsPresent()
   const { item } = result
   const r = RARITIES[result.rarity]
   const offer = buybackOffer(item.value, chest)
@@ -364,6 +378,7 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
 
   return (
     <motion.div
+      inert={!present}
       className="fixed inset-0 z-[60] flex items-end justify-center bg-ink-950/75 sm:items-center sm:p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -378,7 +393,7 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
       <motion.div
         ref={panel}
         onClick={(e) => e.stopPropagation()}
-        className="plate ib-sheet relative w-full max-w-[480px] rounded-b-none p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-b-[10px]"
+        className="ib-ledger ib-sheet w-full max-w-[480px] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
         initial={{ y: instant ? 0 : 40 }}
         animate={{ y: 0 }}
         exit={{ y: instant ? 0 : 30 }}
@@ -387,7 +402,7 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
         <IconButton ref={closeRef} type="button" onClick={onClose} className="absolute right-3 top-3 z-10" aria-label="Close">
           <X size={16} weight="light" />
         </IconButton>
-        <div className="h-[min(42vh,340px)] rounded-[6px]" style={{ background: `radial-gradient(70% 60% at 50% 65%, color-mix(in oklch, ${r.cssVar} 26%, transparent), transparent)` }}>
+        <div className="h-[min(42vh,340px)] rounded-[2px]" style={{ background: `radial-gradient(70% 60% at 50% 65%, color-mix(in oklch, ${r.cssVar} 26%, transparent), transparent)` }}>
           <ItemImg item={item} eager className="h-full w-full drop-shadow-[0_14px_24px_oklch(0%_0_0/.6)]" />
         </div>
         <div className="mt-4">
@@ -411,7 +426,7 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
         <dl className="mt-4 grid grid-cols-2 items-end gap-3 border-t border-bone-100/10 pt-3 tabular">
           <div>
             <dt className="eyebrow !text-[11px]">{item.provenance === 'forged' ? 'Retail price, new' : 'Estimated value'}</dt>
-            <dd className="mt-1 text-[24px] font-semibold text-bone-50">{money(item.value)}</dd>
+            <dd className="ib-money mt-1 text-[30px] leading-none text-bone-50">{money(item.value)}</dd>
             {item.provenance === 'forged' && item.priceSource && (
               <dd className="mt-1">
                 <a href={item.priceSource} target="_blank" rel="noreferrer" className="text-[11px] text-bone-300 underline decoration-bone-100/25 underline-offset-2 hover:text-bone-100">
@@ -422,7 +437,7 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
           </div>
           <div>
             <dt className="eyebrow !text-[11px]">Sell-back offer</dt>
-            <dd className="mt-1 text-[24px] font-semibold text-bone-100">
+            <dd className="ib-money mt-1 text-[30px] leading-none text-bone-100">
               {money(offer)} <span className="text-[13px] font-normal text-bone-300">{Math.round(chest.buyback * 100)}%</span>
             </dd>
           </div>

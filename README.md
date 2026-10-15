@@ -39,7 +39,7 @@ VITE_NO_THUMBS=1 node scripts/artifact-page.mjs dist-artifact   # writes ironbou
 |---|---|
 | Opening ritual (3D chest, royal hall, camera, reveal) | `src/components/chest3d`, `src/components/opening` |
 | Chests, odds and expected value | `src/config/chests.ts`, `src/lib/gacha.ts` |
-| Catalog: 65 newly forged pieces and 72 antiques; retired pieces in `src/data/retired.json` | `src/data/modern.json` (`scripts/assets/modern.py`), `src/data/items.json` (`scripts/assets/catalog.py`) |
+| Catalog, whole pieces only: 85 newly forged pieces from 17 makers and 46 antiques; retired pieces in `src/data/retired.json` | `src/data/modern.json` (`scripts/assets/modern.py`), `src/data/items.json` (`scripts/assets/catalog.py`), `src/data/cleveland.json` (`scripts/assets/cleveland.py`) |
 | Odds tuning | `scripts/odds-tune.mjs` (bands and odds for every chest, expected value near 90%) |
 | Item pages and replays of any pull | `src/pages/Item.tsx` |
 | Onboarding | `src/components/onboarding` |
@@ -48,8 +48,8 @@ VITE_NO_THUMBS=1 node scripts/artifact-page.mjs dist-artifact   # writes ironbou
 
 ## Credits
 
-- Antique photographs: The Metropolitan Museum of Art, Open Access (CC0), cut out locally.
+- Antique photographs: The Metropolitan Museum of Art and The Cleveland Museum of Art, Open Access (CC0), cut out locally.
 - Newly forged pieces: maker names and prices are researched for the demo, with no affiliation. Photos come from Wikimedia Commons, Flickr, The Cleveland Museum of Art and the Kunsthistorisches Museum under the license credited on each piece; many show an example of the type.
 - 3D chest: "Treasure Chest" by Rico Cilliers, Poly Haven (CC0).
 - Hall textures: "Medieval Blocks 03", "Large Floor Tiles 02" and "Velour Velvet", Poly Haven (CC0).
-- Fonts: Cormorant Garamond, Instrument Sans and Grenze Gotisch (SIL Open Font License).
+- Fonts: Cormorant Garamond, Instrument Sans and Grenze Gotisch (SIL Open Font License). The wordmark's capital I comes from Ironbound Gothic, a one-letter font derived from Grenze Gotisch under the same license (`src/assets/fonts/`).

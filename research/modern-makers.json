@@ -155,6 +155,114 @@
       "reputation": "Supplies historical armour and costume equipment to film and television productions.",
       "resale": "low",
       "website": "https://lordofbattles.com/"
+    },
+    {
+      "id": "minosaka",
+      "name": "Minosaka",
+      "country": "Japan",
+      "city": "Kakamigahara",
+      "founded": 1919,
+      "specialty": "Japanese alloy iaito and sword fittings",
+      "priceRange": "$453 to $1,385",
+      "reputation": "Manufactures iaito and sword fittings in its Kakamigahara workshop.",
+      "resale": "medium",
+      "website": "https://www.minosaka.co.jp/"
+    },
+    {
+      "id": "tsuji-kazuyoshi",
+      "name": "Tsuji Kazuyoshi",
+      "country": "Japan",
+      "city": "Miyako",
+      "founded": null,
+      "specialty": "Traditionally forged katana and tachi",
+      "priceRange": "$6,667 starting commission in this selection",
+      "reputation": "A member of the All Japan Swordsmith Association working in Miyako.",
+      "resale": "medium",
+      "website": "https://japanesesword.net/collections/newly-forged-katana/products/newly-forged-katana-by-kazuyoshi"
+    },
+    {
+      "id": "tomioka-yoshimasa",
+      "name": "Tomioka Yoshimasa",
+      "country": "Japan",
+      "city": "Sōja",
+      "founded": 2020,
+      "specialty": "Traditionally forged Japanese swords",
+      "priceRange": "$10,000",
+      "reputation": "Received NBTHK Excellence and Newcomer prizes at the 2020 contemporary sword exhibition.",
+      "resale": "medium",
+      "website": "https://japanesesword.net/collections/newly-forged-katana/products/newly-forged-katana-by-yoshimasa"
+    },
+    {
+      "id": "nezu-hidehira",
+      "name": "Nezu Hidehira",
+      "country": "Japan",
+      "city": null,
+      "founded": 2015,
+      "specialty": "Traditionally forged Japanese swords",
+      "priceRange": "$20,000 starting commission in this selection",
+      "reputation": "Trained under Miyairi Kozaemon Yukihira and established an independent forge in 2015.",
+      "resale": "medium",
+      "website": "https://japanesesword.net/collections/newly-forged-katana/products/newly-forged-katana-by-hidehira"
+    },
+    {
+      "id": "balaur-arms",
+      "name": "Balaur Arms",
+      "country": "United States",
+      "city": null,
+      "founded": null,
+      "specialty": "Production European swords with scabbards",
+      "priceRange": "$418",
+      "reputation": "Kult of Athena house brand with swords produced in collaboration with LK Chen.",
+      "resale": "medium",
+      "website": "https://www.kultofathena.com/brand/balaur-arms/"
+    },
+    {
+      "id": "epic-armoury",
+      "name": "Epic Armoury",
+      "country": "Denmark",
+      "city": "Brøndby",
+      "founded": 2007,
+      "specialty": "Steel costume armour and LARP equipment",
+      "priceRange": "$180",
+      "reputation": "Danish equipment brand offering steel armour alongside its LARP ranges.",
+      "resale": "low",
+      "website": "https://epicarmoury.com/"
+    },
+    {
+      "id": "istvan-toth",
+      "name": "István Tóth",
+      "country": "Hungary",
+      "city": "Kercaszomor",
+      "founded": null,
+      "specialty": "Traditional Hungarian and other Eurasian horse bows.",
+      "priceRange": "$178",
+      "reputation": "His horse bows are distributed in the United States by exclusive importer Seven Meadows Archery.",
+      "resale": "low",
+      "website": "https://sevenmeadowsarchery.com/"
+    },
+    {
+      "id": "adrian-hayes-longbows",
+      "name": "Adrian Hayes Longbows",
+      "country": "United Kingdom",
+      "city": null,
+      "founded": null,
+      "specialty": "Custom English longbows with laminated wood and bamboo construction.",
+      "priceRange": "$713",
+      "reputation": "Makes longbows individually to the buyer's length and draw weight requirements.",
+      "resale": "medium",
+      "website": "https://www.adrianhayeslongbows.com/"
+    },
+    {
+      "id": "koyama-kyugu",
+      "name": "Koyama Kyugu",
+      "country": "Japan",
+      "city": "Tokyo",
+      "founded": 1780,
+      "specialty": "Japanese yumi in fiberglass, carbon fiber and bamboo.",
+      "priceRange": "$264 to $660",
+      "reputation": "Hereditary Ogasawara bow maker; developed the Renshin and Jikishin fiberglass bows.",
+      "resale": "medium",
+      "website": "https://koyama-kyugu.co.jp/"
     }
   ],
   "items": [
@@ -1542,6 +1650,746 @@
         "page": "https://commons.wikimedia.org/wiki/File:Gorget_MET_sfma27.183.57_70993.jpg",
         "author": "The Metropolitan Museum of Art",
         "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-unpainted-medieval-wooden-shield",
+      "makerId": "deepeeka",
+      "name": "Large Medieval Wooden Shield - Unpainted",
+      "category": "shield",
+      "priceUsd": 124.99,
+      "priceSource": "https://www.kultofathena.com/product/large-medieval-wooden-shield-unpainted/",
+      "materials": "wood, bonded fabric covering",
+      "blurb": "A slightly curved wooden heater shield supplied primed for painting.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Schild_konradvonth%C3%BCringen_marburg.JPG/1920px-Schild_konradvonth%C3%BCringen_marburg.JPG",
+        "page": "https://commons.wikimedia.org/wiki/File:Schild_konradvonth%C3%BCringen_marburg.JPG",
+        "author": "Z thomas",
+        "license": "CC BY-SA 4.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-fenrir-wolf-shield",
+      "makerId": "deepeeka",
+      "name": "Viking Fenrir Wolf Shield",
+      "category": "shield",
+      "priceUsd": 139.99,
+      "priceSource": "https://www.kultofathena.com/product/viking-fenrir-wolf-shield-deepeeka/",
+      "length": "60.6 cm diameter",
+      "weight": "2.72 kg",
+      "materials": "plywood, canvas, steel boss",
+      "blurb": "A round wooden shield painted with Fenrir knotwork and backed with canvas.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Eir%C3%ADkssta%C3%B0ir_-_Wikingerschild.jpg/1920px-Eir%C3%ADkssta%C3%B0ir_-_Wikingerschild.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Eir%C3%ADkssta%C3%B0ir_-_Wikingerschild.jpg",
+        "author": "Wolfgang Sauber",
+        "license": "CC BY-SA 3.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-beaten-round-shield",
+      "makerId": "deepeeka",
+      "name": "Beaten round shield",
+      "category": "shield",
+      "priceUsd": 238.92,
+      "priceSource": "https://www.celticwebmerchant.co.uk/products/beaten-round-shield",
+      "length": "55 cm diameter",
+      "weight": "3.2 kg",
+      "materials": "wood, steel",
+      "blurb": "A round Renaissance-style shield with a wooden core and steel facing.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Rodela_%2816168699887%29.jpg/1920px-Rodela_%2816168699887%29.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Rodela_(16168699887).jpg",
+        "author": "Ángel M. Felicísimo",
+        "license": "CC BY-SA 4.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-odonovan-targe",
+      "makerId": "deepeeka",
+      "name": "16th Century Irish O’Donovan Targe",
+      "category": "shield",
+      "priceUsd": 229.99,
+      "priceSource": "https://www.kultofathena.com/product/16th-century-irish-odonovan-targe/",
+      "length": "45.7 cm diameter",
+      "materials": "wood, leather, metal fittings",
+      "blurb": "A leather-faced round targe based on the O’Donovan shield.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Highland_targe.jpg/1920px-Highland_targe.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Highland_targe.jpg",
+        "author": "Kim Traynor",
+        "license": "CC BY-SA 3.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "lord-of-battles-antiqued-heater-shield",
+      "makerId": "lord-of-battles",
+      "name": "Antiqued Medieval Steel Heather Shield",
+      "category": "shield",
+      "priceUsd": 104.99,
+      "priceSource": "https://www.kultofathena.com/product-category/shields/",
+      "materials": "steel",
+      "blurb": "A heater-shaped steel shield with an antiqued finish.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Schild_heinrichvonhessen_marburg.JPG/1280px-Schild_heinrichvonhessen_marburg.JPG",
+        "page": "https://commons.wikimedia.org/wiki/File:Schild_heinrichvonhessen_marburg.JPG",
+        "author": "Z thomas",
+        "license": "CC BY-SA 4.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "cold-steel-trail-hawk",
+      "makerId": "cold-steel",
+      "name": "Trail Hawk",
+      "category": "axe",
+      "priceUsd": 44.99,
+      "priceSource": "https://www.coldsteel.com/trail-hawk/",
+      "length": "55.9 cm",
+      "weight": "669 g",
+      "materials": "1055 carbon steel, American hickory",
+      "blurb": "A light tomahawk with a small cutting edge and hammer poll.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Tomahawk-BHM_Ethno_1894.410.37-P8260256-white.jpg/1920px-Tomahawk-BHM_Ethno_1894.410.37-P8260256-white.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Tomahawk-BHM_Ethno_1894.410.37-P8260256-white.jpg",
+        "author": "Rama",
+        "license": "CC BY-SA 3.0 FR",
+        "exact": false
+      }
+    },
+    {
+      "id": "lord-of-battles-medieval-crescent-axe",
+      "makerId": "lord-of-battles",
+      "name": "Medieval Crescent Axe with Ash Handle",
+      "category": "axe",
+      "priceUsd": 54.99,
+      "priceSource": "https://www.kultofathena.com/product-category/weapons/axes-hatchets-tomahawks/",
+      "materials": "steel, ash wood",
+      "blurb": "A crescent-bladed steel axe mounted on an ash handle.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Ax_MET_DP165771.jpg/1280px-Ax_MET_DP165771.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Ax_MET_DP165771.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "lord-of-battles-sagaris",
+      "makerId": "lord-of-battles",
+      "name": "Sagaris Axe",
+      "category": "axe",
+      "priceUsd": 64.99,
+      "priceSource": "https://www.kultofathena.com/product-category/weapons/axes-hatchets-tomahawks/",
+      "materials": "steel, wood",
+      "blurb": "A hafted axe sold under the Lord of Battles Sagaris model name.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Ax_MET_DP165772.jpg/1280px-Ax_MET_DP165772.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Ax_MET_DP165772.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tod-cutler-rude-bollock",
+      "makerId": "tods-workshop",
+      "name": "Rude Bollock Dagger 14th Century and 15th Century",
+      "category": "dagger",
+      "priceUsd": 132.99,
+      "priceSource": "https://www.kultofathena.com/product/tod-cutler-rude-bollock-dagger-14th-century-and-15th-century/",
+      "length": "34 cm",
+      "weight": "198 g",
+      "materials": "1060-1065 carbon steel, leather sheath",
+      "blurb": "A small bollock dagger supplied with a stitched leather sheath.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Ballock_Knife_MET_sf26-145-7s1.jpg/1280px-Ballock_Knife_MET_sf26-145-7s1.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Ballock_Knife_MET_sf26-145-7s1.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tod-cutler-dresden-rondel",
+      "makerId": "tods-workshop",
+      "name": "The Dresden Rondel Dagger",
+      "category": "dagger",
+      "priceUsd": 159.99,
+      "priceSource": "https://www.kultofathena.com/product/tod-cutler-the-dresden-rondel-dagger/",
+      "length": "39.1 cm",
+      "weight": "340 g",
+      "materials": "1060-1065 carbon steel, leather sheath",
+      "blurb": "An all-steel rondel dagger with a triangular blade and leather sheath.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/HJRK_A_48_-_Scheibendolch%2C_1490-1500.jpg/1920px-HJRK_A_48_-_Scheibendolch%2C_1490-1500.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:HJRK_A_48_-_Scheibendolch,_1490-1500.jpg",
+        "author": "Sandstein",
+        "license": "CC BY 3.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tod-cutler-mary-rose-bollock",
+      "makerId": "tods-workshop",
+      "name": "Mary Rose Bollock Dagger",
+      "category": "dagger",
+      "priceUsd": 144.99,
+      "priceSource": "https://www.kultofathena.com/product-category/weapons/knives-daggers/medieval-knives-daggers/",
+      "materials": "carbon steel, wood, leather sheath",
+      "blurb": "A wooden-hilted bollock dagger based on finds from the Mary Rose.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Kidney_Dagger_in_Gothic_Style_MET_256188.jpg/960px-Kidney_Dagger_in_Gothic_Style_MET_256188.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Kidney_Dagger_in_Gothic_Style_MET_256188.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tod-cutler-whittle-tang",
+      "makerId": "tods-workshop",
+      "name": "Whittle Tang Dagger",
+      "category": "dagger",
+      "priceUsd": 108.24,
+      "priceSource": "https://todcutler.com/collections/cutler/medieval-daggers/",
+      "materials": "carbon steel, leather sheath",
+      "blurb": "A medieval dagger with a narrow tang and a stitched leather sheath.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Ballock_Knife_MET_sf26-145-7s2.jpg/1280px-Ballock_Knife_MET_sf26-145-7s2.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Ballock_Knife_MET_sf26-145-7s2.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tod-cutler-late16-main-gauche",
+      "makerId": "tods-workshop",
+      "name": "Late 16thC Quillon dagger, Main Gauche",
+      "category": "dagger",
+      "priceUsd": 187.44,
+      "priceSource": "https://todcutler.com/collections/cutler/medieval-daggers/",
+      "materials": "carbon steel, leather sheath",
+      "blurb": "A quillon dagger intended to accompany a late sixteenth-century sword.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Parrying_Dagger_with_Scabbard_MET_sfrl04.3.53a_24853.jpg/960px-Parrying_Dagger_with_Scabbard_MET_sfrl04.3.53a_24853.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Parrying_Dagger_with_Scabbard_MET_sfrl04.3.53a_24853.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "arms-armor-milanese-parrying",
+      "makerId": "arms-and-armor",
+      "name": "Milanese Parrying Dagger",
+      "category": "dagger",
+      "priceUsd": 440,
+      "priceSource": "https://www.arms-n-armor.com/collections/daggers/products/milanese-parrying-dagger",
+      "length": "43.9 cm",
+      "materials": "steel",
+      "blurb": "A steel parrying dagger with a side ring and rectangular ricasso.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Parrying_Dagger_MET_DP368605.jpg/1280px-Parrying_Dagger_MET_DP368605.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Parrying_Dagger_MET_DP368605.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "arms-armor-elector-saxony",
+      "makerId": "arms-and-armor",
+      "name": "Elector of Saxony Dagger",
+      "category": "dagger",
+      "priceUsd": 465,
+      "priceSource": "https://www.arms-n-armor.com/collections/daggers/products/elector-of-saxony-dagger",
+      "length": "35.6 cm",
+      "materials": "steel, leather-covered hardwood grip",
+      "blurb": "A ring-guard parrying dagger based on weapons carried by the Elector of Saxony’s guard.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Parrying_Dagger_MET_sfeah29-157-14CRs1.jpeg/1280px-Parrying_Dagger_MET_sfeah29-157-14CRs1.jpeg",
+        "page": "https://commons.wikimedia.org/wiki/File:Parrying_Dagger_MET_sfeah29-157-14CRs1.jpeg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "minosaka-tokusei-koshirae",
+      "makerId": "minosaka",
+      "name": "Tokusei Koshirae Iaito",
+      "category": "sword",
+      "priceUsd": 453,
+      "priceSource": "https://www.seidoshop.com/products/iaito-minosaka-tokusei-koshirae-2-30-2-45-shaku",
+      "materials": "zinc-aluminum alloy, magnolia wood, metal fittings",
+      "blurb": "A Japan-made unsharpenable alloy training sword in Tokusei mounts.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Iaito-6.jpg/1920px-Iaito-6.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Iaito-6.jpg",
+        "author": "Falling Outside The Normal Moral Constraints, derivative by MathKnight",
+        "license": "CC BY 2.5",
+        "exact": false
+      }
+    },
+    {
+      "id": "minosaka-higo-koshirae",
+      "makerId": "minosaka",
+      "name": "Higo Koshirae Iaito",
+      "category": "sword",
+      "priceUsd": 744,
+      "priceSource": "https://www.seidoshop.com/products/iaito-minosaka-higo-koshirae-2-30-2-45-shaku",
+      "weight": "810 g",
+      "materials": "zinc-aluminum alloy, magnolia wood, metal fittings",
+      "blurb": "A Japan-made unsharpenable alloy training sword in Higo mounts.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Katana_and_koshirae.jpg/1920px-Katana_and_koshirae.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Katana_and_koshirae.jpg",
+        "author": "Samuraiantiqueworld",
+        "license": "CC BY 3.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "minosaka-hon-koshirae",
+      "makerId": "minosaka",
+      "name": "Hon Koshirae Iaito",
+      "category": "sword",
+      "priceUsd": 1385,
+      "priceSource": "https://www.seidoshop.com/products/iaito-minosaka-hon-koshirae-2-45-2-55-shaku",
+      "weight": "920 g",
+      "materials": "zinc-aluminum alloy, magnolia wood, metal fittings",
+      "blurb": "A Japan-made unsharpenable alloy training sword in Hon mounts.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Katana_blade-IMG_4683-black.jpg/1920px-Katana_blade-IMG_4683-black.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Katana_blade-IMG_4683-black.jpg",
+        "author": "Rama",
+        "license": "CC BY-SA 2.0 FR",
+        "exact": false
+      }
+    },
+    {
+      "id": "tsuji-kazuyoshi-commissioned-katana",
+      "makerId": "tsuji-kazuyoshi",
+      "name": "Newly Forged Japanese Katana Sword - Kazuyoshi",
+      "category": "sword",
+      "priceUsd": 6667,
+      "priceSource": "https://japanesesword.net/collections/newly-forged-katana/products/newly-forged-katana-by-kazuyoshi",
+      "materials": "tamahagane steel",
+      "blurb": "A Japanese katana forged to order by Kazuyoshi with specifications agreed for the commission.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Blade_for_a_Sword_%28Katana%29_MET_DP162175.jpg/1280px-Blade_for_a_Sword_%28Katana%29_MET_DP162175.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Blade_for_a_Sword_(Katana)_MET_DP162175.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "tomioka-yoshimasa-commissioned-katana",
+      "makerId": "tomioka-yoshimasa",
+      "name": "Newly Forged Japanese Katana Sword - Yoshimasa (Bizen)",
+      "category": "sword",
+      "priceUsd": 10000,
+      "priceSource": "https://japanesesword.net/collections/newly-forged-katana/products/newly-forged-katana-by-yoshimasa",
+      "materials": "tamahagane steel",
+      "blurb": "A Japanese katana forged to order by Yoshimasa with specifications agreed for the commission.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/%E5%88%80_%E9%8A%98_%E9%95%B7%E6%9B%BD%E7%A5%A2%E8%88%88%E9%87%8C%E5%85%A5%E9%81%93%E4%B9%95%E5%BE%B9%2C_Katana_Nagasone_Kotetsu.jpg/1920px-%E5%88%80_%E9%8A%98_%E9%95%B7%E6%9B%BD%E7%A5%A2%E8%88%88%E9%87%8C%E5%85%A5%E9%81%93%E4%B9%95%E5%BE%B9%2C_Katana_Nagasone_Kotetsu.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:%E5%88%80_%E9%8A%98_%E9%95%B7%E6%9B%BD%E7%A5%A2%E8%88%88%E9%87%8C%E5%85%A5%E9%81%93%E4%B9%95%E5%BE%B9,_Katana_Nagasone_Kotetsu.jpg",
+        "author": "Tokyo Fuji Art Museum",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "nezu-hidehira-commissioned-katana",
+      "makerId": "nezu-hidehira",
+      "name": "Newly Forged Japanese Katana Sword - Hidehira",
+      "category": "sword",
+      "priceUsd": 20000,
+      "priceSource": "https://japanesesword.net/collections/newly-forged-katana/products/newly-forged-katana-by-hidehira",
+      "materials": "tamahagane steel",
+      "blurb": "A Japanese katana forged to order by Hidehira with specifications agreed for the commission.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/1/10/Katana_forged_by_Minamoto_Kiyomaro%2C_%E6%BA%90%E6%B8%85%E7%A3%A8%E5%98%89%E6%B0%B8%E4%B8%89%E5%B9%B4%E4%BA%8C%E6%9C%88%E6%97%A5.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Katana_forged_by_Minamoto_Kiyomaro,_%E6%BA%90%E6%B8%85%E7%A3%A8%E5%98%89%E6%B0%B8%E4%B8%89%E5%B9%B4%E4%BA%8C%E6%9C%88%E6%97%A5.jpg",
+        "author": "SLIMHANNYA",
+        "license": "CC BY-SA 4.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "albion-brescia",
+      "makerId": "albion-swords",
+      "name": "The Brescia Spadona",
+      "category": "sword",
+      "priceUsd": 2493,
+      "priceSource": "https://albion-swords.com/product/the-brescia-spadona/",
+      "materials": "carbon steel, leather-covered wood grip",
+      "blurb": "A newly made longsword from Albion's Museum Line based on a surviving historical sword.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/The_Brescia_Spadona_01.jpg/1920px-The_Brescia_Spadona_01.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:The_Brescia_Spadona_01.jpg",
+        "author": "Albion Europe ApS",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-cluny",
+      "makerId": "albion-swords",
+      "name": "The Cluny",
+      "category": "sword",
+      "priceUsd": 2910,
+      "priceSource": "https://albion-swords.com/product/the-brescia-spadona-copy/",
+      "materials": "carbon steel, leather-covered wood grip",
+      "blurb": "A newly made longsword from Albion's Museum Line based on a surviving historical sword.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Albion_Cluny_Medieval_Sword_01_%286092947684%29.jpg/1920px-Albion_Cluny_Medieval_Sword_01_%286092947684%29.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Cluny_Medieval_Sword_01_(6092947684).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-ljubljana",
+      "makerId": "albion-swords",
+      "name": "The Ljubljana",
+      "category": "sword",
+      "priceUsd": 3220,
+      "priceSource": "https://albion-swords.com/product/the-cluny-copy/",
+      "materials": "carbon steel, leather-covered wood grip",
+      "blurb": "A newly made longsword from Albion's Museum Line based on a surviving historical sword.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Albion_Ljubljana_Medieval_Sword_16_%288259967721%29.jpg/1920px-Albion_Ljubljana_Medieval_Sword_16_%288259967721%29.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Ljubljana_Medieval_Sword_16_(8259967721).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "albion-sture",
+      "makerId": "albion-swords",
+      "name": "The Svante Nilsson Sture",
+      "category": "sword",
+      "priceUsd": 4520,
+      "priceSource": "https://albion-swords.com/product/the-svante-nilsson-sture/",
+      "materials": "carbon steel, leather-covered wood grip",
+      "blurb": "A newly made longsword from Albion's Museum Line based on a surviving historical sword.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/The_Svante_Nilsson_Sture_Sword_01.jpg/1920px-The_Svante_Nilsson_Sture_Sword_01.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:The_Svante_Nilsson_Sture_Sword_01.jpg",
+        "author": "Albion Europe ApS",
+        "license": "CC BY 2.0",
+        "exact": true
+      }
+    },
+    {
+      "id": "balaur-arms-bastard-15th",
+      "makerId": "balaur-arms",
+      "name": "15th Century Bastard Sword",
+      "category": "sword",
+      "priceUsd": 398,
+      "priceSource": "https://www.kultofathena.com/product/balaur-arms-15th-century-bastard-sword/",
+      "length": "104.6 cm",
+      "weight": "1.25 kg",
+      "materials": "9260 carbon steel, leather-covered wood grip",
+      "blurb": "A Type XV bastard sword with a sharply tapering blade.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Albion_Poitiers_Medieval_Sword_1_%286093790988%29.jpg/1280px-Albion_Poitiers_Medieval_Sword_1_%286093790988%29.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Poitiers_Medieval_Sword_1_(6093790988).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "balaur-arms-italian-longsword",
+      "makerId": "balaur-arms",
+      "name": "15th Century Italian Longsword",
+      "category": "sword",
+      "priceUsd": 418,
+      "priceSource": "https://www.kultofathena.com/product/balaur-arms-15th-century-italian-longsword-3/",
+      "length": "114.3 cm",
+      "weight": "1.2 kg",
+      "materials": "60Si2MnA spring steel, leather-covered wood grip",
+      "blurb": "An Italian-style longsword produced with LK Chen and supplied with a scabbard.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Albion_Lancaster_Medieval_Sword_4_%286093705560%29.jpg/1920px-Albion_Lancaster_Medieval_Sword_4_%286093705560%29.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Lancaster_Medieval_Sword_4_(6093705560).jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-writhen-gothic",
+      "makerId": "deepeeka",
+      "name": "Writhen Gothic German Sword, Royal Armouries Collection",
+      "category": "sword",
+      "priceUsd": 242,
+      "priceSource": "https://www.kultofathena.com/product/writhen-gothic-german-sword-royal-armouries-collection/",
+      "length": "108.6 cm",
+      "weight": "1.05 kg",
+      "materials": "C60 carbon steel",
+      "blurb": "A licensed Royal Armouries reproduction with a twisted Gothic hilt.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Albion_Ringeck_Medieval_Sword_01_%286092641880%29_I.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Albion_Ringeck_Medieval_Sword_01_(6092641880)_I.jpg",
+        "author": "Søren Niedziella",
+        "license": "CC BY 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "regenyei-tournament-saber",
+      "makerId": "regenyei-armory",
+      "name": "Tournament Saber",
+      "category": "sword",
+      "priceUsd": 368.99,
+      "priceSource": "https://www.kultofathena.com/",
+      "materials": "steel",
+      "blurb": "A steel saber made by Regenyei for historical fencing.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/9/98/Saber_MET_268249.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Saber_MET_268249.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "lord-of-battles-burgundian-fluted",
+      "makerId": "lord-of-battles",
+      "name": "Burgundian Fluted Helm",
+      "category": "helmet",
+      "priceUsd": 139.99,
+      "priceSource": "https://www.kultofathena.com/product/burgundian-fluted-helm/",
+      "materials": "mild steel",
+      "blurb": "A fluted kettle hat based on a late fifteenth-century Burgundian helmet.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/War_Hat_MET_29.158.40_004AA2015.jpg/1280px-War_Hat_MET_29.158.40_004AA2015.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:War_Hat_MET_29.158.40_004AA2015.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "epic-armoury-visored-barbuta",
+      "makerId": "epic-armoury",
+      "name": "Visored Barbuta, 19 Gauge Steel",
+      "category": "helmet",
+      "priceUsd": 180,
+      "priceSource": "https://www.kultofathena.com/product/visored-barbuta-19-gauge-steel/",
+      "materials": "19 gauge steel, leather liner",
+      "blurb": "A steel barbuta with a removable lifting faceplate and adjustable suspension liner.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Barbute_MET_14.25.580_004mar2015.jpg/1280px-Barbute_MET_14.25.580_004mar2015.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Barbute_MET_14.25.580_004mar2015.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-great-helm-ah05",
+      "makerId": "steel-mastery",
+      "name": "Great Helm",
+      "category": "helmet",
+      "priceUsd": 672,
+      "priceSource": "https://steel-mastery.com/great-helm.html",
+      "materials": "1.5 mm cold-rolled steel, leather strap",
+      "blurb": "A made-to-measure great helm with a leather chin strap.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Ancient_German_armour_helmet.jpg/1280px-Ancient_German_armour_helmet.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Ancient_German_armour_helmet.jpg",
+        "author": "Thomas Quine",
+        "license": "CC BY-SA 2.0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-houndskull-ah13",
+      "makerId": "steel-mastery",
+      "name": "Bascinet houndskull",
+      "category": "helmet",
+      "priceUsd": 996.8,
+      "priceSource": "https://steel-mastery.com/bascinet-hounskull.html",
+      "materials": "1.5 mm cold-rolled steel, leather strap",
+      "blurb": "A made-to-measure bascinet with a projecting houndskull visor.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Visored_Bascinet_MET_04.3.247_004june2015.jpg/1280px-Visored_Bascinet_MET_04.3.247_004june2015.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Visored_Bascinet_MET_04.3.247_004june2015.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-armet-ah27",
+      "makerId": "steel-mastery",
+      "name": "Armet closed helmet 16th century",
+      "category": "helmet",
+      "priceUsd": 2060.8,
+      "priceSource": "https://steel-mastery.com/armet-closed-helmet-16th-century.html",
+      "materials": "1.5 mm cold-rolled steel, cotton liner",
+      "blurb": "A custom armet with hinged cheek pieces, a lifting visor and an articulated neck defense.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Armet_MET_14.25.519_005AA2015.jpg/1280px-Armet_MET_14.25.519_005AA2015.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Armet_MET_14.25.519_005AA2015.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-burgonet-ah46",
+      "makerId": "steel-mastery",
+      "name": "Open-Faced Landskneht Burgonet Helmet",
+      "category": "helmet",
+      "priceUsd": 2587.2,
+      "priceSource": "https://steel-mastery.com/open-faced-landskneht-burgonet-helmet.html",
+      "materials": "1.5 mm cold-rolled steel, cotton liner",
+      "blurb": "A crested burgonet with hinged cheek pieces made to the buyer’s measurements.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Burgonet_MET_14.25.604_003AA2015.jpg/1280px-Burgonet_MET_14.25.604_003AA2015.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Burgonet_MET_14.25.604_003AA2015.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-english-pauldrons-as08",
+      "makerId": "steel-mastery",
+      "name": "English pauldrons late 15th century",
+      "category": "armor",
+      "priceUsd": 750.4,
+      "priceSource": "https://steel-mastery.com/english-pauldrons-late-15th-century.html",
+      "materials": "1 mm cold-rolled steel, leather straps",
+      "blurb": "A pair of English-style pauldrons based on the effigy of Ralph Fitzherbert.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Left_Shoulder_Defense_%28Pauldron%29_MET_DP-12882-012.jpg/1920px-Left_Shoulder_Defense_%28Pauldron%29_MET_DP-12882-012.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Left_Shoulder_Defense_(Pauldron)_MET_DP-12882-012.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-churburg-breastplate-ab01",
+      "makerId": "steel-mastery",
+      "name": "Churburg type Breastplate 14th century",
+      "category": "armor",
+      "priceUsd": 1232,
+      "priceSource": "https://steel-mastery.com/churburg-type-breastplate-14th-century.html",
+      "materials": "1 mm cold-rolled steel, leather straps",
+      "blurb": "A segmented breastplate based on armour preserved at Churburg Castle.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Breastplate_with_applied_stop-ribs_MET_DP-12882-027.jpg/1920px-Breastplate_with_applied_stop-ribs_MET_DP-12882-027.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Breastplate_with_applied_stop-ribs_MET_DP-12882-027.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "steel-mastery-kasten-brust-ab14",
+      "makerId": "steel-mastery",
+      "name": "Kasten-Brust Cuirass with the Skirt",
+      "category": "armor",
+      "priceUsd": 3707.2,
+      "priceSource": "https://steel-mastery.com/cuirasses-breastplates-and-gorgets",
+      "materials": "steel, leather straps",
+      "blurb": "A box-shaped early Gothic cuirass with an articulated skirt.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Breastplate_MET_DP-12882-025.jpg/1280px-Breastplate_MET_DP-12882-025.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Breastplate_MET_DP-12882-025.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "deepeeka-medieval-heavy-crossbow",
+      "makerId": "deepeeka",
+      "name": "Medieval Heavy Crossbow",
+      "category": "crossbow",
+      "priceUsd": 369.99,
+      "priceSource": "https://www.kultofathena.com/product/medieval-heavy-crossbow/",
+      "length": "103.5 cm",
+      "weight": "6.12 kg",
+      "materials": "steel prod and fittings, hardwood stock",
+      "blurb": "A steel-prod crossbow supplied with three wooden bolts and sold without a windlass.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Crossbow_%28Halbe_R%C3%BCstung%29_with_Cranequin_%28Winder%29_MET_DP282475.jpg/1920px-Crossbow_%28Halbe_R%C3%BCstung%29_with_Cranequin_%28Winder%29_MET_DP282475.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Crossbow_(Halbe_R%C3%BCstung)_with_Cranequin_(Winder)_MET_DP282475.jpg",
+        "author": "The Metropolitan Museum of Art",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "toth-attila",
+      "makerId": "istvan-toth",
+      "name": "Attila Hungarian Horse Bow",
+      "category": "bow",
+      "priceUsd": 178.08,
+      "priceSource": "https://recurvebowshop.com/hungarian-revurve-bow-attila/",
+      "length": "145 cm unstrung",
+      "weight": "0.703 kg",
+      "materials": "fiberglass, wood, genuine leather, ash siyahs, horn-reinforced tips",
+      "blurb": "A Hungarian horse bow with ash siyahs, horn tips and leather-covered limbs.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Hungarian_bow.png",
+        "page": "https://commons.wikimedia.org/wiki/File:Hungarian_bow.png",
+        "author": "Hatala Branislav",
+        "license": "CC0",
+        "exact": false
+      }
+    },
+    {
+      "id": "adrian-hayes-three-laminate-osage",
+      "makerId": "adrian-hayes-longbows",
+      "name": "3 Laminate Osage Longbow",
+      "category": "bow",
+      "priceUsd": 712.8,
+      "priceSource": "https://www.adrianhayeslongbows.com/custom-bows",
+      "materials": "bamboo back, padauk core, osage belly, horn nocks, leather or braid grip",
+      "blurb": "An English longbow with bamboo backing, a padauk core and an osage belly.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Englishlongbow.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Englishlongbow.jpg",
+        "author": "Hitchhiker89",
+        "license": "Public domain",
+        "exact": false
+      }
+    },
+    {
+      "id": "koyama-renshin-nisun",
+      "makerId": "koyama-kyugu",
+      "name": "Renshin Glass Yumi, Nisun-nobi",
+      "category": "bow",
+      "priceUsd": 264,
+      "priceSource": "https://suizanmiyabi.com/SHOP/120712.html",
+      "length": "227 cm",
+      "materials": "fiberglass sheet, wood, deerskin grip, rattan bindings",
+      "blurb": "A black fiberglass yumi with a wood core and three rattan bindings.",
+      "image": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Yumi01.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Yumi01.jpg",
+        "author": "Nuage fou",
+        "license": "Public domain",
         "exact": false
       }
     }

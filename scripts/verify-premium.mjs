@@ -10,8 +10,13 @@ const { chromium } = await import(process.env.PLAYWRIGHT_MODULE ?? pathToFileURL
 const base = process.env.BASE_URL ?? 'http://127.0.0.1:5190'
 const output = 'node_modules/.tmp/premium-qa'
 await mkdir(output, { recursive: true })
-const items = JSON.parse(await readFile('src/data/items.json', 'utf8'))
-const categories = ['sword', 'helmet', 'dagger', 'polearm', 'armor', 'shield', 'axe', 'fitting']
+// The whole catalog, as src/data/items.ts merges it: Met and Cleveland antiques, then newly forged pieces.
+const items = [
+  ...JSON.parse(await readFile('src/data/items.json', 'utf8')),
+  ...JSON.parse(await readFile('src/data/cleveland.json', 'utf8')),
+  ...JSON.parse(await readFile('src/data/modern.json', 'utf8')).items,
+]
+const categories = ['sword', 'helmet', 'dagger', 'polearm', 'armor', 'shield', 'axe', 'bow']
 const objects = categories.map((category) => items.find((item) => item.category === category))
 assert.ok(objects.every(Boolean), 'Every test category needs a catalog object')
 const values = [2000, 540, 180, 960, 4800, 280, 140, 24]
@@ -72,14 +77,17 @@ async function contrast(page, name, selector) {
         for (const style of styles.reverse()) background = over(rgba(style.backgroundColor), background)
         const style = getComputedStyle(element)
         let painted = []
-        // Compare button text with every opaque gradient stop as well as its solid base.
-        for (const parentStyle of styles) if (parentStyle.backgroundImage.startsWith('linear-gradient')) {
+        // Compare text with every opaque stop of the nearest painted surface: a gradient on the text's own
+        // element or an ancestor, but never one behind a solid background nearer the text (a flat brass
+        // button inside a footer that fades to dark is read against the brass).
+        for (const parentStyle of [...styles].reverse()) {
+          if (!parentStyle.backgroundImage.startsWith('linear-gradient')) { if (rgba(parentStyle.backgroundColor)[3] === 1) break; continue }
           const stops = []
           for (const stop of parentStyle.backgroundImage.match(/(?:oklch|oklab|rgb|color)\([^)]*\)/g) ?? []) {
             const color = rgba(stop)
             if (color[3] === 1) stops.push(color)
           }
-          if (stops.length) painted = stops
+          if (stops.length) { painted = stops; break }
         }
         const ratios = (painted.length ? painted : [background]).map((color) => { const a = light(over(rgba(style.color), color)), b = light(color); return (Math.max(a, b) + .05) / (Math.min(a, b) + .05) })
         const size = parseFloat(style.fontSize), large = size >= 24 || size >= 18.66 && Number(style.fontWeight) >= 700

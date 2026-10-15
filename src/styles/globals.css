@@ -41,7 +41,7 @@
 
   --font-display: "Cormorant Garamond Variable", "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --font-sans: "Instrument Sans Variable", "Instrument Sans", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
-  --font-gothic: "Grenze Gotisch", "Cormorant Garamond Variable", Georgia, serif;
+  --font-gothic: "Ironbound Gothic", "Grenze Gotisch", "Cormorant Garamond Variable", Georgia, serif;
 
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -52,6 +52,19 @@
   --animate-shimmer: shimmer 2.8s var(--ease-in-out-quart) infinite;
   --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
   --animate-marquee: marquee 60s linear infinite;
+}
+
+/* The wordmark's capital I. Grenze Gotisch's own I is a closed form that reads as a D, so a
+   one-letter font holds an I drawn from the face's own capital stem
+   (scripts/assets/wordmark_font.py, OFL). It covers U+0049 alone; every other letter falls
+   through to Grenze Gotisch, and the I renders as text at the face's weight. */
+@font-face {
+  font-family: "Ironbound Gothic";
+  src: url("../assets/fonts/ironbound-gothic-i.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+  unicode-range: U+0049;
 }
 
 @keyframes ib-fade-in {
@@ -118,10 +131,12 @@ body {
   color: var(--color-bone-50);
 }
 
+/* A brass ring with a dark collar, so focus reads on a brass plate as well as on iron. It
+   follows each control's own shape: the wax seal stays round. */
 :focus-visible {
-  outline: 2px solid var(--color-brass-400);
-  outline-offset: 3px;
-  border-radius: 4px;
+  outline: 2px solid var(--color-brass-300);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--color-ink-950);
 }
 
 button {
@@ -135,6 +150,15 @@ img {
 
 .tabular {
   font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Money set large (20 px and up): the display serif with lining figures, as in a catalog.
+   Small figures in tables and ledger rows stay in Instrument Sans. */
+.ib-money {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0;
 }
 
 .font-display {
@@ -221,7 +245,7 @@ img {
 .plate {
   background: color-mix(in oklch, var(--color-ink-900) 94%, transparent);
   border: 1px solid color-mix(in oklch, var(--color-bone-100) 8%, transparent);
-  border-radius: 10px;
+  border-radius: 2px;
   box-shadow: inset 0 1px 0 color-mix(in oklch, var(--color-bone-100) 4%, transparent);
 }
 
@@ -236,11 +260,13 @@ img {
   display: none;
 }
 
-/* The receipt never runs off the screen. On a short wide screen (a phone on its side, a small
-   laptop window) it settles below the top controls and scrolls inside itself, so every action
-   stays in reach. Taller screens keep it centered beside the piece. */
+/* The receipt never runs off the screen. On a phone it is a sheet over the lower part of the
+   screen, so the piece keeps the upper part, and it scrolls inside itself. On a short wide
+   screen (a phone on its side, a small laptop window) it settles below the top controls and
+   scrolls inside itself, so every action stays in reach. Taller screens keep it centered
+   beside the piece. */
 .ib-receipt {
-  max-height: calc(100dvh - 1rem);
+  max-height: min(62dvh, calc(100dvh - 1rem));
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -252,6 +278,482 @@ img {
 }
 @media (min-width: 768px) and (max-height: 860px) {
   .ib-receipt-dock { align-items: flex-end; padding-top: 6rem; padding-bottom: 1rem; }
+}
+
+@layer components {
+  /* One button language. A flat brass plate for the single most important action on a view,
+     a square hairline for everything secondary, plain words for the rest. No gradients, no
+     sheen, no glow: the light in this product belongs to rarity. */
+  .ib-button {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .ib-button--primary {
+    background: var(--color-brass-500);
+    border-color: var(--color-brass-600);
+    color: var(--color-ink-950);
+  }
+  @media (hover: hover) {
+    .ib-button--primary:hover {
+      background: var(--color-brass-400);
+    }
+  }
+  .ib-button--primary:active {
+    background: var(--color-brass-600);
+  }
+  .ib-button--secondary {
+    border-color: color-mix(in oklch, var(--color-bone-100) 26%, transparent);
+    color: var(--color-bone-50);
+  }
+  @media (hover: hover) {
+    .ib-button--secondary:hover {
+      border-color: color-mix(in oklch, var(--color-bone-100) 50%, transparent);
+      background: color-mix(in oklch, var(--color-bone-100) 5%, transparent);
+    }
+  }
+  .ib-button--ghost {
+    color: var(--color-bone-200);
+  }
+  @media (hover: hover) {
+    .ib-button--ghost:hover {
+      background: color-mix(in oklch, var(--color-bone-100) 5%, transparent);
+      color: var(--color-bone-50);
+    }
+  }
+  .ib-button:disabled {
+    pointer-events: none;
+    opacity: 0.45;
+  }
+  .ib-button-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.25;
+  }
+  .ib-button-sub {
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: normal;
+    text-transform: none;
+    opacity: 0.8;
+  }
+
+  /* Single-glyph controls (close, zoom): a square of hairline, never a circle. */
+  .ib-icon-button {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    border: 1px solid color-mix(in oklch, var(--color-bone-100) 22%, transparent);
+    border-radius: 2px;
+    color: var(--color-bone-200);
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+  }
+  @media (hover: hover) {
+    .ib-icon-button:hover {
+      border-color: color-mix(in oklch, var(--color-bone-100) 46%, transparent);
+      background: color-mix(in oklch, var(--color-bone-100) 5%, transparent);
+      color: var(--color-bone-50);
+    }
+  }
+
+  /* On and off as a ledger tick: an empty square, or a brass one with a dark tick. */
+  .ib-switch {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    color: var(--color-bone-300);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: color 0.15s ease;
+  }
+  @media (hover: hover) {
+    .ib-switch:hover {
+      color: var(--color-bone-100);
+    }
+  }
+  .ib-switch-mark {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    flex: none;
+    border: 1px solid color-mix(in oklch, var(--color-bone-100) 45%, transparent);
+    border-radius: 1px;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .ib-switch[aria-checked="true"] .ib-switch-mark {
+    background: var(--color-brass-500);
+    border-color: var(--color-brass-500);
+  }
+  .ib-switch[aria-checked="true"] .ib-switch-mark::after {
+    content: "";
+    position: absolute;
+    left: 4.5px;
+    top: 1px;
+    width: 5px;
+    height: 9px;
+    border: solid var(--color-ink-950);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .ib-switch-state {
+    min-width: 2.2em;
+    color: var(--color-bone-400);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+  }
+  .ib-switch[aria-checked="true"] .ib-switch-state {
+    color: var(--color-brass-300);
+  }
+
+  /* A choice between a few values, read like ruled entries: the chosen one carries a brass rule. */
+  .ib-quantity {
+    display: inline-flex;
+    border-bottom: 1px solid color-mix(in oklch, var(--color-bone-100) 22%, transparent);
+  }
+  .ib-quantity-option {
+    position: relative;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    color: var(--color-bone-400);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums lining-nums;
+    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  }
+  @media (hover: hover) {
+    .ib-quantity-option:hover {
+      color: var(--color-bone-100);
+      background: color-mix(in oklch, var(--color-bone-100) 4%, transparent);
+    }
+  }
+  .ib-quantity-option[aria-checked="true"] {
+    border-bottom-color: var(--color-brass-400);
+    color: var(--color-bone-50);
+  }
+
+  /* A ledger page: dark iron with a brass head rule over a fine second rule. Square, open at
+     the sides, no glow. Used for the receipt and the featured chest. */
+  .ib-ledger {
+    position: relative;
+    background: var(--color-ink-900);
+    border-top: 2px solid var(--color-brass-500);
+    border-bottom: 1px solid color-mix(in oklch, var(--color-bone-100) 12%, transparent);
+    border-radius: 0;
+  }
+  .ib-ledger::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    inset-inline: 0;
+    height: 1px;
+    background: color-mix(in oklch, var(--color-brass-500) 45%, transparent);
+    pointer-events: none;
+  }
+
+  /* The receipt. As a title the words stand on their own over the scene; with the actions it
+     becomes a ledger entry. */
+  .ib-receipt {
+    position: relative;
+    border-top: 2px solid transparent;
+    border-bottom: 1px solid transparent;
+    transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+  }
+  .ib-receipt[data-stage="full"] {
+    background: var(--color-ink-900);
+    border-top-color: var(--color-brass-500);
+    border-bottom-color: color-mix(in oklch, var(--color-bone-100) 12%, transparent);
+    box-shadow: 0 34px 70px -34px oklch(0% 0 0 / 0.75);
+  }
+  .ib-receipt[data-stage="full"]::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    inset-inline: 0;
+    height: 1px;
+    background: color-mix(in oklch, var(--color-brass-500) 45%, transparent);
+    pointer-events: none;
+  }
+  .receipt-stamp-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .receipt-stamp {
+    font-size: 32px;
+    line-height: 1;
+  }
+  .receipt-category {
+    margin-left: auto;
+    color: var(--color-bone-400);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .receipt-title {
+    margin-top: 12px;
+    color: var(--color-bone-50);
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+  .receipt-provenance {
+    margin-top: 8px;
+    color: var(--color-bone-200);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .receipt-note {
+    margin-top: 6px;
+    color: var(--color-bone-400);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .receipt-disclosures {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+    margin-top: 8px;
+    color: var(--color-bone-400);
+    font-size: 12px;
+  }
+  /* The value, entered like a line in a ledger: the label, a dotted leader, the figure. */
+  .receipt-value {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid transparent;
+  }
+  .ib-receipt[data-stage="full"] .receipt-value {
+    border-top-color: color-mix(in oklch, var(--color-bone-100) 12%, transparent);
+  }
+  /* A long figure on a narrow phone drops to its own line, still on the right. */
+  .receipt-value-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+  }
+  .receipt-value-label {
+    flex: none;
+    color: var(--color-bone-300);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .receipt-leader {
+    flex: 1;
+    min-width: 16px;
+    align-self: flex-end;
+    margin-bottom: 9px;
+    border-bottom: 1px dotted color-mix(in oklch, var(--color-bone-100) 30%, transparent);
+  }
+  .receipt-value-number {
+    flex: none;
+    margin-left: auto;
+    color: var(--color-bone-50);
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  .receipt-value-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2px 12px;
+    margin-top: 6px;
+    color: var(--color-bone-300);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  .receipt-source {
+    color: var(--color-bone-300);
+    font-size: 12px;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklch, var(--color-bone-100) 28%, transparent);
+    text-underline-offset: 3px;
+  }
+  @media (hover: hover) {
+    .receipt-source:hover {
+      color: var(--color-bone-100);
+    }
+  }
+  .receipt-comparison {
+    margin-left: auto;
+  }
+  .receipt-specs {
+    display: none;
+    flex-wrap: wrap;
+    gap: 2px 16px;
+    margin-top: 12px;
+    color: var(--color-bone-400);
+    font-size: 12px;
+  }
+  .receipt-specs b {
+    color: var(--color-bone-100);
+    font-weight: 500;
+  }
+  .receipt-blurb {
+    display: none;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: 10px;
+    color: var(--color-bone-300);
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-style: italic;
+    line-height: 1.35;
+  }
+  .receipt-trial {
+    display: none;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in oklch, var(--color-bone-100) 10%, transparent);
+    color: var(--color-bone-200);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .receipt-actions {
+    display: flex;
+    flex-direction: column;
+    margin-top: 16px;
+  }
+  /* Sell and Ship: entries in the ledger, the action on the left and its terms on the right. */
+  .receipt-commands {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 10px;
+    border-block: 1px solid color-mix(in oklch, var(--color-bone-100) 12%, transparent);
+  }
+  .receipt-command {
+    display: flex;
+    min-height: 56px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: 9px 12px;
+    text-align: left;
+    color: var(--color-bone-50);
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .receipt-command + .receipt-command {
+    border-left: 1px solid color-mix(in oklch, var(--color-bone-100) 12%, transparent);
+  }
+  @media (hover: hover) {
+    .receipt-command:hover {
+      background: color-mix(in oklch, var(--color-bone-100) 5%, transparent);
+    }
+  }
+  .receipt-command:disabled {
+    pointer-events: none;
+    opacity: 0.45;
+  }
+  .receipt-command-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  .receipt-command-note {
+    color: var(--color-bone-300);
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .receipt-sold {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-block: 12px;
+    border-block: 1px solid color-mix(in oklch, var(--color-moss-400) 30%, transparent);
+  }
+  .receipt-spectate {
+    display: grid;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  /* Inspect, Replay and Share, in words, along the foot of the entry. */
+  .receipt-tools {
+    display: flex;
+    margin-top: 6px;
+  }
+  .receipt-tool {
+    min-height: 44px;
+    padding-inline: 10px;
+    color: var(--color-bone-300);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: color 0.15s ease;
+  }
+  .receipt-tool:first-child {
+    padding-left: 0;
+  }
+  @media (hover: hover) {
+    .receipt-tool:hover {
+      color: var(--color-bone-50);
+    }
+  }
+  .receipt-draw {
+    display: none;
+    margin-top: 4px;
+    color: var(--color-bone-400);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+  .receipt-credit {
+    margin-top: 6px;
+    color: var(--color-bone-400);
+    font-size: 11px;
+    line-height: 1.45;
+  }
+  @media (min-width: 640px) {
+    .receipt-specs,
+    .receipt-trial {
+      display: flex;
+    }
+    .receipt-blurb {
+      display: -webkit-box;
+    }
+    .receipt-draw {
+      display: block;
+    }
+    .receipt-stamp {
+      font-size: 40px;
+    }
+    .receipt-title {
+      font-size: 46px;
+    }
+    .receipt-value-number {
+      font-size: 46px;
+    }
+  }
 }
 
 /* Sheets over an opening (share, inspect) scroll inside themselves on a short screen. */

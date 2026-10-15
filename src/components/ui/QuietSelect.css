@@ -3,7 +3,7 @@
 .ib-select-trigger { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--color-bone-200); white-space: nowrap; transition: color .2s var(--ease-out-expo); }
 .ib-select-trigger:hover, .ib-select-trigger[aria-expanded="true"] { color: var(--color-bone-50); }
 .ib-select-list { position: absolute; z-index: 5; right: 0; top: calc(100% + 4px); min-width: 200px; margin: 0; padding: 6px; list-style: none; }
-.ib-select-list [role="option"] { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 44px; padding: 8px 12px; border-radius: 6px; color: var(--color-bone-200); font-size: 13px; cursor: pointer; }
+.ib-select-list [role="option"] { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 44px; padding: 8px 12px; border-radius: 2px; color: var(--color-bone-200); font-size: 13px; cursor: pointer; }
 .ib-select-list [role="option"]:hover, .ib-select-list [role="option"]:focus { background: var(--color-ink-800); }
 .ib-select-list [aria-selected="true"] { color: var(--color-bone-50); }
 .ib-select-list [aria-selected="true"] svg { color: var(--color-brass-400); }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseSave } from './store'
+import { actions, getState, parseSave, setState } from './store'
 import { ARCHIVE_BY_ID, ITEM_BY_ID } from '../data/items'
 import { CHEST_BY_ID } from '../config/chests'
 
@@ -48,5 +48,29 @@ describe('saved state', () => {
       expect(ARCHIVE_BY_ID[id], id).toBeUndefined()
     }
     expect(CHEST_BY_ID[saved.chestId]).toBeUndefined()
+  })
+})
+
+describe('sell-back', () => {
+  it('takes a sale back exactly, and only a sale', () => {
+    setState({ balance: 1000, pulls: [{ ...pull, uid: 's', status: 'vaulted' } as never], stats: { spent: 100, opened: 1, soldFor: 0 } })
+    actions.sellBack('s', 2385)
+    expect(getState().balance).toBe(3385)
+    expect(getState().pulls[0]).toMatchObject({ status: 'sold', soldFor: 2385 })
+    actions.undoSell('s')
+    expect(getState().balance).toBe(1000)
+    expect(getState().stats.soldFor).toBe(0)
+    expect(getState().pulls[0]).toMatchObject({ status: 'vaulted' })
+    expect(getState().pulls[0]?.soldFor).toBeUndefined()
+    // A second tap on Sell pays nothing more.
+    actions.sellBack('s', 2385)
+    actions.sellBack('s', 2385)
+    expect(getState().balance).toBe(3385)
+    actions.undoSell('s')
+    expect(getState().balance).toBe(1000)
+    // A piece that was never sold, or is already back, is left alone.
+    actions.undoSell('s')
+    actions.undoSell('missing')
+    expect(getState().balance).toBe(1000)
   })
 })

@@ -160,12 +160,29 @@ export const actions = {
   removePulls(uids: string[]) {
     setState((s) => ({ pulls: s.pulls.filter((p) => !uids.includes(p.uid)), stats: { ...s.stats, opened: Math.max(0, s.stats.opened - uids.length) } }))
   },
+  /** Sells a piece in the vault back for credit. A piece already sold, shipped or gone is left alone, so a second tap never pays twice. */
   sellBack(uid: string, amount: number) {
-    setState((s) => ({
-      balance: s.balance + amount,
-      pulls: s.pulls.map((p) => (p.uid === uid ? { ...p, status: 'sold' as const, soldFor: amount } : p)),
-      stats: { ...s.stats, soldFor: s.stats.soldFor + amount },
-    }))
+    setState((s) => {
+      if (!s.pulls.some((p) => p.uid === uid && p.status === 'vaulted')) return {}
+      return {
+        balance: s.balance + amount,
+        pulls: s.pulls.map((p) => (p.uid === uid ? { ...p, status: 'sold' as const, soldFor: amount } : p)),
+        stats: { ...s.stats, soldFor: s.stats.soldFor + amount },
+      }
+    })
+  },
+  /** Takes back a sale made a moment ago: the piece returns to the vault, the credit leaves the purse. */
+  undoSell(uid: string) {
+    setState((s) => {
+      const pull = s.pulls.find((p) => p.uid === uid)
+      if (!pull || pull.status !== 'sold' || pull.soldFor == null) return {}
+      const amount = pull.soldFor
+      return {
+        balance: s.balance - amount,
+        pulls: s.pulls.map((p) => (p.uid === uid ? { ...p, status: 'vaulted' as const, soldFor: undefined } : p)),
+        stats: { ...s.stats, soldFor: s.stats.soldFor - amount },
+      }
+    })
   },
   ship(uid: string, shipment: NonNullable<Pull['shipment']>) {
     setState((s) => ({ pulls: s.pulls.map((p) => (p.uid === uid ? { ...p, status: 'shipping' as const, shipment } : p)) }))

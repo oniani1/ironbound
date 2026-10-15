@@ -27,7 +27,7 @@ QUERIES = [
     "helmet", "sallet", "armet", "close helmet", "burgonet", "morion", "bascinet",
     "kabuto", "shield", "buckler", "spear", "halberd", "glaive", "partisan", "pollaxe",
     "axe", "mace", "war hammer", "armor", "gauntlet", "breastplate", "crossbow",
-    "arrowhead", "tsuba", "spur", "shamshir", "kris", "Viking",
+    "bow", "yumi", "yari", "shamshir", "kris", "Viking",
 ]
 PER_QUERY = int(os.environ.get("MET_PER_QUERY", "24"))
 KEEP = (

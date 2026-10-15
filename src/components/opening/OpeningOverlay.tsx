@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { FastForward, X } from '@phosphor-icons/react'
 import { ChestScene } from '../chest3d/ChestScene'
 import { ChestAnim } from '../chest3d/animState'
-import { applyCharge, introTimeline, revealTimeline, settleReveal, type Phase } from '../chest3d/timeline'
+import { applyCharge, introTimeline, revealTimeline, settleReveal, whenChestReady, type Phase } from '../chest3d/timeline'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
 import type { RarityId } from '../../types'
 import { buybackOffer, chestPool } from '../../lib/gacha'
@@ -17,6 +17,7 @@ import { money } from '../../lib/format'
 import { revealFacts } from '../../lib/facts'
 import { HoldToOpen, type HoldHandle } from './HoldToOpen'
 import { IconButton } from '../ui/Button'
+import { Switch } from '../ui/Switch'
 import { Pips } from '../ui/RarityTag'
 import { RevealCard } from './RevealCard'
 import { MultiReveal } from './MultiReveal'
@@ -30,9 +31,16 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   const { chest, results, trial, spectate } = session
   const multi = results.length > 1
   const anim = useMemo(() => new ChestAnim(), [])
+  // The reveal (or the seal breaking by itself), and the chest's arrival, which a hold can cut short.
   const tl = useRef<gsap.core.Timeline | null>(null)
+  const introTl = useRef<gsap.core.Timeline | null>(null)
+  // A reveal waiting for the chest to be in the scene; calling it cancels the wait.
+  const pending = useRef<() => void>(() => {})
   const hold = useRef<HoldHandle>(null)
-  const [phase, setPhase] = useState<Phase>('intro')
+  const fast = useStore((s) => s.settings.fast)
+  const balance = useStore((s) => s.balance)
+  // The seal can be held from the first frame. Fast mode and spectators open by themselves.
+  const [phase, setPhase] = useState<Phase>(() => (fast || spectate ? 'intro' : 'await'))
   const [soldUids, setSoldUids] = useState<Set<string>>(new Set())
   // The rarity, once named, and how many facts about the piece are showing.
   const [named, setNamed] = useState<RarityId | null>(null)
@@ -41,11 +49,26 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   // Whether the piece's photograph is in, checked while the result is up: a photo that never
   // loaded is said plainly on the receipt, and the line goes if it arrives late.
   const [photoMissing, setPhotoMissing] = useState(false)
+  // Until when a sale from the receipt can be taken back, set the moment it is made.
+  const [undoUntil, setUndoUntil] = useState<Record<string, number>>({})
+  // Open another keeps this room and its scene, so there is nothing to rebuild and the next seal
+  // can be held at once. Everything about the last pull is put away before the next one shows.
+  const [shown, setShown] = useState(session.key)
+  const [round, setRound] = useState(0)
+  if (shown !== session.key) {
+    setShown(session.key)
+    setRound((r) => r + 1)
+    setPhase(fast || spectate ? 'intro' : 'await')
+    setSoldUids(new Set())
+    setNamed(null)
+    setBeat(-1)
+    setCollapsed(false)
+    setPhotoMissing(false)
+    setUndoUntil({})
+  }
   const root = useRef<HTMLDivElement>(null)
   const closeBtn = useRef<HTMLButtonElement>(null)
   const skipBtn = useRef<HTMLButtonElement>(null)
-  const fast = useStore((s) => s.settings.fast)
-  const balance = useStore((s) => s.balance)
   const reduced = useReducedMotion()
   useEffect(() => {
     if (phase !== 'title' && phase !== 'reveal') return
@@ -70,41 +93,79 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   useEffect(() => () => window.clearTimeout(replayTimer.current), [])
 
   const startReveal = useCallback(() => {
-    tl.current?.kill()
-    if (reduced) {
-      // Reduced motion: no flight, no flashes. The result fades in.
-      settleReveal(anim, best.rarity, multi)
-      setPhase('reveal')
-      return
+    // A seal broken while the chest is still arriving lands it at once.
+    const intro = introTl.current
+    introTl.current = null
+    if (intro) {
+      intro.eventCallback('onComplete', null)
+      intro.progress(1)
+      intro.kill()
     }
-    // Once the seal breaks the rest plays by itself: the lid opens, the camera studies the
-    // piece while the facts come one by one, and the rarity is named last.
-    tl.current = revealTimeline(anim, { rarity: best.rarity, fast: fastRef.current, multi, reducedMotion: reduced, onPhase: setPhase, onRarity: setNamed, beats: facts.length, onBeat: setBeat })
+    pending.current()
+    pending.current = whenChestReady(anim, () => {
+      pending.current = () => {}
+      tl.current?.kill()
+      if (reduced) {
+        // Reduced motion: no flight, no flashes. The result fades in.
+        settleReveal(anim, best.rarity, multi)
+        setPhase('reveal')
+        return
+      }
+      // Once the seal breaks the rest plays by itself: the lid opens, the camera studies the
+      // piece while the facts come one by one, and the rarity is named last.
+      tl.current = revealTimeline(anim, { rarity: best.rarity, fast: fastRef.current, multi, reducedMotion: reduced, onPhase: setPhase, onRarity: setNamed, beats: facts.length, onBeat: setBeat })
+    })
   }, [anim, multi, reduced, best.rarity, facts.length])
+  const startRevealRef = useRef(startReveal)
+  startRevealRef.current = startReveal
 
-  // The seal heats and strains as the charge builds.
-  const onCharge = useCallback((p: number) => applyCharge(anim, p), [anim])
+  // The seal heats and strains as the charge builds. A hold during the arrival hurries it.
+  const onCharge = useCallback(
+    (p: number) => {
+      const intro = introTl.current
+      if (p > 0 && intro?.isActive() && intro.timeScale() === 1) {
+        intro.timeScale(4)
+        // The charge lights the seams from here on.
+        gsap.killTweensOf(anim, 'glow')
+      }
+      applyCharge(anim, p)
+    },
+    [anim],
+  )
 
-  // Intro: the chest drops onto the plinth. In fast mode the seal breaks by itself.
   useEffect(() => {
     document.body.style.overflow = 'hidden'
-    tl.current = introTimeline(
+    return () => {
+      document.body.style.overflow = ''
+      tl.current?.kill()
+      introTl.current?.kill()
+      pending.current()
+    }
+  }, [])
+
+  // Each chest arrives, the first and every one opened after it. Laid out before the frame is
+  // drawn, so the last pull's piece and open lid never show with the new chest. In fast mode
+  // and for spectators the seal breaks by itself; spectators see it strain first.
+  useLayoutEffect(() => {
+    window.clearTimeout(replayTimer.current)
+    tl.current?.kill()
+    tl.current = null
+    pending.current()
+    pending.current = () => {}
+    introTl.current?.kill()
+    // Only the arrival in play can complete: a killed one never calls back.
+    introTl.current = introTimeline(
       anim,
       () => {
-        // Fast mode and spectators break the seal by themselves; spectators see it strain first.
-        if (fastRef.current || spectate) {
-          const o = { p: 0 }
-          tl.current = gsap.timeline()
-          tl.current.to(o, { p: 1, duration: fastRef.current ? 0.08 : 1.1, ease: 'power1.in', onUpdate: () => applyCharge(anim, o.p), onComplete: startReveal })
-        } else setPhase('await')
+        introTl.current = null
+        if (!fastRef.current && !spectate) return
+        const o = { p: 0 }
+        tl.current = gsap.timeline()
+        tl.current.to(o, { p: 1, duration: fastRef.current ? 0.08 : 1.1, ease: 'power1.in', onUpdate: () => applyCharge(anim, o.p), onComplete: () => startRevealRef.current() })
       },
       fastRef.current,
     )
-    return () => {
-      tl.current?.kill()
-      document.body.style.overflow = ''
-    }
-  }, [anim, startReveal])
+  }, [anim, session.key, spectate])
 
   const skip = useCallback(() => {
     window.clearTimeout(replayTimer.current)
@@ -177,11 +238,12 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     if (phase !== 'reveal') setCollapsed(false)
   }, [phase])
 
-  // Keyboard focus: Close while the chest lands, the seal while it waits, Skip while it
-  // opens, the result card after. The provider returns it to the launcher on exit.
+  // Keyboard focus: the seal from the first frame (it takes focus itself), Close when the chest
+  // opens by itself, Skip while it opens, the result card after. The provider returns it to
+  // the launcher on exit.
   useEffect(() => {
-    closeBtn.current?.focus({ preventScroll: true })
-  }, [])
+    if (fastRef.current || spectate) closeBtn.current?.focus({ preventScroll: true })
+  }, [session.key, spectate])
   useEffect(() => {
     if (phase === 'tell') skipBtn.current?.focus({ preventScroll: true })
   }, [phase])
@@ -242,6 +304,16 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     return () => window.removeEventListener('keydown', onKey)
   }, [phase, exit, skip])
 
+  // A sale from the receipt can be taken back for a few seconds.
+  const unsell = (uids: string[]) => {
+    uids.forEach((u) => actions.undoSell(u))
+    setSoldUids((s) => {
+      const n = new Set(s)
+      uids.forEach((u) => n.delete(u))
+      return n
+    })
+  }
+
   const sell = (uids: string[]) => {
     uids.forEach((u) => {
       const r = results.find((x) => x.uid === u)!
@@ -254,9 +326,13 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     })
   }
 
+  // Only the receipt that is up buys the next chest: a second click, or a click on a receipt
+  // still fading out, finds the next opening already under way and does nothing.
+  const phaseRef = useRef(phase)
+  phaseRef.current = phase
   const again = () => {
-    const res = open(chest.id, results.length)
-    if (!res.ok) return
+    if (phaseRef.current !== 'reveal') return
+    if (open(chest.id, results.length).ok) phaseRef.current = 'await'
   }
 
   const canAfford = balance >= chest.price * results.length
@@ -286,6 +362,18 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       data-phase={phase}
     >
       <ChestScene theme={chest.theme} anim={anim} item={multi ? null : first.item} rarityHex={rarityHex} itemGlow={0.3 + RARITIES[best.rarity].tier * 0.12} className="!absolute inset-0" />
+      {/* Open another: a cut to the next chest. The hall comes back out of the dark with the
+          chest dropping onto the altar, and the seal can be held through it. */}
+      {round > 0 && (
+        <motion.div
+          key={session.key}
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-ink-950"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: reduced ? 0.25 : 0.55, ease: [0.4, 0, 0.2, 1] }}
+        />
+      )}
 
       {/* While waiting, a press anywhere on the scene charges the seal. */}
       {phase === 'await' && (
@@ -341,24 +429,15 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            role="switch"
-            aria-checked={fast}
-            aria-label="Fast opening"
-            onClick={() => actions.setFast(!fast)}
-            className="flex h-11 items-center gap-2.5 whitespace-nowrap rounded-full bg-ink-950/70 px-3.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-bone-300 shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_14%,transparent)] transition-colors hover:text-bone-100"
-          >
-            <span className={`relative block h-[14px] w-[24px] rounded-full transition-colors duration-200 ${fast ? 'bg-brass-500' : 'bg-bone-100/15'}`} aria-hidden>
-              <span className={`absolute top-[2px] block h-[10px] w-[10px] rounded-full bg-bone-50 transition-[left] duration-200 ${fast ? 'left-[12px]' : 'left-[2px]'}`} />
-            </span>
+          <Switch checked={fast} onChange={(v) => actions.setFast(v)} label="Fast opening" className="h-11 border border-bone-100/[0.16] bg-ink-950/75 px-3.5 max-sm:[&_.ib-switch-state]:hidden">
             Fast
-          </button>
+          </Switch>
           {(phase === 'tell' || phase === 'rise' || phase === 'burst' || phase === 'title') && (
             <button
               ref={skipBtn}
               data-testid="skip"
               onClick={skip}
-              className="flex min-h-11 items-center gap-2 rounded-full bg-ink-950/70 px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-bone-100 shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--color-bone-100)_18%,transparent)] transition-colors hover:bg-bone-100/10 max-sm:fixed max-sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:px-6"
+              className="flex min-h-11 items-center gap-2 rounded-[2px] border border-bone-100/[0.22] bg-ink-950/75 px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-bone-100 transition-colors hover:border-bone-100/45 hover:bg-ink-900 max-sm:fixed max-sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:px-6"
             >
               Skip <FastForward size={14} weight="light" aria-hidden />
             </button>
@@ -398,7 +477,9 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       <div className="pointer-events-none absolute inset-x-0 bottom-[22%] flex justify-center sm:bottom-[max(2.5rem,env(safe-area-inset-bottom))]">
         <AnimatePresence>
           {phase === 'await' && (
-            <div className="pointer-events-auto">
+            // Only the seal itself takes the pointer: a press on its caption falls through to the
+            // scene, where a press anywhere charges the seal.
+            <div key={session.key}>
               <HoldToOpen
                 ref={hold}
                 autoFocus
@@ -562,6 +643,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
       <AnimatePresence>
         {card && (
           <div
+            key={`card-${session.key}`}
             className={`pointer-events-none absolute inset-0 flex items-end justify-center ${collapsed ? 'sm:pb-8' : 'ib-receipt-dock md:items-center md:justify-end md:pr-[max(2rem,6vw)]'}`}
           >
             <RevealCard
@@ -581,8 +663,17 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
                 navigate(`/chests/${chest.id}`)
               }}
               sold={soldUids.has(first.uid) ? buybackOffer(first.item.value, chest) : null}
-              onKeep={() => close()}
-              onSell={() => sell([first.uid])}
+              onKeep={() => {
+                // The end of the ritual says where the piece went.
+                if (!trial && !soldUids.has(first.uid)) toast(`${first.item.name} is in your vault.`)
+                close()
+              }}
+              onSell={() => {
+                sell([first.uid])
+                setUndoUntil((u) => ({ ...u, [first.uid]: Date.now() + 6000 }))
+              }}
+              onUndoSell={() => unsell([first.uid])}
+              undoUntil={undoUntil[first.uid]}
               onShip={() => {
                 close()
                 navigate(`/vault/${first.uid}?ship=1`)
@@ -595,10 +686,14 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
           </div>
         )}
         {phase === 'reveal' && multi && (
-          <motion.div className="absolute inset-0 z-10 flex flex-col overflow-y-auto pb-6 pt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div key={`multi-${session.key}`} className="pointer-events-none absolute inset-0 z-10 flex flex-col overflow-y-auto pb-6 pt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.2 } }}>
             <div className="fixed inset-0 bg-ink-950/55" />
             <div className="relative my-auto w-full">
-              <MultiReveal results={results} chest={chest} soldUids={soldUids} onSell={sell} onDone={() => close()} onAgain={again} canAfford={canAfford} fast={fast} />
+              <MultiReveal results={results} chest={chest} soldUids={soldUids} onSell={sell} onDone={() => {
+                const kept = results.filter((r) => !soldUids.has(r.uid)).length
+                if (kept) toast(kept === 1 ? 'One piece is in your vault.' : `${kept} pieces are in your vault.`)
+                close()
+              }} onAgain={again} canAfford={canAfford} fast={fast} />
             </div>
           </motion.div>
         )}

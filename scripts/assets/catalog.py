@@ -235,6 +235,13 @@ RETIRED = {
     32057, 32137, 32684, 32786, 33738, 33849, 33858, 33990, 33999, 34089, 34119, 34123,
     34127, 34339, 34504, 34759, 34790, 34806, 35133, 35784, 35799, 35804, 35806, 35890,
     642391, 702011, 754980, 934509,
+    # The founder's fourth review: complete arms and armor only, no small fittings.
+    35800, 35798, 35801, 717707, 35809, 35807,  # arrowheads
+    29334, 29197, 29620, 32883, 29247, 26546,  # a snaffle bit, spurs and a stirrup
+    30094, 26295, 24780, 29995, 29976, 34470, 30089, 24711, 30090, 24623, 34385,  # tsuba
+    24988, 23404,  # a kozuka and a pierced yano arrowhead
+    25610, 694438,  # axe heads photographed without a haft
+    29011, 25908, 25845, 27026, 25093, 34306, 34321,  # polearms photographed as a head on a stub of shaft
 }
 
 ORIGIN = {
@@ -341,7 +348,7 @@ def orientation(rgba, category, oid=0):
         return 0
     a = np.asarray(rgba)[..., 3] > 40
     h, w = a.shape
-    if w / max(h, 1) < 1.8 or category not in ("sword", "dagger", "polearm", "axe"):
+    if w / max(h, 1) < 1.8 or category not in ("sword", "dagger", "polearm", "axe", "bow"):
         return 0
     k = max(2, int(w * 0.18))
 
@@ -424,6 +431,43 @@ def strip_stand(rgba):
         bbox = im.getbbox()
         return im.crop(bbox) if bbox else im
     return rgba
+
+
+def strip_pole(rgba, max_frac=0.08):
+    """Removes what strip_stand leaves of a display pole: the stretch beside a helmet's lowest
+    edge, where the row is wide but the pole still shows. The pole is the narrow run at the
+    bottom of the cutout that keeps one width the longest on the way up; it is cleared up to
+    where it meets the metal."""
+    a = np.asarray(rgba).copy()
+    alpha = a[..., 3] > 40
+    h, w = alpha.shape
+    rows = np.where(alpha.any(axis=1))[0]
+    if not len(rows):
+        return rgba
+
+    def runs(y):
+        d = np.diff(np.concatenate([[0], alpha[y].astype(np.int8), [0]]))
+        return list(zip(np.where(d == 1)[0], np.where(d == -1)[0]))
+
+    def climb(run):
+        """The highest row the run keeps its place and width to."""
+        center, width = (run[0] + run[1]) / 2, run[1] - run[0]
+        y = bottom
+        while y > 0 and any(abs((s + e) / 2 - center) <= max(3, width * 0.15) and e - s <= width * 1.15 + 2 for s, e in runs(y - 1)):
+            y -= 1
+        return y
+
+    bottom = rows.max()
+    narrow = [r for r in runs(bottom) if 2 <= r[1] - r[0] <= w * max_frac]
+    if not narrow:
+        return rgba
+    top, (s0, e0) = min((climb(r), r) for r in narrow)
+    if bottom - top < h * 0.02:
+        return rgba
+    a[top:bottom + 1, max(0, s0 - 3):min(w, e0 + 3), 3] = 0
+    im = Image.fromarray(a, "RGBA")
+    box = im.getbbox()
+    return im.crop(box) if box else im
 
 
 def main():
@@ -517,20 +561,23 @@ def main():
     print("items", len(items))
 
 
-def archive_retired(items):
-    """Records every piece the new catalog drops in retired.json, before items.json is replaced."""
-    if not os.path.exists(OUT_JSON):
-        return
+def archive_retired(items, old=None):
+    """Records every piece the new catalog drops in retired.json, before its file is replaced.
+    `old` is the catalog being replaced; by default the current items.json."""
+    if old is None:
+        if not os.path.exists(OUT_JSON):
+            return
+        old = json.load(io.open(OUT_JSON, encoding="utf-8"))
     kept = {i["id"] for i in items}
     archive = json.load(io.open(RETIRED_JSON, encoding="utf-8")) if os.path.exists(RETIRED_JSON) else []
     known = {r["id"] for r in archive}
-    for old in json.load(io.open(OUT_JSON, encoding="utf-8")):
-        if old["id"] in kept or old["id"] in known:
+    for piece in old:
+        if piece["id"] in kept or piece["id"] in known:
             continue
-        record = {k: old[k] for k in ("id", "name", "category", "era", "origin")}
-        record["provenance"] = old.get("provenance", "antique")
+        record = {k: piece[k] for k in ("id", "name", "category", "era", "origin")}
+        record["provenance"] = piece.get("provenance", "antique")
         if record["provenance"] == "antique":
-            record["sourceUrl"] = old["sourceUrl"]
+            record["sourceUrl"] = piece["sourceUrl"]
         archive.append(record)
     archive = sorted((r for r in archive if r["id"] not in kept), key=lambda r: r["id"])
     with io.open(RETIRED_JSON, "w", encoding="utf-8", newline="\n") as f:

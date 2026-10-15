@@ -14,24 +14,42 @@ const KIND: Record<Category, string> = {
   helmet: 'A helmet',
   shield: 'A shield',
   armor: 'Armor',
+  bow: 'A bow',
   crossbow: 'A crossbow',
   fitting: 'A fitting',
 }
 
-/** Fittings are many things; the name says which, without giving the name away. */
-const FITTING: [RegExp, string][] = [
-  [/arrowhead|yano|bodkin/i, 'An arrowhead'],
-  [/tsuba|guard/i, 'A sword guard'],
-  [/spur/i, 'A spur'],
-  [/stirrup/i, 'A stirrup'],
-  [/kozuka/i, 'A knife handle'],
-  [/collar|fuchi|kashira|menuki/i, 'A sword fitting'],
-  [/\bbit\b|snaffle/i, 'A horse bit'],
-]
+/**
+ * Where the category is too broad to say what a piece is (a mace filed with the axes, a yari
+ * with the polearms, a breastplate with the armor), its own name says it. The first match wins.
+ */
+const SPECIFIC: Partial<Record<Category, [RegExp, string][]>> = {
+  axe: [
+    [/\bmace\b/i, 'A mace'],
+    [/hammer/i, 'A war hammer'],
+  ],
+  polearm: [
+    [/halberd/i, 'A halberd'],
+    [/glaive/i, 'A glaive'],
+    [/partisan/i, 'A partisan'],
+    [/\bbill\b/i, 'A bill'],
+    [/poll?axe|pole ?axe/i, 'A pollaxe'],
+    [/yari|spear/i, 'A spear'],
+  ],
+  armor: [
+    [/gauntlets\b/i, 'A pair of gauntlets'],
+    [/gauntlet\b/i, 'A gauntlet'],
+    [/pauldrons\b/i, 'A pair of pauldrons'],
+    [/breastplate|cuirass/i, 'A breastplate'],
+    [/gorget/i, 'A gorget'],
+    [/\barmou?r\b/i, 'A suit of armor'],
+  ],
+}
 
-function kind(item: Pick<Item, 'category' | 'name'>) {
-  if (item.category === 'fitting') return FITTING.find(([re]) => re.test(item.name))?.[1] ?? KIND.fitting
-  return KIND[item.category]
+/** What a piece is, in a few words: its kind, named as closely as the record allows. */
+export function kindOf(item: Pick<Item, 'name' | 'category'>) {
+  const found = SPECIFIC[item.category]?.find(([re]) => re.test(item.name))
+  return found ? found[1] : KIND[item.category]
 }
 
 function capitalize(s: string) {
@@ -46,7 +64,7 @@ function capitalize(s: string) {
 export function revealFacts(item: Pick<Item, 'name' | 'origin' | 'category' | 'provenance' | 'era' | 'maker' | 'weight'>): RevealFact[] {
   const facts: RevealFact[] = [
     { label: 'Origin', value: capitalize((item.origin.split(';')[0] ?? item.origin).trim()) },
-    { label: 'Type', value: kind(item) },
+    { label: 'Type', value: kindOf(item) },
   ]
   if (item.provenance === 'antique') {
     facts.push({ label: 'Age', value: 'Antique' })

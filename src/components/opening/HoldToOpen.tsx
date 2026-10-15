@@ -116,10 +116,10 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
   return (
     <motion.div
       className="flex flex-col items-center gap-4"
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 12, transition: { duration: 0.2 } }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
     >
       <button
         type="button"
@@ -133,7 +133,7 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
         onPointerUp={stop}
         onPointerCancel={stop}
         onContextMenu={(e) => e.preventDefault()}
-        className="group relative grid h-28 w-28 touch-none select-none place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-brass-300 focus-visible:ring-offset-4 focus-visible:ring-offset-ink-950"
+        className="group pointer-events-auto relative grid h-28 w-28 touch-none select-none place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-brass-300 focus-visible:ring-offset-4 focus-visible:ring-offset-ink-950"
         style={{ WebkitTouchCallout: 'none' }}
       >
         {/* Heat halo grows with the charge. */}
@@ -176,7 +176,14 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
       <div className="relative isolate px-2 text-center">
         <span aria-hidden className="absolute -inset-x-8 -inset-y-3 -z-10 rounded-[40px] bg-[oklch(9%_0.012_60/.78)] blur-lg" />
         <p className="font-display text-xl italic text-bone-100">{label}</p>
-        <p className="mt-1 text-xs text-bone-400">{hint ?? 'Press and hold anywhere, or hold Space'}</p>
+        <p className="mt-1 text-xs text-bone-400">
+          {/* A phone has no Space bar to hold. */}
+          {hint ?? (
+            <>
+              Press and hold anywhere<span className="[@media(pointer:coarse)]:hidden">, or hold Space</span>
+            </>
+          )}
+        </p>
       </div>
     </motion.div>
   )

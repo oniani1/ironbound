@@ -1,0 +1,193 @@
+{
+ "values": [
+  {
+   "id": 95880,
+   "usd": 2300,
+   "low": 1500,
+   "high": 3500,
+   "comps": [
+    {
+     "house": "Olympia Auctions / Thomas Del Mar",
+     "lot": "501: Swiss halberd, 17th century, wooden haft",
+     "date": "2016-12-07",
+     "price": "GBP 1400 reported sold, equivalent to USD 1848. Premium basis not stated.",
+     "url": "https://www.olympiaauctions.com/auction/lot/lot-501---a-swiss-halberd/?lot=13575&sd=1"
+    },
+    {
+     "house": "Olympia Auctions / Thomas Del Mar",
+     "lot": "123: Swiss Sempach-type halberd, probably Zurich, third quarter of the 17th century, early haft",
+     "date": "2020-12-02",
+     "price": "GBP 2000 reported sold, equivalent to USD 2640. Premium basis not stated.",
+     "url": "https://www.olympiaauctions.com/auction/lot/lot-123---a-fine-swiss-halberd-of-so-called-sempach-type-third-quarter-of-the-17th-century-probably-zurich/?lot=9394&sd=1"
+    },
+    {
+     "house": "Czerny's / Finarte",
+     "lot": "260: Swiss Sempacher halberd, mid-17th century, probably later shaft",
+     "date": "2024-09-25",
+     "price": "EUR 2500 including buyer's premium, equivalent to USD 2800.",
+     "url": "https://www.finarte.it/auction/fine-antique-arms-and-militaria-from-around-the-world-sarzana-2024-09-25/a-sempacher-halberd-130945?lang=en"
+    }
+   ]
+  },
+  {
+   "id": 96096,
+   "usd": null,
+   "low": null,
+   "high": null,
+   "comps": []
+  },
+  {
+   "id": 104199,
+   "usd": 1200,
+   "low": 600,
+   "high": 2000,
+   "comps": [
+    {
+     "house": "Toovey's",
+     "lot": "4028: Edo magari-yari, signed mid-18th century, full decorated shaft, 213 cm",
+     "date": "2026-04-23",
+     "price": "GBP 750 hammer, equivalent to USD 990. Cross-bladed head 16.5 cm.",
+     "url": "https://www.tooveys.com/lots/619375/a-fine-japanese-magari-yari"
+    },
+    {
+     "house": "Ewbank's",
+     "lot": "2267: Jumonji yari, Edo period or perhaps later, full shaft, 238 cm",
+     "date": "2026-09-25",
+     "price": "GBP 442 including buyer fees, equivalent to USD 583.44.",
+     "url": "https://www.ewbankauctions.co.uk/20260925F3-lot-2267-A-Japanese-Yari-of-Jumonji-form-cf-Nagayama-Sensei/page-49-for?auction_id=1191&view=lot_detail"
+    }
+   ]
+  },
+  {
+   "id": 104212,
+   "usd": 650,
+   "low": 400,
+   "high": 1000,
+   "comps": [
+    {
+     "house": "Toovey's",
+     "lot": "4035: Edo su-yari, complete decorated lacquered shaft, 218 cm",
+     "date": "2026-04-23",
+     "price": "GBP 260 hammer, equivalent to USD 343.20. Head 11.5 cm.",
+     "url": "https://www.tooveys.com/lots/619382/a-japanese-su-yari-edo-period"
+    },
+    {
+     "house": "Toovey's",
+     "lot": "4036: Edo su-yari, complete shell-decorated lacquered shaft, 214 cm",
+     "date": "2026-04-23",
+     "price": "GBP 280 hammer, equivalent to USD 369.60. Head 13 cm.",
+     "url": "https://www.tooveys.com/lots/619383/a-japanese-su-yari-edo-period"
+    },
+    {
+     "house": "Toovey's",
+     "lot": "4033: Edo su-yari, complete shaft with red lacquer and copper mounts, 220 cm",
+     "date": "2026-04-23",
+     "price": "GBP 300 hammer, equivalent to USD 396. Head 14 cm.",
+     "url": "https://www.tooveys.com/online-catalogue/single-owner-collections/2458/2/"
+    }
+   ]
+  },
+  {
+   "id": 103345,
+   "usd": 400,
+   "low": 200,
+   "high": 800,
+   "comps": [
+    {
+     "house": "Olympia Auctions",
+     "lot": "3: Late Edo lacquered yumi, 218 cm, with reel, six arrows and quiver",
+     "date": "2024-06-26",
+     "price": "GBP 400 reported sold, equivalent to USD 528 for the complete set. Premium basis not stated.",
+     "url": "https://www.olympiaauctions.com/auction/lot/lot-3---a-japanese-bow-yumi-bow-string-reel-six-arrows-and-quiver-yadzutsu-late-edo-period-19th-centuryearly-20th-century/?lot=44040&sd=1"
+    },
+    {
+     "house": "Olympia Auctions",
+     "lot": "5: Late Edo lacquered yumi, 217.5 cm, with reel, three arrows and quiver",
+     "date": "2024-06-26",
+     "price": "GBP 600 reported sold, equivalent to USD 792 for the complete set. Premium basis not stated.",
+     "url": "https://www.olympiaauctions.com/auction/lot/lot-5---a-japanese-bow-yumi-bow-string-reel-three-arrows-and-quiver-yadzutsu-late-edo-period-19th-centuryearly-20th-century/?lot=44041&sd=1"
+    },
+    {
+     "house": "Maison Jules",
+     "lot": "511: Edo-period yumi, maker's mark, 220 cm, bow alone",
+     "date": "2021-09-26",
+     "price": "EUR 500 to 600 estimate, equivalent to USD 560 to 672. Passed.",
+     "url": "https://www.maisonjules.be/auction-lot/japanese-yumi-daikyu-longbow_27447A9AC0"
+    }
+   ]
+  },
+  {
+   "id": 103346,
+   "usd": 400,
+   "low": 200,
+   "high": 800,
+   "comps": [
+    {
+     "house": "Olympia Auctions",
+     "lot": "3: Late Edo lacquered yumi, 218 cm, with reel, six arrows and quiver",
+     "date": "2024-06-26",
+     "price": "GBP 400 reported sold, equivalent to USD 528 for the complete set. Premium basis not stated.",
+     "url": "https://www.olympiaauctions.com/auction/lot/lot-3---a-japanese-bow-yumi-bow-string-reel-six-arrows-and-quiver-yadzutsu-late-edo-period-19th-centuryearly-20th-century/?lot=44040&sd=1"
+    },
+    {
+     "house": "Olympia Auctions",
+     "lot": "5: Late Edo lacquered yumi, 217.5 cm, with reel, three arrows and quiver",
+     "date": "2024-06-26",
+     "price": "GBP 600 reported sold, equivalent to USD 792 for the complete set. Premium basis not stated.",
+     "url": "https://www.olympiaauctions.com/auction/lot/lot-5---a-japanese-bow-yumi-bow-string-reel-three-arrows-and-quiver-yadzutsu-late-edo-period-19th-centuryearly-20th-century/?lot=44041&sd=1"
+    },
+    {
+     "house": "Maison Jules",
+     "lot": "511: Edo-period yumi, maker's mark, 220 cm, bow alone",
+     "date": "2021-09-26",
+     "price": "EUR 500 to 600 estimate, equivalent to USD 560 to 672. Passed.",
+     "url": "https://www.maisonjules.be/auction-lot/japanese-yumi-daikyu-longbow_27447A9AC0"
+    }
+   ]
+  },
+  {
+   "id": 95901,
+   "usd": null,
+   "low": null,
+   "high": null,
+   "comps": [
+    {
+     "house": "Bonhams",
+     "lot": "100: Fighting axe, probably Norwegian, 15th century, later wooden haft",
+     "date": "2015-07-23",
+     "price": "GBP 2000 to 3000 estimate excluding buyer's premium, equivalent to USD 2640 to 3960. Sale result not verified.",
+     "url": "https://images1.bonhams.com/original?src=Images%2Flive%2F2015-06%2F23%2FS-22991-0-1.pdf"
+    }
+   ]
+  },
+  {
+   "id": 97072,
+   "usd": null,
+   "low": null,
+   "high": null,
+   "comps": []
+  },
+  {
+   "id": 95895,
+   "usd": 10000,
+   "low": 5000,
+   "high": 18000,
+   "comps": [
+    {
+     "house": "Olympia Auctions / Thomas Del Mar",
+     "lot": "274: German or Italian seven-flanged steel mace, second quarter of the 16th century, chiseled foliage, 62.5 cm",
+     "date": "2022-12-07",
+     "price": "GBP 14000 reported sold, equivalent to USD 18480. Fine condition. Premium basis not stated.",
+     "url": "https://www.olympiaauctions.com/auction/lot/274-a-fine-mace-formed-entirely-of-steel-second-quarter-of-the-16th-century-german-or-italian/?lot=39704"
+    },
+    {
+     "house": "Olympia Auctions / Thomas Del Mar",
+     "lot": "280: German or Italian seven-flanged steel mace, second quarter of the 16th century, chiseled foliage, 60.7 cm",
+     "date": "2007-12-12",
+     "price": "GBP 3200 reported sold, equivalent to USD 4224. Areas of pitting. Premium basis not stated.",
+     "url": "https://www.olympiaauctions.com/auction/lot/lot-280---a-mace/?lot=16004&sd=1"
+    }
+   ]
+  }
+ ]
+}

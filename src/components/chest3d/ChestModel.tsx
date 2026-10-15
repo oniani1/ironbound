@@ -1,4 +1,4 @@
-import { use, useMemo, useRef } from 'react'
+import { use, useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
@@ -390,6 +390,13 @@ export function ChestModel({ theme, anim }: Props) {
     [],
   )
   const tmp = useMemo(() => new THREE.Color(), [])
+  // Mounted means the model has loaded: an opening may now break the seal in front of it.
+  useEffect(() => {
+    anim.chestReady = true
+    return () => {
+      anim.chestReady = false
+    }
+  }, [anim])
   // Pool of light inside the chest: radial falloff with a slow shimmer, not a flat card.
   const innerMat = useMemo(
     () =>

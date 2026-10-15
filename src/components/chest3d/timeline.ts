@@ -41,8 +41,10 @@ function tweenColor(tl: gsap.core.Timeline, target: Color, hex: string, at: numb
 }
 
 /**
- * The arrival: the hall is dark, the sunlight comes up, the camera cranes down as the
- * chest lowers onto the altar and lands heavily, then it breathes once at the seams.
+ * The arrival, short enough that the seal can be held from the first moment (the founder,
+ * fourth review): the sunlight comes up, the camera settles from a little higher, the chest
+ * drops onto the altar and lands heavily, then it breathes once at the seams. A hold that
+ * starts during it hurries it along, so the chest is down before the seal gives.
  */
 export function introTimeline(anim: ChestAnim, onDone: () => void, fast = false) {
   anim.reset()
@@ -58,18 +60,41 @@ export function introTimeline(anim: ChestAnim, onDone: () => void, fast = false)
   }
   anim.drop = 0
   anim.room = 0.05
-  anim.crane = 1
+  anim.crane = 0.55
   anim.glow = 0.12
-  tl.to(anim, { room: 1, duration: 1.8, ease: 'power2.inOut' }, 0)
-  tl.to(anim, { crane: 0, duration: 1.9, ease: 'power3.inOut' }, 0.15)
-  tl.to(anim, { drop: 1, duration: 0.85, ease: 'power3.in' }, 0.6)
-  tl.call(() => anim.emit(26, '#c9a27a', 0.55), [], 1.45)
-  tl.to(anim, { shake: 0.9, duration: 0.05 }, 1.45)
-  tl.to(anim, { shake: 0, duration: 0.5, ease: 'power2.out' }, 1.5)
+  tl.to(anim, { room: 1, duration: 0.9, ease: 'power2.out' }, 0)
+  tl.to(anim, { crane: 0, duration: 1.0, ease: 'power3.out' }, 0)
+  tl.to(anim, { drop: 1, duration: 0.55, ease: 'power3.in' }, 0.1)
+  tl.call(() => anim.emit(26, '#c9a27a', 0.55), [], 0.65)
+  tl.to(anim, { shake: 0.9, duration: 0.05 }, 0.65)
+  tl.to(anim, { shake: 0, duration: 0.45, ease: 'power2.out' }, 0.7)
   // One breath of light at the seams: something inside.
-  tl.to(anim, { glow: 0.6, duration: 0.4, ease: 'sine.inOut' }, 1.75)
-  tl.to(anim, { glow: 0.28, duration: 0.55, ease: 'sine.inOut' }, 2.15)
+  tl.to(anim, { glow: 0.6, duration: 0.3, ease: 'sine.inOut' }, 0.8)
+  tl.to(anim, { glow: 0.28, duration: 0.4, ease: 'sine.inOut' }, 1.1)
   return tl
+}
+
+/**
+ * Runs `go` once the chest is in the scene, so a seal broken in the first moments of a cold
+ * opening never plays to an empty room. Without a live scene (no WebGL, or the scene failed)
+ * it goes after 1.5 s, and it never waits longer than 4 s. Returns a function that cancels it.
+ */
+export function whenChestReady(anim: ChestAnim, go: () => void) {
+  if (anim.chestReady) {
+    go()
+    return () => {}
+  }
+  const start = performance.now()
+  const check = () => {
+    const waited = performance.now() - start
+    const live = anim.rigTick > start
+    if (anim.chestReady || (!live && waited > 1500) || waited > 4000) {
+      gsap.ticker.remove(check)
+      go()
+    }
+  }
+  gsap.ticker.add(check)
+  return () => gsap.ticker.remove(check)
 }
 
 /** Applies hold progress (0..1) while the player charges the seal. */

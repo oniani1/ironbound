@@ -107,10 +107,7 @@ function Hero() {
       </motion.div>
       <div className="pointer-events-none relative mx-auto flex min-h-[100svh] max-w-[1400px] flex-col px-4 pb-[58svh] pt-[calc(var(--header-h)+var(--ticker-h)+1.75rem)] sm:px-6 md:justify-center md:pb-24 md:pt-[calc(var(--header-h)+var(--ticker-h)+2.5rem)]">
         <div className="pointer-events-auto max-w-[620px]">
-          <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2, ease }} className="eyebrow">
-            Real arms and armor, sealed in iron
-          </motion.p>
-          <h1 className="font-display mt-3 text-[46px] font-semibold leading-[0.92] text-bone-50 sm:text-[84px] md:mt-4 lg:text-[100px]">
+          <h1 className="font-display text-[46px] font-semibold leading-[0.92] text-bone-50 sm:text-[84px] md:mt-4 lg:text-[100px]">
             {['Open the chest.', 'Keep the steel.'].map((line, i) => (
               <motion.span
                 key={line}
@@ -124,9 +121,9 @@ function Hero() {
             ))}
           </h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.65, ease }} className="mt-4 max-w-[50ch] text-[15px] leading-relaxed text-bone-300 sm:text-[17px] md:mt-6">
-            <span className="sm:hidden">One real piece in every chest, newly forged or antique. Keep it, ship it or sell it back.</span>
+            <span className="sm:hidden">One real piece of arms or armor in every chest, newly forged or antique. Keep it, ship it or sell it back.</span>
             <span className="hidden sm:inline">
-              Every chest holds one real piece: newly forged by a named maker, or an antique from the armory. From a $22 arrowhead to a full armor worth over a million. Keep it, ship it home, or sell it back in one tap.
+              Every chest holds one real piece of arms or armor: newly forged by a named maker, or an antique from the armory. From a $45 tomahawk to a full armor worth over a million. Keep it, ship it home, or sell it back in one tap.
             </span>
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8, ease }} className="mt-5 flex flex-wrap items-center gap-1 sm:gap-3 md:mt-8">
@@ -147,9 +144,8 @@ function Hero() {
             </Link>
           </motion.div>
           <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.1 }} className="mt-12 hidden flex-wrap gap-x-7 gap-y-2 md:flex">
-            {['Odds on every chest', '85 to 92% sell-back', 'Insured shipping'].map((t) => (
-              <li key={t} className="caps flex items-center gap-2 text-bone-400">
-                <span className="block h-[5px] w-[5px] rotate-45 bg-brass-500" aria-hidden />
+            {['Odds on every chest', '85 to 92% sell-back', 'Insured shipping'].map((t, i) => (
+              <li key={t} className={`caps text-bone-400 ${i ? 'border-l border-bone-100/15 pl-7' : ''}`}>
                 {t}
               </li>
             ))}
@@ -184,10 +180,9 @@ function Showcase() {
     <section className="relative border-y border-bone-100/[0.06] bg-ink-950 py-14 sm:py-20" aria-label="Items in the chests">
       <div className="mx-auto mb-8 flex max-w-[1400px] items-end justify-between gap-6 px-4 sm:mb-10 sm:px-6">
         <div>
-          <p className="eyebrow">In the chests right now</p>
-          <p className="font-display mt-2 text-[32px] font-semibold leading-tight text-bone-50 sm:text-[44px]">
-            From {money(range.min)} to {money(range.max, { compact: true })}
-          </p>
+          <h2 className="font-display text-[32px] font-semibold leading-tight text-bone-50 sm:text-[44px]">
+            In the chests now, from {money(range.min)} to {money(range.max, { compact: true })}
+          </h2>
         </div>
         <Link to="/chests" className="caps group hidden items-center gap-2 text-bone-300 transition-colors hover:text-bone-50 sm:flex">
           Browse every chest
@@ -200,10 +195,12 @@ function Showcase() {
           <ItemVitrine key={it.id} item={it} aspect="aspect-[4/5]" className="w-[58vw] shrink-0 snap-center" to={`/item/${it.id}`} />
         ))}
       </div>
-      <div className="group relative hidden overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)] md:block">
+      {/* The river repeats itself and drifts off screen, so it is for the eye and the pointer
+          only: the keyboard and screen readers go on to the chests. */}
+      <div className="group relative hidden overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)] md:block" aria-hidden>
         <div className="flex w-max animate-marquee gap-8 group-hover:[animation-play-state:paused]">
           {loop.map((it, i) => (
-            <ItemVitrine key={`${it.id}-${i}`} item={it} aspect="aspect-[4/5]" className="w-[200px] shrink-0 sm:w-[220px]" to={`/item/${it.id}`} />
+            <ItemVitrine key={`${it.id}-${i}`} item={it} aspect="aspect-[4/5]" className="w-[200px] shrink-0 sm:w-[220px]" to={`/item/${it.id}`} tabIndex={-1} />
           ))}
         </div>
       </div>

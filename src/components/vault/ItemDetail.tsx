@@ -35,11 +35,15 @@ export function ItemDetail({ pull, item }: { pull: Pull; item: Item | ArchivedIt
   const receiptHeading = useRef<HTMLHeadingElement>(null)
   const actionButton = useRef<HTMLButtonElement | null>(null)
   const committed = useRef(false)
+  // Back from a confirmation, focus returns to the action that opened it once its bar is back.
+  const refocus = useRef(false)
+  useEffect(() => { if (flow === 'idle' && refocus.current) { refocus.current = false; actionButton.current?.focus() } }, [flow])
   const chest = CHEST_BY_ID[pull.chestId]
   const offer = chest ? buybackOffer(pull.value, chest) : null
   const vaulted = pull.status === 'vaulted'
   const certificate = `IB-${itemHash(pull.uid).toString(16).toUpperCase().padStart(8, '0')}`
-  useEffect(() => { if (flow === 'sell') confirmHeading.current?.focus() }, [flow])
+  // The confirmation comes into view whole: its heading takes focus, then the section is centred.
+  useEffect(() => { if (flow !== 'sell') return; confirmHeading.current?.focus({ preventScroll: true }); confirmHeading.current?.closest('section')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' }) }, [flow, reduced])
   useEffect(() => { if (celebrate) receiptHeading.current?.focus() }, [celebrate])
   // Bring the form into view; from a result card, wait out the page transition and its scroll reset.
   const fromQuery = useRef(flow === 'ship')
@@ -93,13 +97,14 @@ export function ItemDetail({ pull, item }: { pull: Pull; item: Item | ArchivedIt
         <section className="ib-certificate plate" aria-labelledby="certificate-title"><div className="ib-certificate-head"><Seal /><div><p className="ib-kicker">Demo certificate</p><h2 id="certificate-title">Certificate of authenticity</h2></div></div><dl><div><dt>Certificate</dt><dd className="tabular">{certificate}</dd></div><div><dt>Vault location</dt><dd className="tabular">Demo vault · Bay {String(itemHash(item.id) % 24 + 1).padStart(2, '0')}</dd></div><div><dt>Insured value</dt><dd className="tabular">{money(pull.value)}</dd></div><div><dt>Object classification</dt><dd>{item.provenance === 'antique' ? 'Antique' : 'Newly forged'}</dd></div></dl><p className="text-sm text-bone-300 mt-5 mb-0">{!live ? 'A simulated record. This certificate does not authenticate any museum object.' : live.provenance === 'forged' ? 'A simulated record. The photo may show an example of this type, not this exact piece.' : 'A simulated record. This certificate does not authenticate the pictured museum object.'}</p></section>
         {vaulted && <div className="ib-actions"><div className="ib-detail-inline-actions">{actionButtons}</div><Button variant="ghost" disabled aria-describedby="market-coming-soon">List on market</Button><p id="market-coming-soon" className="ib-actions-note">Marketplace coming soon. Keeping this item in your vault is free.</p></div>}
         <AnimatePresence mode="wait">
-          {vaulted && flow === 'sell' && <motion.section key="sell" className="ib-transaction" initial={{ opacity: 0, y: reduced ? 0 : 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ duration: 0.25, ease: EXPO }} aria-labelledby="sell-title"><p className="ib-kicker">Sell-back · demo</p><h2 id="sell-title" ref={confirmHeading} tabIndex={-1} className="ib-transaction-heading">Trade your steel for credit?</h2><p className="ib-sale-amount tabular">{money(offer ?? 0)}</p><p className="ib-copy">This exact offer goes to your demo balance. {item.name} leaves your vault. The sale cannot be reversed.</p>{error && <p className="ib-error" role="alert">{error}</p>}<div className="ib-transaction-buttons"><Button onClick={sell}>Confirm sell-back</Button><Button variant="ghost" onClick={() => { setFlow('idle'); actionButton.current?.focus() }}>Keep in vault</Button></div></motion.section>}
-          {vaulted && flow === 'ship' && <motion.div key="ship" ref={shipRef} className="scroll-mt-28" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ duration: 0.25, ease: EXPO }}><ShipFlow pull={pull} onCancel={() => { setFlow('idle'); actionButton.current?.focus() }} /></motion.div>}
+          {vaulted && flow === 'sell' && <motion.section key="sell" className="ib-transaction" initial={{ opacity: 0, y: reduced ? 0 : 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ duration: 0.25, ease: EXPO }} aria-labelledby="sell-title"><p className="ib-kicker">Sell-back · demo</p><h2 id="sell-title" ref={confirmHeading} tabIndex={-1} className="ib-transaction-heading">Trade your steel for credit?</h2><p className="ib-sale-amount tabular">{money(offer ?? 0)}</p><p className="ib-copy">This exact offer goes to your demo balance. {item.name} leaves your vault. The sale cannot be reversed.</p>{error && <p className="ib-error" role="alert">{error}</p>}<div className="ib-transaction-buttons"><Button onClick={sell}>Confirm sell-back</Button><Button variant="ghost" onClick={() => { refocus.current = true; setFlow('idle') }}>Keep in vault</Button></div></motion.section>}
+          {vaulted && flow === 'ship' && <motion.div key="ship" ref={shipRef} className="scroll-mt-28" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ duration: 0.25, ease: EXPO }}><ShipFlow pull={pull} onCancel={() => { refocus.current = true; setFlow('idle') }} /></motion.div>}
         </AnimatePresence>
         {pull.status === 'sold' && <section className="ib-transaction" aria-live="polite"><p className="ib-kicker">Sale recorded</p><h2 ref={receiptHeading} tabIndex={-1} className="ib-transaction-heading">Steel into coin.</h2><div className="ib-sale-amount tabular">{celebrate && <CoinBurst />}<span aria-hidden="true"><CountUp to={pull.soldFor ?? 0} format={(n) => `+${money(n)}`} /></span><span className="sr-only">{money(pull.soldFor ?? 0)} added to your demo balance.</span></div><p className="ib-copy">Added to your demo balance. This item remains in your sold history.</p><Link to="/chests" className="ib-action-link mt-4">Choose another chest <ArrowRight size={18} weight="light" aria-hidden="true" /></Link></section>}
         {(pull.status === 'shipping' || pull.status === 'shipped') && <ShipmentTimeline pull={pull} autoFocus={flow === 'ship'} />}
       </Reveal>
     </div>
-    {vaulted && createPortal(<div className="ib-detail-mobile-actions" role="group" aria-label="Item actions">{actionButtons}</div>, document.body)}
+    {/* Phones: the bar steps aside while a sale or a shipment is being confirmed, so it never covers the amount or the Confirm button. */}
+    {vaulted && createPortal(<div className="ib-detail-mobile-actions" data-away={flow !== 'idle'} role="group" aria-label="Item actions">{actionButtons}</div>, document.body)}
   </>
 }

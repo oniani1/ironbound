@@ -105,8 +105,9 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
       if (H >= W * 1.35) {
         close = Math.max(0.42, H * 0.42)
         // Down to just above the low end: lower, the open lid would fill the background. Phones
-        // see more of the frame's height, so they stop sooner.
-        macroLook = anim.focusY + H * (0.36 - a * (portrait ? 0.41 : 0.58))
+        // see more of the frame's height, so they stop sooner. A long-hafted piece is studied
+        // from its point down its head and the top of its haft; the pull back shows the rest.
+        macroLook = anim.headed ? anim.focusY + H * (0.38 - a * 0.18) : anim.focusY + H * (0.36 - a * (portrait ? 0.41 : 0.58))
         // Across to where the metal is at that height: a curved blade or a crooked haft stays in the shot.
         macroX = sample(anim.profileX, 0.5 - (macroLook - anim.focusY) / H)
         crop = H

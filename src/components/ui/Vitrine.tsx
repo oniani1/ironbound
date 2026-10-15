@@ -20,6 +20,7 @@ export function ItemVitrine({
   footer,
   to,
   state,
+  tabIndex,
 }: {
   item: Item
   rarity?: RarityId
@@ -32,11 +33,13 @@ export function ItemVitrine({
   /** Makes the whole vitrine a link, usually to the piece's page. */
   to?: string
   state?: unknown
+  /** -1 keeps the link out of the tab order (a decorative river that repeats itself). */
+  tabIndex?: number
 }) {
   const light = rarity ? RARITIES[rarity].cssVar : 'var(--color-brass-500)'
   return (
     <figure className={`group relative m-0 ${className}`}>
-      {to && <Link to={to} state={state} aria-label={`${item.name}, ${money(item.value)}`} className="absolute inset-0 z-10" style={{ outlineOffset: 2 }} />}
+      {to && <Link to={to} state={state} tabIndex={tabIndex} aria-label={`${item.name}, ${money(item.value)}`} className="absolute inset-0 z-10" style={{ outlineOffset: 2 }} />}
       <div className={`vitrine relative ${aspect} overflow-hidden rounded-[2px]`} style={{ '--light': light } as CSSProperties}>
         <span
           className="pointer-events-none absolute inset-x-[22%] bottom-[7%] h-[9%] rounded-[50%] bg-[oklch(0%_0_0/.55)] blur-md transition-[transform,opacity] duration-500 ease-out group-hover:scale-x-90 group-hover:opacity-70"
@@ -53,7 +56,7 @@ export function ItemVitrine({
           alt={item.name}
           className="relative h-full w-full p-[12%] drop-shadow-[0_18px_22px_oklch(0%_0_0/.55)] transition-transform duration-500 ease-[cubic-bezier(.16,1,.3,1)] group-hover:-translate-y-1"
         />
-        {item.photoExact === false && <span className="absolute bottom-1.5 left-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-bone-400/80">Example photo</span>}
+        {item.photoExact === false && <span className="absolute bottom-1.5 left-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-bone-300">Example photo</span>}
       </div>
       <figcaption className="mt-3 min-w-0">
         {showRarity && rarity && <RarityTag rarity={rarity} size="xs" />}

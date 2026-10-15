@@ -21,8 +21,8 @@ export function itemPlaneSize(aspect: number) {
   return { w: h * aspect, h, uprightH: h }
 }
 
-/** The detail a macro shot lands on: hilts and heads high, visors a little above center, boss and plates centered. */
-const MACRO_BIAS: Record<string, number> = { sword: 0.3, dagger: 0.28, polearm: 0.32, axe: 0.28, helmet: 0.06, shield: 0, armor: 0.12, crossbow: 0.1, fitting: 0 }
+/** The detail a macro shot lands on: hilts, heads and bow tips high, visors a little above center, boss and plates centered. */
+const MACRO_BIAS: Record<string, number> = { sword: 0.3, dagger: 0.28, polearm: 0.32, axe: 0.28, helmet: 0.06, shield: 0, armor: 0.12, bow: 0.3, crossbow: 0.1, fitting: 0 }
 
 const BANDS = 16
 
@@ -249,6 +249,8 @@ export function ItemRise({ item, anim, color, glow = 1, hero = false }: Props) {
     anim.focusH = content.h * s
     anim.focusW = content.w * s
     anim.macroBias = MACRO_BIAS[item.category] ?? 0.2
+    // A spear or a halberd is studied at its head; the pull back shows its full length.
+    anim.headed = item.category === 'polearm'
     anim.profileX = profile.x
     anim.profileY = profile.y
     anim.texDensity = texelsPerUnit * (1 / s)

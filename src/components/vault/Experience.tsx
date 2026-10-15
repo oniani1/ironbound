@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Emblem } from '../layout/Logo'
 import { motion, useReducedMotion } from 'motion/react'
 import './experience.css'
 
@@ -16,6 +17,7 @@ export function CoinBurst() {
   return <div className="ib-coin-burst" aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <motion.span key={i} className="ib-coin" initial={{ x: 0, y: 20, opacity: 0, rotateY: 0 }} animate={{ x: (i - 4) * 25, y: [-12, -95 - (i % 3) * 18, -130], opacity: [0, 1, 0], rotateY: 200 + i * 70 }} transition={{ duration: 0.85, delay: i * 0.025, ease: EXPO }}>$</motion.span>)}</div>
 }
 
-export function Seal({ label = 'IB' }: { label?: string }) {
-  return <span className="ib-seal caps" aria-hidden="true"><span>{label}</span></span>
+/** The house mark, stamped: the chest emblem in a hairline square. */
+export function Seal() {
+  return <span className="ib-seal" aria-hidden="true"><Emblem size={30} /></span>
 }
