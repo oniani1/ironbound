@@ -62,10 +62,13 @@ async (mcpPage) => {
       await page.mouse.down()
       await page.waitForTimeout(1500)
       await page.mouse.up()
+      // Through the whole opening to the receipt's arrival (Keep can take focus), 35 s at most.
       const t1 = Date.now()
-      while (Date.now() - t1 < 15000) {
+      while (Date.now() - t1 < 35000) {
         await page.mouse.move(100 + Math.random() * 1240, 80 + Math.random() * 260, { steps: 2 })
+        if (await page.evaluate(() => document.querySelector('[data-testid="keep"]')?.tabIndex === 0)) break
       }
+      await page.waitForTimeout(1000)
       await cdp.send('Page.stopScreencast')
       await page.waitForTimeout(300)
       // Measure each frame: mean luminance of the canvas region.

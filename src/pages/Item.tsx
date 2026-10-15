@@ -13,6 +13,7 @@ import { ImageViewer } from '../components/vault/ImageViewer'
 import { ChestArt } from '../components/chest/ChestArt'
 import { Button } from '../components/ui/Button'
 import { RarityTag, Tag } from '../components/ui/RarityTag'
+import { PhotoCredit } from '../components/ui/PhotoCredit'
 import { useOpening } from '../components/opening/OpeningProvider'
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -42,7 +43,7 @@ export default function ItemPage() {
   const watchChest = (pull && VISIBLE_CHESTS.find((c) => c.id === pull.chestId)) ?? homes[homes.length - 1]?.chest
   const isNew = item.provenance === 'forged'
   const specs: [string, string][] = [
-    ['Provenance', isNew ? 'New work' : 'Antique'],
+    ['Provenance', isNew ? 'Newly forged' : 'Antique'],
     ['Maker', item.maker ?? 'Unrecorded'],
     ...(isNew ? ([['Resale, our assessment', resaleLabel(item.resale)]] as [string, string][]) : []),
     ['Era', item.era],
@@ -72,7 +73,7 @@ export default function ItemPage() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
           <ImageViewer item={item} rarity={rarity} />
           <p className="mt-3 text-[12px] text-bone-400">
-            {isNew ? item.credit : `Photograph: ${item.credit}`}{' '}
+            <PhotoCredit item={item} />{' '}
             <a className="inline-flex items-center gap-1 text-bone-300 underline decoration-bone-100/25 underline-offset-2 hover:text-bone-100" href={item.sourceUrl} target="_blank" rel="noreferrer">
               {isNew ? 'Photo source' : 'Museum record'}
               <ArrowUpRight size={12} weight="light" aria-hidden />

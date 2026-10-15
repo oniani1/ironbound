@@ -14,6 +14,7 @@ import { useStore } from '../lib/store'
 import { Button } from '../components/ui/Button'
 import { useGuestCta, useOnboarding } from '../components/onboarding/OnboardingContext'
 import { LandingSections } from '../components/landing/sections'
+import { useOpening } from '../components/opening/OpeningProvider'
 import { MakersSection } from '../components/landing/MakersSection'
 import type { Item } from '../types'
 
@@ -46,6 +47,10 @@ function Hero() {
   }, [])
   const featured = useMemo(() => ITEMS.find((i) => i.id === 'knightly-longsword-27458') ?? ITEMS.find((i) => i.category === 'sword' && i.value > 40000) ?? ITEMS[ITEMS.length - 1]!, [])
   const { start } = useOnboarding()
+  // An opening draws its own scene over the page; the hero holds its last frame meanwhile.
+  const { active: opening } = useOpening()
+  const covered = useRef(opening)
+  covered.current = opening
   const guestCta = useGuestCta()
   const signedIn = useStore((s) => s.signedIn)
   const theme = CHEST_BY_ID.king!.theme
@@ -55,10 +60,13 @@ function Hero() {
   useEffect(() => {
     if (anim.still) return
     const tease = () => {
-      // A slow glint runs down the steel, and the chest exhales a few embers.
-      gsap.fromTo(anim, { glint: 0 }, { glint: 1, duration: 1.1, ease: 'power2.inOut', onComplete: () => void (anim.glint = -1) })
-      gsap.timeline().to(anim, { glow: 1.5, duration: 0.3, ease: 'power2.out', overwrite: 'auto' }).to(anim, { glow: 1.05, duration: 1.2, ease: 'power2.out' })
-      anim.emit(16, '#ffc46e', 0.6)
+      // A slow glint runs down the steel, and the chest exhales a few embers. Not while an
+      // opening covers the hero: its embers would wait in the paused scene and burst out together.
+      if (!covered.current) {
+        gsap.fromTo(anim, { glint: 0 }, { glint: 1, duration: 1.1, ease: 'power2.inOut', onComplete: () => void (anim.glint = -1) })
+        gsap.timeline().to(anim, { glow: 1.5, duration: 0.3, ease: 'power2.out', overwrite: 'auto' }).to(anim, { glow: 1.05, duration: 1.2, ease: 'power2.out' })
+        anim.emit(16, '#ffc46e', 0.6)
+      }
       teaseTimer.current = window.setTimeout(tease, 4800 + Math.random() * 3000)
     }
     teaseTimer.current = window.setTimeout(tease, 2400)
@@ -77,7 +85,7 @@ function Hero() {
         onPointerEnter={() => hover(true)}
         onPointerLeave={() => hover(false)}
       >
-        <ChestScene theme={theme} anim={anim} item={featured} heroItem rarityHex="#ffc94d" itemGlow={0.6} parallax className="!absolute inset-0" />
+        <ChestScene theme={theme} anim={anim} item={featured} heroItem rarityHex="#ffc94d" itemGlow={0.6} parallax frameloop={opening ? 'never' : 'always'} className="!absolute inset-0" />
         {/* Edge fades as plain overlays: a CSS mask on a live WebGL canvas can flicker. */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[14%] bg-[linear-gradient(180deg,var(--color-ink-950),transparent)] md:hidden" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[8%] bg-[linear-gradient(0deg,var(--color-ink-950),transparent)] md:h-[30%]" />
@@ -116,9 +124,9 @@ function Hero() {
             ))}
           </h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.65, ease }} className="mt-4 max-w-[50ch] text-[15px] leading-relaxed text-bone-300 sm:text-[17px] md:mt-6">
-            <span className="sm:hidden">One real piece in every chest, antique or new. Keep it, ship it or sell it back.</span>
+            <span className="sm:hidden">One real piece in every chest, newly forged or antique. Keep it, ship it or sell it back.</span>
             <span className="hidden sm:inline">
-              Every chest holds one real piece: an antique from the armory or new work from a named maker, from a $22 arrowhead to a Gothic armor worth over a million. Keep it, ship it home, or sell it back in one tap.
+              Every chest holds one real piece: newly forged by a named maker, or an antique from the armory. From a $22 arrowhead to a full armor worth over a million. Keep it, ship it home, or sell it back in one tap.
             </span>
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8, ease }} className="mt-5 flex flex-wrap items-center gap-1 sm:gap-3 md:mt-8">

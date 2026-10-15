@@ -83,6 +83,11 @@ export function chanceToBeatPrice(chest: Chest, items: readonly Item[]): number 
   }, 0)
 }
 
+/** The instant sell-back offer for a piece from this chest, in whole dollars wherever it is made. */
+export function buybackOffer(value: number, chest: Pick<Chest, 'buyback'>): number {
+  return Math.round(value * chest.buyback)
+}
+
 export function multiplier(value: number, price: number): number {
   return price > 0 ? value / price : 0
 }

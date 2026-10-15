@@ -14,14 +14,16 @@ export function LootBeam({ anim }: { anim: ChestAnim }) {
         blending: THREE.AdditiveBlending,
         side: THREE.DoubleSide,
         toneMapped: false,
-        uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color() }, uStrength: { value: 0 } },
+        uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color() }, uStrength: { value: 0 }, uPiece: { value: new THREE.Vector4(0, 1.6, 0.5, 1.2) }, uBehind: { value: 0 } },
         vertexShader: /* glsl */ `
           varying vec2 vUv;
           varying vec3 vNormalW;
           varying vec3 vViewDir;
+          varying vec3 vWorld;
           void main() {
             vUv = uv;
             vec4 wp = modelMatrix * vec4(position, 1.0);
+            vWorld = wp.xyz;
             vNormalW = normalize(mat3(modelMatrix) * normal);
             vViewDir = normalize(cameraPosition - wp.xyz);
             gl_Position = projectionMatrix * viewMatrix * wp;
@@ -30,9 +32,13 @@ export function LootBeam({ anim }: { anim: ChestAnim }) {
           uniform float uTime;
           uniform vec3 uColor;
           uniform float uStrength;
+          // The piece in front of the beam: centre x, centre y, width, height (world units).
+          uniform vec4 uPiece;
+          uniform float uBehind;
           varying vec2 vUv;
           varying vec3 vNormalW;
           varying vec3 vViewDir;
+          varying vec3 vWorld;
           const float TAU = 6.2831853;
           void main() {
             float facing = abs(dot(normalize(vNormalW), normalize(vViewDir)));
@@ -47,6 +53,10 @@ export function LootBeam({ anim }: { anim: ChestAnim }) {
             float a1 = vUv.x * TAU;
             float streaks = 0.5 + 0.25 * sin(a1 * 9.0 + v * 4.0 - uTime * 1.3) + 0.15 * sin(a1 * 17.0 - v * 6.0 + uTime * 0.9) + 0.1 * sin(a1 * 5.0 + uTime * 0.5);
             float a = core * fadeUp * fadeBase * (0.12 + streaks * 0.85) * uStrength * 0.75;
+            // The beam passes behind the piece: through its openings and soft edges it shows dimmed,
+            // so a guard's holes read as openings, not as white.
+            vec2 q = (vWorld.xy - uPiece.xy) / max(uPiece.zw * 0.5, vec2(0.05));
+            a *= 1.0 - 0.75 * uBehind * (1.0 - smoothstep(0.85, 1.08, length(q)));
             vec3 col = mix(uColor, vec3(1.0, 0.97, 0.9), core * 0.22) * (0.75 + core * 0.7);
             gl_FragColor = vec4(col, a);
           }`,
@@ -58,6 +68,8 @@ export function LootBeam({ anim }: { anim: ChestAnim }) {
     u.uTime!.value += dt
     ;(u.uColor!.value as THREE.Color).copy(anim.beamColor)
     u.uStrength!.value = anim.beam
+    ;(u.uPiece!.value as THREE.Vector4).set(0, anim.focusY, anim.focusW, anim.focusH)
+    u.uBehind!.value = Math.min(1, anim.item * 2)
     if (mesh.current) mesh.current.visible = anim.beam > 0.001
   })
   return (

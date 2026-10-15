@@ -159,8 +159,10 @@ function buildBase(theme: ChestTheme): THREE.Object3D | null {
     const stand = new THREE.Mesh(new THREE.BoxGeometry(halfW * 2 + 0.1, f.lift - 0.012, halfD * 2 + 0.1), lacquer)
     stand.position.y = (f.lift - 0.012) / 2 + 0.012
     g.add(stand)
+    // A gilt belt just under the top: level with the top it shared its plane with the lacquer
+    // and the two flickered against each other.
     const edge = new THREE.Mesh(new THREE.BoxGeometry(halfW * 2 + 0.104, 0.008, halfD * 2 + 0.104), metal)
-    edge.position.y = f.lift - 0.004
+    edge.position.y = f.lift - 0.007
     g.add(edge)
     for (const x of [-1, 1]) {
       for (const z of [-1, 1]) {
@@ -369,6 +371,24 @@ export function ChestModel({ theme, anim }: Props) {
   const form = theme.form ? FORMS[theme.form] : null
   const base = useMemo(() => buildBase(theme), [theme])
   const heatColor = useMemo(() => new THREE.Color(), [])
+  const fillRef = useRef<THREE.Mesh>(null)
+  // Opaque and written to depth, so whatever is still below the rim stays hidden.
+  const fillMat = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        toneMapped: false,
+        uniforms: { uColor: { value: new THREE.Color() } },
+        vertexShader: /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+        fragmentShader: /* glsl */ `
+          uniform vec3 uColor; varying vec2 vUv;
+          void main(){
+            vec2 p = (vUv - 0.5) * vec2(1.0, 1.8);
+            float d = clamp(length(p) * 2.0, 0.0, 1.0);
+            gl_FragColor = vec4(uColor * (1.25 - 0.55 * d * d), 1.0);
+          }`,
+      }),
+    [],
+  )
   const tmp = useMemo(() => new THREE.Color(), [])
   // Pool of light inside the chest: radial falloff with a slow shimmer, not a flat card.
   const innerMat = useMemo(
@@ -397,10 +417,9 @@ export function ChestModel({ theme, anim }: Props) {
   useFrame((state) => {
     const t = state.clock.elapsedTime
     const { hinge, lock, lockBase, lockMat } = rigged
-    // Lid: opening plus a high-frequency rattle while the seal strains.
-    const rattle = anim.rattle * (Math.sin(t * 61) * 0.6 + Math.sin(t * 97) * 0.4)
+    // Lid: it opens once. While the seal strains only the body shakes; the lid stays shut.
     const idleCrack = anim.idle * (0.018 + (anim.still ? 0 : Math.sin(t * 1.3) * 0.008))
-    hinge.rotation.x = -(anim.lid * LID_OPEN + Math.max(0, rattle) * 0.06 + idleCrack)
+    hinge.rotation.x = -(anim.lid * LID_OPEN + idleCrack)
     if (root.current) {
       // The top tiers lift the chest off the plinth and let it drift.
       const lev = anim.levitate
@@ -409,6 +428,8 @@ export function ChestModel({ theme, anim }: Props) {
       root.current.rotation.x = drift * Math.sin(t * 0.9) * 0.01
       root.current.position.x = anim.rattle * Math.sin(t * 57) * 0.007
       root.current.position.y = (1 - anim.drop) * 1.8 + (form?.lift ?? 0) + lev * 0.08 + drift * Math.sin(t * 1.7) * 0.008
+      // The camera keeps below this line while the lid opens, so the inside never shows.
+      anim.rim = root.current.position.y + HINGE.y * (form?.scale[1] ?? 1)
     }
     if (rays.current) {
       // Turn about the vertical axis toward the camera (the chest sits at the origin).
@@ -441,6 +462,13 @@ export function ChestModel({ theme, anim }: Props) {
     innerMat.uniforms.uTime!.value = t
     ;(innerMat.uniforms.uColor!.value as THREE.Color).copy(anim.glowColor).multiplyScalar(0.6 + Math.min(glow, 2.4) * 0.55)
     innerMat.uniforms.uA!.value = Math.min(1, glow * 0.7) * Math.min(1, open * 3 + anim.idle * 0.05)
+    // Once open, the chest is full of light: an opaque glowing surface just under the rim
+    // hides the empty box and the piece rises out of it.
+    if (fillRef.current) {
+      const k = Math.min(1, open * 2.5)
+      fillRef.current.visible = k > 0.01
+      ;(fillMat.uniforms.uColor!.value as THREE.Color).copy(anim.glowColor).multiplyScalar((1.1 + Math.min(glow, 2) * 0.5) * k)
+    }
   })
 
   return (
@@ -457,6 +485,10 @@ export function ChestModel({ theme, anim }: Props) {
       <mesh ref={seam} position={[0, 0.419, 0.2635]}>
         <planeGeometry args={[0.84, 0.007]} />
         <meshBasicMaterial transparent toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} />
+      </mesh>
+      {/* The light that fills the open chest. */}
+      <mesh ref={fillRef} position={[0, 0.405, 0]} rotation={[-Math.PI / 2, 0, 0]} material={fillMat} visible={false}>
+        <planeGeometry args={[0.86, 0.48]} />
       </mesh>
       {/* Light pooled inside the open chest. */}
       <mesh ref={inner} position={[0, 0.39, 0]} rotation={[-Math.PI / 2, 0, 0]} material={innerMat}>

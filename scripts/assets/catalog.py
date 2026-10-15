@@ -28,6 +28,8 @@ CUT = os.path.join(MET, "cut")
 PUB = os.path.join(ROOT, "public", "items")
 THUMB = os.path.join(PUB, "thumb")
 OUT_JSON = os.path.join(ROOT, "src", "data", "items.json")
+# Pieces that leave the catalog keep a short record here, so vaults that hold them still show them.
+RETIRED_JSON = os.path.join(ROOT, "src", "data", "retired.json")
 
 # (objectID, name, category, value_usd, provenance 'a'|'f', maker or None, blurb)
 E = [
@@ -218,6 +220,22 @@ E = [
     (33738, "Central European Crossbow", "crossbow", 42000, "a", None, "Late fifteenth century, with bone inlay along the tiller."),
     (23336, "Gilded Crossbow", "crossbow", 68000, "a", None, "Central Europe, around 1450, decorated in gold."),
 ]
+
+# Retired in the third founder review: museum masterpieces no one could buy. The catalog keeps
+# the antiques a collector can find for sale, plus a short list of grails for the top tiers.
+RETIRED = {
+    # Photographs that cut off the blade, so the piece can never be shown whole.
+    679351, 23043, 22631,
+    21877, 21943, 21973, 21986, 22101, 22247, 22317, 22344, 22408, 22513, 22774, 22859,
+    22885, 23040, 23091, 23145, 23227, 23237, 23255, 23263, 23336, 23367, 24029, 24299,
+    24645, 24700, 24701, 24790, 24796, 24832, 24897, 24904, 25032, 25059, 25073, 25077,
+    25079, 25384, 25388, 25391, 26090, 26433, 26437, 26445, 26450, 26456, 26545, 26713,
+    26777, 26917, 27113, 27115, 27237, 27374, 27422, 27452, 27602, 27614, 27847, 27907,
+    27942, 29203, 29225, 29245, 29360, 29626, 31128, 31300, 31472, 31504, 31824, 31838,
+    32057, 32137, 32684, 32786, 33738, 33849, 33858, 33990, 33999, 34089, 34119, 34123,
+    34127, 34339, 34504, 34759, 34790, 34806, 35133, 35784, 35799, 35804, 35806, 35890,
+    642391, 702011, 754980, 934509,
+}
 
 ORIGIN = {
     "western european": "Western Europe", "european": "Europe", "north european": "Northern Europe", "eastern european": "Eastern Europe",
@@ -416,6 +434,8 @@ def main():
     allmeta = {o["objectID"]: o for o in json.load(io.open(os.path.join(MET, "objects.json"), encoding="utf-8"))}
     metas = []
     for e in E:
+        if e[0] in RETIRED:
+            continue
         meta = cands.get(e[0]) or allmeta.get(e[0])
         if not meta:
             print("MISSING META", e[0], e[1])
@@ -491,9 +511,31 @@ def main():
         print(f"{oid:>7} {rot:>4} {item['aspect']:>6} {slug}", flush=True)
 
     items.sort(key=lambda i: i["value"])
+    archive_retired(items)
     with io.open(OUT_JSON, "w", encoding="utf-8", newline="\n") as f:
         json.dump(items, f, ensure_ascii=False, indent=1)
     print("items", len(items))
+
+
+def archive_retired(items):
+    """Records every piece the new catalog drops in retired.json, before items.json is replaced."""
+    if not os.path.exists(OUT_JSON):
+        return
+    kept = {i["id"] for i in items}
+    archive = json.load(io.open(RETIRED_JSON, encoding="utf-8")) if os.path.exists(RETIRED_JSON) else []
+    known = {r["id"] for r in archive}
+    for old in json.load(io.open(OUT_JSON, encoding="utf-8")):
+        if old["id"] in kept or old["id"] in known:
+            continue
+        record = {k: old[k] for k in ("id", "name", "category", "era", "origin")}
+        record["provenance"] = old.get("provenance", "antique")
+        if record["provenance"] == "antique":
+            record["sourceUrl"] = old["sourceUrl"]
+        archive.append(record)
+    archive = sorted((r for r in archive if r["id"] not in kept), key=lambda r: r["id"])
+    with io.open(RETIRED_JSON, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(archive, f, ensure_ascii=False, indent=1)
+        f.write("\n")
 
 
 def _safe_dl(meta):

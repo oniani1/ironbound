@@ -12,6 +12,7 @@ import { RoyalHall } from './RoyalHall'
 import { ItemRise } from './ItemRise'
 import { PostFX } from './PostFX'
 import { Stage } from './Stage'
+import { Quiet } from './Quiet'
 
 /** Resolves a CSS color (any syntax the browser knows, including oklch) to a hex string. */
 export function cssColorToHex(cssVar: string, fallback = '#0b0806') {
@@ -132,6 +133,11 @@ export function ChestScene(props: Props) {
 
 function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, plinth = true, fx = true, className, distance, frameloop = 'always', render = false, itemGlow = 1, heroItem = false }: Props) {
   const bg = useMemo(() => cssColorToHex('--color-ink-950'), [])
+  // A new piece starts with a clean slate: an earlier photo's failure is not its own.
+  const itemId = item?.id
+  useEffect(() => {
+    anim.itemFailed = false
+  }, [anim, itemId])
   // Start sharp; if the device cannot hold the frame rate, step down once and stay there.
   // Stepping back up on every recovery resized the canvas and the effect buffers, which
   // flashed black frames whenever the pointer moved fast over the hero.
@@ -143,6 +149,8 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
     <Canvas
       className={className}
       frameloop={frameloop}
+      // One shadow map: the sun through the hall's windows, with the chest and the columns casting.
+      shadows={render ? false : 'percentage'}
       dpr={render ? 1 : dpr}
       // preserveDrawingBuffer keeps the last frame for the compositor, so a page effect or a
       // late composite never shows a cleared (black) buffer.
@@ -152,7 +160,8 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
     >
       {!render && <PerformanceMonitor onDecline={() => setDpr(1)} />}
       {!render && <color attach="background" args={[bg]} />}
-      {!render && <fog attach="fog" args={[bg, 4.5, 11]} />}
+      {/* Haze that deepens with distance, so the far end of the hall sinks into the dark. */}
+      {!render && <fogExp2 attach="fog" args={[bg, 0.055]} />}
       <Suspense fallback={null}>
         {/* The hall brings its own floor. */}
         <Stage anim={anim} plinth={plinth && !render} floor={false} />
@@ -160,13 +169,23 @@ function ChestSceneInner({ theme, anim, item, rarityHex = '#ffc94d', parallax, p
         <LootBeam anim={anim} />
         <Shockwave anim={anim} />
         {!render && <Sparks anim={anim} />}
-        {!render && <RoyalHall anim={anim} />}
         {!render && fx && <DustMotes anim={anim} count={typeof window !== 'undefined' && window.innerWidth < 768 ? 150 : 260} />}
       </Suspense>
+      {/* The hall loads its stone on its own, so the chest never waits for it. */}
+      {!render && (
+        <Quiet>
+          <Suspense fallback={null}>
+            <RoyalHall anim={anim} />
+          </Suspense>
+        </Quiet>
+      )}
+      {/* A photo that cannot load leaves the piece out; the reveal goes on without it. */}
       {item && (
-        <Suspense fallback={null}>
-          <ItemRise key={item.id} item={item} anim={anim} color={rarityHex} glow={itemGlow} hero={heroItem} />
-        </Suspense>
+        <Quiet key={item.id} onError={() => (anim.itemFailed = true)}>
+          <Suspense fallback={null}>
+            <ItemRise key={item.id} item={item} anim={anim} color={rarityHex} glow={itemGlow} hero={heroItem} />
+          </Suspense>
+        </Quiet>
       )}
       {!render && <CameraRig anim={anim} parallax={parallax} distance={distance} />}
       {fx && !render && <PostFX anim={anim} msaa={msaa} />}

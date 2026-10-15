@@ -19,6 +19,8 @@ const C = 2 * Math.PI * R
 export interface HoldHandle {
   start: () => void
   stop: () => void
+  /** The seal is broken some other way (Fast): stop the charge and never report progress again. */
+  cancel: () => void
 }
 
 /**
@@ -44,7 +46,9 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
 
   const loop = useCallback(
     (t: number) => {
-      const dt = last.current ? Math.min(0.05, (t - last.current) / 1000) : 0
+      // A hold is measured in real time, not in frames: a slow phone or the first frames of a
+      // cold opening still break the seal after the full hold. Only a long gap (a hidden tab) is cut short.
+      const dt = last.current ? Math.min(0.5, (t - last.current) / 1000) : 0
       last.current = t
       const dir = holding.current ? 1 / duration : -2.2 / duration
       value.current = Math.max(0, Math.min(1, value.current + dir * dt))
@@ -79,7 +83,13 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
     holding.current = false
   }, [])
 
-  useImperativeHandle(ref, () => ({ start, stop }), [start, stop])
+  const cancel = useCallback(() => {
+    finished.current = true
+    holding.current = false
+    cancelAnimationFrame(raf.current)
+  }, [])
+
+  useImperativeHandle(ref, () => ({ start, stop, cancel }), [start, stop, cancel])
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -162,7 +172,9 @@ export const HoldToOpen = forwardRef<HoldHandle, Props>(function HoldToOpen({ du
           <path d={`M24 8 L${23 - p * 3} 18 L${27 + p * 4} 24 L${22 - p * 2} 31 L24 40`} stroke="#1a0d0a" strokeWidth={0.6 + p * 1.6} fill="none" opacity={p} />
         </svg>
       </button>
-      <div className="text-center">
+      {/* A soft dark plate under the words, so they read over the lit altar whatever its stone. */}
+      <div className="relative isolate px-2 text-center">
+        <span aria-hidden className="absolute -inset-x-8 -inset-y-3 -z-10 rounded-[40px] bg-[oklch(9%_0.012_60/.78)] blur-lg" />
         <p className="font-display text-xl italic text-bone-100">{label}</p>
         <p className="mt-1 text-xs text-bone-400">{hint ?? 'Press and hold anywhere, or hold Space'}</p>
       </div>

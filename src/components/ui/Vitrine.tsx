@@ -59,7 +59,7 @@ export function ItemVitrine({
         {showRarity && rarity && <RarityTag rarity={rarity} size="xs" />}
         <p className="font-display mt-1 line-clamp-1 text-[18px] font-semibold leading-snug text-bone-50">{item.name}</p>
         <p className="mt-0.5 flex items-baseline justify-between gap-3 text-[12px] text-bone-400">
-          <span className="truncate">{meta ?? (item.provenance === 'forged' ? item.maker ?? 'New work' : shortEra(item.era))}</span>
+          <span className="truncate">{meta ?? (item.provenance === 'forged' ? item.maker ?? 'Newly forged' : shortEra(item.era))}</span>
           <span className="shrink-0 font-semibold text-bone-200 tabular">{money(item.value, { compact: true })}</span>
         </p>
         {footer}

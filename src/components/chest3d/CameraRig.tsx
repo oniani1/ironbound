@@ -3,6 +3,15 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { ChestAnim } from './animState'
 
+/** A value from evenly spaced bands at fraction f (0..1), read between bands. */
+function sample(bands: number[], f: number) {
+  if (!bands.length) return 0
+  const x = Math.min(bands.length - 1, Math.max(0, f * (bands.length - 1)))
+  const i = Math.floor(x)
+  const j = Math.min(bands.length - 1, i + 1)
+  return bands[i]! + (bands[j]! - bands[i]!) * (x - i)
+}
+
 interface Props {
   anim: ChestAnim
   /** Follow the pointer a little (landing hero). */
@@ -24,6 +33,7 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
   const look = useMemo(() => new THREE.Vector3(), [])
 
   useFrame((state, rawDt) => {
+    anim.rigTick = performance.now()
     const dt = Math.min(rawDt, 1 / 20)
     const t = state.clock.elapsedTime
     const aspect = size.width / Math.max(1, size.height)
@@ -59,13 +69,26 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     const lift = portrait ? 0.24 * (1 - frame) : 0
     let dist = baseDist - dolly * 0.55 + frame * (revealDist - baseDist)
     let lookY = 0.45 - lift - dolly * 0.03 + frame * (revealLook - 0.45)
-    let height = 1.05 - lift - dolly * 0.12 + frame * (revealLook + 0.25 - 1.05)
+    // The whole piece is seen nearly level, so the open chest below it shows no inside.
+    let height = 1.05 - lift - dolly * 0.12 + frame * (revealLook + 0.02 - 1.05)
     let offsetX = wide && !sheet ? frame * anim.cardSide * Math.min(0.75, halfH * aspect * 0.42) : 0
-    // Macro: an extreme close-up that travels as anim.along runs 0 to 1, so the piece is
-    // never seen whole until the pull back. The move follows the shape: tall pieces are read
-    // top to bottom (hilt or crest first), wide ones left to right, and round or compact ones
-    // (helms, shields, plates) spiral out from their telling detail.
     const m = anim.macro * frame
+    // The lid opens with the camera at the rim line, looking just over it: the front of the
+    // chest hides the inside.
+    const low = anim.low * (1 - frame)
+    if (low > 0) {
+      height += (anim.rim - 0.06 - height) * low
+      lookY += (anim.rim + 0.1 - lookY) * low
+    }
+    // Then the camera tilts up into the light above the chest, and only then climbs to the
+    // piece, so the opening stays below the frame the whole way.
+    const up = anim.lookUp * (1 - m)
+    if (up > 0) lookY += (anim.rim + (portrait ? 2.8 : 1.8) - lookY) * up
+    // Macro: a close-up that travels as anim.along runs 0 to 1, so the piece is never seen
+    // whole until the pull back. The move follows the shape: tall pieces are read top to
+    // bottom (hilt or crest first), wide ones left to right, both keeping to the metal however
+    // the piece bends, and round or compact ones (guards, shields, helms, plates) are circled
+    // half a turn as the view opens out.
     let roll = 0
     let yaw = 0
     if (m > 0) {
@@ -77,24 +100,42 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
       let close: number
       let macroLook = anim.focusY
       let macroX = 0
+      // Along the piece's longest side as the screen shows it: the share of it that may be in view.
+      let crop: number
       if (H >= W * 1.35) {
         close = Math.max(0.42, H * 0.42)
-        macroLook = anim.focusY + H * (0.36 - a * 0.72)
+        // Down to just above the low end: lower, the open lid would fill the background. Phones
+        // see more of the frame's height, so they stop sooner.
+        macroLook = anim.focusY + H * (0.36 - a * (portrait ? 0.41 : 0.58))
+        // Across to where the metal is at that height: a curved blade or a crooked haft stays in the shot.
+        macroX = sample(anim.profileX, 0.5 - (macroLook - anim.focusY) / H)
+        crop = H
       } else if (W >= H * 1.35) {
         close = Math.max(0.42, W * 0.45)
         macroX = W * (-0.34 + a * 0.68)
+        macroLook = anim.focusY + sample(anim.profileY, 0.5 + macroX / W)
+        crop = W / aspect
       } else {
-        // Circles the centre once, closing in on it as the camera pulls out.
+        // Half a turn around the piece, from one side with about half of it in view (across the
+        // screen's narrower side) to most of it, so a guard or a shield is seen as a whole object
+        // taking shape, never as one patch of it.
         const size = Math.max(H, W)
-        const turn = a * Math.PI * 1.3 + 0.6
-        const r = size * 0.24 * (1 - a)
-        close = size * (0.3 + 0.48 * a)
+        const turn = 2.4 - a * 3.2
+        const r = size * 0.22 * (1 - a * 0.55)
+        close = (size * (0.5 + 0.3 * a)) / (2 * Math.tan((16 * Math.PI) / 180) * Math.min(1, aspect))
         macroLook = anim.focusY + anim.macroBias * H * (1 - a) + Math.sin(turn) * r
         macroX = Math.cos(turn) * r
-        roll = -0.2 * (1 - a) * m
-        yaw = (-0.22 + 0.3 * a) * m
+        roll = -0.02 * (1 - a) * m
+        yaw = (-0.12 + 0.2 * a) * m
+        crop = size / Math.min(1, aspect)
       }
       close *= lens
+      // Never closer than the photograph can hold: at most about twice its own resolution
+      // on screen, so the steel stays sharp. But never so far that the whole piece shows before
+      // the pull back: a low-resolution photo is shown a little soft rather than whole.
+      const screenPx = size.height * Math.min(state.viewport.dpr, 1.5)
+      const minView = screenPx / (2 * Math.max(1, anim.texDensity))
+      close = Math.min(Math.max(close, minView / (2 * tanHalf)), (0.9 * crop) / (2 * tanHalf))
       dist += (close - dist) * m
       lookY += (macroLook - lookY) * m
       height += (macroLook + 0.04 - height) * m
@@ -143,10 +184,14 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
     look.set(offsetX + sx * 0.4, lookY + sy * 0.4, 0)
     // Reduced motion: cut to the framing instead of easing toward it.
     // The close-up follows its path tightly; everything else eases in more softly.
-    const k = still ? 1 : 1 - Math.exp(-dt * (m > 0 ? 7 : 4.5))
+    // A slow device that has not reached the close-up in time jumps there at once.
+    const snap = anim.snap
+    if (snap) anim.snap = false
+    const k = still || snap ? 1 : 1 - Math.exp(-dt * (m > 0 ? 7 : 4.5))
     camera.position.lerp(pos, k)
-    // The piece may rise only once the camera is really in close, whatever the frame rate.
-    anim.closeReady = m > 0.99 && camera.position.distanceTo(pos) < Math.max(0.06, dist * 0.25)
+    // The piece may rise only once the camera is in close, whatever the frame rate: it rises
+    // through the last of the push-in, so the zoom ends on it.
+    anim.closeReady = anim.itemReady && m > 0.99 && camera.position.distanceTo(pos) < Math.max(0.06, dist * 0.35)
     target.current.lerp(look, k)
     camera.lookAt(target.current)
     rolled.current += (roll - rolled.current) * k

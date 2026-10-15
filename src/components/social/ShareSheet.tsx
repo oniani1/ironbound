@@ -4,10 +4,11 @@ import { motion, useReducedMotion } from 'motion/react'
 import { Check, Copy, ShareNetwork, X } from '@phosphor-icons/react'
 import type { Item, RarityId } from '../../types'
 import { RARITIES } from '../../config/rarity'
-import { money, shortEra } from '../../lib/format'
+import { money, photoCredit, shortEra } from '../../lib/format'
 import { Button, IconButton } from '../ui/Button'
 import { ItemImg } from '../ui/ItemImg'
 import { Pips } from '../ui/RarityTag'
+import { PhotoCredit } from '../ui/PhotoCredit'
 
 export interface SharePull {
   item: Item
@@ -76,9 +77,14 @@ export function ShareSheet({ pull, onClose }: { pull: SharePull; onClose: () => 
     } catch {
       // Some hosts refuse clipboard access; select the line so it can be copied by hand.
       setCopied('manual')
-      window.setTimeout(() => textRef.current?.select(), 0)
     }
   }
+  // The line appears focused and selected, ready for Ctrl+C or Cmd+C.
+  useEffect(() => {
+    if (copied !== 'manual') return
+    textRef.current?.focus()
+    textRef.current?.select()
+  }, [copied])
   const share = async () => {
     try {
       await navigator.share({ title: `${pull.item.name} · Ironbound`, text })
@@ -104,7 +110,7 @@ export function ShareSheet({ pull, onClose }: { pull: SharePull; onClose: () => 
       <motion.div
         ref={panel}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[420px] rounded-t-[10px] border border-bone-100/10 bg-ink-900 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-[10px]"
+        className="ib-sheet relative w-full max-w-[420px] rounded-t-[10px] border border-bone-100/10 bg-ink-900 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-[10px]"
         initial={{ y: reduced ? 0 : 36, opacity: reduced ? 0 : 1 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: reduced ? 0 : 24, opacity: reduced ? 0 : 1 }}
@@ -129,6 +135,8 @@ export function ShareSheet({ pull, onClose }: { pull: SharePull; onClose: () => 
               <span className="caps !text-[10px] text-bone-400">{pull.chestName}</span>
             </div>
             <ItemImg item={pull.item} size="full" eager alt="" className="relative h-full w-full p-[13%] drop-shadow-[0_18px_26px_oklch(0%_0_0/.6)]" />
+            {/* The disclosure travels with the picture: many newly forged pieces show an example of the type. */}
+            {pull.item.photoExact === false && <span className="caps absolute bottom-3 left-4 !text-[10px] text-bone-400">Example photo of the type</span>}
           </div>
           <figcaption className="border-t border-bone-100/[0.08] px-4 pb-4 pt-3.5">
             <div className="flex items-center gap-2.5">
@@ -139,7 +147,7 @@ export function ShareSheet({ pull, onClose }: { pull: SharePull; onClose: () => 
             </div>
             <p className="font-display mt-2 text-[26px] font-semibold leading-[1.05] text-bone-50">{pull.item.name}</p>
             <p className="mt-1 text-[12px] text-bone-400">
-              {pull.item.provenance === 'forged' ? `New · ${pull.item.maker ?? 'Master smith'}` : `${shortEra(pull.item.era)} · ${pull.item.origin}`}
+              {pull.item.provenance === 'forged' ? `Newly forged · ${pull.item.maker ?? 'Master smith'}` : `${shortEra(pull.item.era)} · ${pull.item.origin}`}
             </p>
             <div className="mt-3 flex items-end justify-between border-t border-bone-100/[0.08] pt-3">
               <span className="text-[26px] font-semibold leading-none text-bone-50 tabular">{money(pull.item.value)}</span>
@@ -150,17 +158,25 @@ export function ShareSheet({ pull, onClose }: { pull: SharePull; onClose: () => 
                 Demo · simulated value
               </span>
             </div>
+            {!photoCredit(pull.item).publicDomain && (
+              <p className="mt-2.5 text-[10px] leading-snug text-bone-400">
+                <PhotoCredit item={pull.item} />
+              </p>
+            )}
           </figcaption>
         </figure>
 
-        <textarea
-          ref={textRef}
-          readOnly
-          value={text}
-          rows={2}
-          aria-label="Share text"
-          className={`mt-4 w-full resize-none rounded-[6px] border border-bone-100/10 bg-ink-950 px-3 py-2 text-[13px] leading-snug text-bone-200 focus:border-brass-500/60 focus:outline-none ${copied === 'manual' ? '' : 'sr-only'}`}
-        />
+        {/* Only when the clipboard is out of reach: the line, selected, to copy by hand. */}
+        {copied === 'manual' && (
+          <textarea
+            ref={textRef}
+            readOnly
+            value={text}
+            rows={2}
+            aria-label="Share text"
+            className="mt-4 w-full resize-none rounded-[6px] border border-bone-100/10 bg-ink-950 px-3 py-2 text-[13px] leading-snug text-bone-200 focus:border-brass-500/60 focus:outline-none"
+          />
+        )}
         {copied === 'manual' && <p className="mt-1.5 text-[12px] text-bone-400">This page cannot reach your clipboard. The line is selected: press Ctrl+C or Cmd+C.</p>}
 
         <div className={`mt-4 grid gap-2 ${canShare ? 'grid-cols-2' : 'grid-cols-1'}`}>

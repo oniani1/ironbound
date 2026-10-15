@@ -6,7 +6,7 @@ import './sections.css'
 
 const QUESTIONS = [
   ['Is this real money?', 'No. Ironbound is a demo. All chest prices, item values and payouts are simulated. Your $1,000 credit has no cash value.'],
-  ['What is inside a chest?', 'One arms or armor object from the demo catalog: an antique, or new work from a named maker. Swords, daggers, polearms, axes, helmets, shields, armor, crossbows and fittings. Museum photographs show physical objects; new pieces often show an example of the type. Opening a demo chest does not transfer ownership of anything.'],
+  ['What is inside a chest?', 'One arms or armor object from the demo catalog: a newly forged piece from a named maker, or an antique. Swords, daggers, polearms, axes, helmets, shields, armor, crossbows and fittings. Museum photographs show physical objects; new pieces often show an example of the type. Opening a demo chest does not transfer ownership of anything.'],
   ['How are the odds set?', 'Each chest has published rarity bands. A random draw selects a band and then an item in its value range. Empty demo bands fall back to a lower populated band. Each opening is independent. Inspect the full pool before opening.'],
   ['Can I sell a piece back?', 'Yes, while it is in your vault. Each chest pays 85% to 92% of estimated item value as demo credit. The exact offer appears before confirmation. Credit is not a cash withdrawal.'],
   ['How does shipping work?', 'Enter a mock address, choose insured standard or express, then review the cost. Shipping costs demo credit. The timeline separates your request from packing and courier acceptance. No parcel is sent.'],

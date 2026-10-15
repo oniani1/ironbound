@@ -3,7 +3,9 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Check, X } from '@phosphor-icons/react'
 import type { Chest, Item, RarityId } from '../../types'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
-import { money, provenanceLine, resaleLabel, RETAIL_CHECKED_SHORT, sourceHost } from '../../lib/format'
+import { money, photoCredit, provenanceLine, resaleLabel, RETAIL_CHECKED_SHORT, sourceHost } from '../../lib/format'
+import { PhotoCredit } from '../ui/PhotoCredit'
+import { buybackOffer } from '../../lib/gacha'
 import { Button, IconButton } from '../ui/Button'
 import { CountUp } from '../ui/CountUp'
 import { RarityTag, Tag } from '../ui/RarityTag'
@@ -42,6 +44,8 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [inspect, setInspect] = useState<MultiResult | null>(null)
   const timers = useRef<number[]>([])
+  /** Each card's face (its Inspect button), so focus can follow a flip. */
+  const faces = useRef(new Map<string, HTMLButtonElement>())
   const revealAllBtn = useRef<HTMLButtonElement>(null)
   const keepAllBtn = useRef<HTMLButtonElement>(null)
   const allFlipped = flipped.size === results.length
@@ -61,7 +65,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
     else if (allFlipped && active === revealAllBtn.current) target?.focus({ preventScroll: true })
   }, [allFlipped])
 
-  const offerOf = (r: MultiResult) => Math.round(r.item.value * chest.buyback)
+  const offerOf = (r: MultiResult) => buybackOffer(r.item.value, chest)
   const unsold = results.filter((r) => !soldUids.has(r.uid))
   const offersLeft = unsold.reduce((s, r) => s + offerOf(r), 0)
   const credited = results.filter((r) => soldUids.has(r.uid)).reduce((s, r) => s + offerOf(r), 0)
@@ -121,7 +125,14 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                 {/* Back: forged plate, glowing at the edges in the rarity color. */}
                 <button
                   type="button"
-                  onClick={() => flip(r)}
+                  onClick={(e) => {
+                    const back = e.currentTarget
+                    flip(r)
+                    // The face that held focus turns away; focus follows to the piece once it has turned.
+                    timers.current.push(window.setTimeout(() => {
+                      if (document.activeElement === back || document.activeElement === document.body) faces.current.get(r.uid)?.focus({ preventScroll: true })
+                    }, instant ? 0 : 650))
+                  }}
                   className="absolute inset-0 overflow-hidden rounded-[10px] border outline-none focus-visible:ring-2 focus-visible:ring-brass-300"
                   style={{
                     backfaceVisibility: 'hidden',
@@ -159,6 +170,10 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                   aria-hidden={!isUp}
                 >
                   <button
+                    ref={(el) => {
+                      if (el) faces.current.set(r.uid, el)
+                      else faces.current.delete(r.uid)
+                    }}
                     type="button"
                     onClick={() => setInspect(r)}
                     className="relative min-h-0 flex-1 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brass-300"
@@ -167,6 +182,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                     aria-label={`Inspect ${r.item.name}, ${rr.label}, ${money(r.item.value)}`}
                   >
                     <ItemImg item={r.item} eager className="absolute inset-2 h-[calc(100%-16px)] w-[calc(100%-16px)] drop-shadow-[0_10px_18px_oklch(0%_0_0/.6)]" />
+                    {r.item.photoExact === false && <span className="absolute bottom-1.5 left-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-bone-400">Example photo</span>}
                   </button>
                   {isSold ? (
                     <span className="absolute inset-x-0 top-0 flex justify-center bg-ink-950/80 py-1.5">
@@ -308,7 +324,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
 function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }: { result: MultiResult; chest: Chest; sold: boolean; instant: boolean; onSell: () => void; onKeep: () => void; onClose: () => void }) {
   const { item } = result
   const r = RARITIES[result.rarity]
-  const offer = Math.round(item.value * chest.buyback)
+  const offer = buybackOffer(item.value, chest)
   const closeRef = useRef<HTMLButtonElement>(null)
   const panel = useRef<HTMLDivElement>(null)
   const closeCb = useRef(onClose)
@@ -362,7 +378,7 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
       <motion.div
         ref={panel}
         onClick={(e) => e.stopPropagation()}
-        className="plate relative w-full max-w-[480px] rounded-b-none p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-b-[10px]"
+        className="plate ib-sheet relative w-full max-w-[480px] rounded-b-none p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-b-[10px]"
         initial={{ y: instant ? 0 : 40 }}
         animate={{ y: 0 }}
         exit={{ y: instant ? 0 : 30 }}
@@ -384,6 +400,11 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
             <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
               <Tag tone={item.resale === 'strong' ? 'moss' : 'bone'}>{resaleLabel(item.resale)}</Tag>
               <span className="text-[11px] text-bone-400">Our assessment{item.photoExact === false ? ' · Example photo of the type' : ''}</span>
+            </p>
+          )}
+          {!photoCredit(item).publicDomain && (
+            <p className="mt-2 text-[11px] leading-snug text-bone-400">
+              <PhotoCredit item={item} />
             </p>
           )}
         </div>

@@ -4,7 +4,7 @@ import type { RarityId } from '../../types'
 import { RARITIES } from '../../config/rarity'
 import type { ChestAnim } from './animState'
 
-export type Phase = 'intro' | 'await' | 'tell' | 'rise' | 'burst' | 'reveal'
+export type Phase = 'intro' | 'await' | 'tell' | 'rise' | 'burst' | 'title' | 'reveal'
 
 interface RevealOptions {
   /** The rarity of the piece. */
@@ -14,19 +14,26 @@ interface RevealOptions {
   multi?: boolean
   reducedMotion?: boolean
   onPhase: (p: Phase) => void
-  /** The rarity is named: the last beat of the reveal. */
+  /** The rarity is named. */
   onRarity?: (r: RarityId) => void
   /** How many facts the overlay shows while the camera travels along the piece. */
   beats?: number
-  /** Called as each fact should appear, 0 first. */
+  /** Called as each fact should appear, 0 first; called with the count once the last one ends. */
   onBeat?: (i: number) => void
 }
 
-/** Warm torchlight: the light in the chest and on the piece until the rarity is named. */
+/** Warm light: the light in the chest and on the piece until the rarity is named. */
 const NEUTRAL = '#ffd9a8'
 
-/** Seconds between facts: the founder asked for one every second to second and a half. */
-export const BEAT_S = 1.05
+/**
+ * Seconds each fact holds the screen (the founder asked for at least 2.5 s each): about 0.2 s
+ * to arrive, 2.5 s fully legible, 0.1 s to leave.
+ */
+export const FACT_S = 2.8
+
+/** How long the rarity has the screen to itself, and how long the name and value build after it. */
+export const RARITY_HOLD_S = 2.4
+export const TITLE_S = 3.5
 
 function tweenColor(tl: gsap.core.Timeline, target: Color, hex: string, at: number | string, duration: number) {
   const c = new Color(hex)
@@ -34,7 +41,7 @@ function tweenColor(tl: gsap.core.Timeline, target: Color, hex: string, at: numb
 }
 
 /**
- * The arrival: the hall is dark, the torchlight comes up, the camera cranes down as the
+ * The arrival: the hall is dark, the sunlight comes up, the camera cranes down as the
  * chest lowers onto the altar and lands heavily, then it breathes once at the seams.
  */
 export function introTimeline(anim: ChestAnim, onDone: () => void, fast = false) {
@@ -76,13 +83,15 @@ export function applyCharge(anim: ChestAnim, p: number) {
 }
 
 /**
- * The reveal, in the order the founder set (about ten seconds). The lock breaks and falls
- * to the stone. The lid breathes open twice in plain torchlight, then opens by itself. The
- * piece rises into an extreme close-up and the camera travels slowly along it in plain
- * light, no rarity color anywhere, while the overlay names one fact at a time (where it is
- * from, what it is, old or new, its year or maker, its weight). The camera pulls back to
- * the whole piece, and only then is the rarity named, with its light flooding the hall;
- * the top two tiers black out first. The name and the receipt follow.
+ * The reveal, in the order the founder set in the third review. The lock breaks and falls to
+ * the stone. A held breath: the camera sinks to the rim line while the seam light swells, the
+ * lid shut. The lid opens once, slowly, and the open chest is full of light. The camera tilts
+ * up into that light and climbs to meet the piece, which rises into an extreme close-up and is
+ * never seen whole first. The camera travels slowly along it in plain light while the facts
+ * arrive one at a time, each held 2.8 s (where it is from, what it is, antique or newly
+ * forged, its year or maker, its weight). A slow pull back to the whole piece, a breath (the
+ * top two tiers fall dark), then the rarity floods the hall and holds the screen alone. Then
+ * the name, the provenance and the value build beside the piece, then the receipt.
  */
 export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   const { rarity, fast, multi, reducedMotion, onPhase, onRarity, beats = 4, onBeat } = opts
@@ -91,6 +100,9 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   const k = fast ? 0.28 : 1
   const shakeK = reducedMotion ? 0 : 1
   const tl = gsap.timeline()
+  // A replay starts from the plain light of the study, whatever the last rarity was.
+  anim.glowColor.set(NEUTRAL)
+  anim.beamColor.set(NEUTRAL)
 
   tl.call(() => onPhase('tell'))
   // The lock is knocked off, tumbles onto the altar and stays there.
@@ -103,44 +115,33 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
   tl.to(anim, { shake: 0, duration: 0.35 * k, ease: 'power2.out' }, 'strike+=0.12')
 
   if (!fast) {
-    // Two breaths of plain light at the seams once the lock has landed. Every rarity looks
-    // the same here.
-    tl.addLabel('tease', 'strike+=1.0')
-    tl.to(anim, { orbit: 0.14, duration: 2.6, ease: 'sine.inOut' }, 'tease')
-    const breaths = [
-      { lid: 0.06, glow: 0.8, gap: 0.45, dolly: 0.14, hold: 0.3 },
-      { lid: 0.1, glow: 1.0, gap: 0.7, dolly: 0.26, hold: 0.38 },
-    ]
-    breaths.forEach((b, i) => {
-      const label = `breath${i}`
-      tl.addLabel(label, i === 0 ? 'tease' : 'tease+=1.05')
-      tl.to(anim, { lid: b.lid, glow: b.glow, gapLight: b.gap, duration: 0.38, ease: 'power3.out' }, label)
-      tl.to(anim, { dolly: b.dolly, duration: 0.7, ease: 'power2.out' }, label)
-      tl.to(anim, { flare: 0.5 + i * 0.25, duration: 0.15 }, label)
-      tl.to(anim, { flare: 0, duration: 0.55, ease: 'power2.out' }, `${label}+=0.15`)
-      tl.call(() => anim.emit(14 + i * 10, NEUTRAL, 0.55), [], label)
-      tl.to(anim, { lid: 0.012, gapLight: 0.2, glow: 0.55, duration: 0.16, ease: 'power2.in' }, `${label}+=${0.38 + b.hold}`)
-      tl.to(anim, { shake: (0.26 + i * 0.12) * shakeK, duration: 0.04 }, '>')
-      tl.to(anim, { shake: 0, duration: 0.28 }, '>')
-    })
+    // A held breath with the lid shut: the camera sinks to the rim line and the seam light swells.
+    tl.addLabel('tension', 'strike+=0.1')
+    tl.to(anim, { low: 1, duration: 1.1, ease: 'sine.inOut' }, 'tension')
+    tl.to(anim, { glow: 0.95, duration: 1.1, ease: 'sine.in' }, 'tension')
+    tl.to(anim, { rattle: 0.2 * shakeK, duration: 0.5, ease: 'sine.in' }, 'tension+=0.55')
   }
 
-  // The lid opens by itself, in plain light.
-  tl.addLabel('open', fast ? 'strike+=0.3' : 'tease+=2.0')
+  // The lid opens, once, in plain light.
+  tl.addLabel('open', fast ? 'strike+=0.3' : 'strike+=1.2')
   tl.call(() => onPhase('rise'), [], 'open')
-  tl.to(anim, { lid: 1, duration: 0.6 * k, ease: 'back.out(1.4)' }, 'open')
-  tl.to(anim, { gapLight: 0, duration: 0.25 }, 'open')
-  tl.to(anim, { glow: 1.2, beam: 0.3, room: 1, orbit: 0, dolly: 0, duration: 0.7 * k, ease: 'power2.out', overwrite: 'auto' }, 'open')
-  tl.call(() => anim.emit(36, NEUTRAL, 0.8), [], 'open')
-  tl.to(anim, { shake: 0.3 * shakeK, duration: 0.04 }, 'open')
-  tl.to(anim, { shake: 0, duration: 0.4 }, 'open+=0.04')
+  tl.to(anim, { rattle: 0, duration: 0.2 }, 'open')
+  tl.to(anim, { lid: 1, duration: 1.5 * k, ease: 'sine.inOut' }, 'open')
+  tl.fromTo(anim, { gapLight: 0 }, { gapLight: 0.8, duration: 0.45 * k, ease: 'power2.out', immediateRender: false }, 'open')
+  tl.to(anim, { gapLight: 0, duration: 0.6 * k }, `open+=${0.6 * k}`)
+  tl.to(anim, { glow: 1.2, beam: 0.3, room: 1, dolly: 0, duration: 1.2 * k, ease: 'power2.out', overwrite: 'auto' }, 'open')
+  tl.call(() => anim.emit(36, NEUTRAL, 0.8), [], `open+=${0.5 * k}`)
+  // A soft thud as it comes to rest on its hinges.
+  tl.to(anim, { shake: 0.22 * shakeK, duration: 0.04 }, `open+=${1.45 * k}`)
+  tl.to(anim, { shake: 0, duration: 0.4 }, `open+=${1.49 * k}`)
 
   if (multi) {
-    tl.call(() => onPhase('reveal'), [], 'open+=0.9')
+    tl.to(anim, { low: 0, duration: 0.6 }, `open+=${1.5 * k}`)
+    tl.call(() => onPhase('reveal'), [], `open+=${1.6 * k}`)
     return tl
   }
 
-  const lightUp = () => {
+  const lightUp = (settle: number) => {
     tweenColor(tl, anim.glowColor, hex, 'burst', 0.25 * k)
     tl.to(anim, { tint: 1, duration: 0.35 * k, ease: 'power2.out' }, 'burst')
     tl.call(() => {
@@ -157,69 +158,90 @@ export function revealTimeline(anim: ChestAnim, opts: RevealOptions) {
     tl.to(anim, { flare: 0, duration: 1.1, ease: 'power2.out' }, 'burst+=0.1')
     tl.to(anim, { shake: (0.35 + tier * 0.15) * shakeK, duration: 0.05 }, 'burst')
     tl.to(anim, { shake: 0, duration: 0.6 + tier * 0.08, ease: 'power3.out' }, 'burst+=0.05')
-    // Settle to a calmer glow for the receipt.
-    tl.to(anim, { beam: tier >= 2 ? 0.38 : 0.24, duration: 1.2, ease: 'power2.out' }, 'burst+=0.5')
+    // Settle to a calmer glow for the name and the receipt.
+    tl.to(anim, { beam: tier >= 2 ? 0.38 : 0.24, duration: settle, ease: 'power2.out' }, 'burst+=0.5')
   }
 
   if (fast || reducedMotion) {
+    tl.to(anim, { low: 0, duration: 0.2 }, 'open')
     tl.to(anim, { frame: 1, item: 1, itemLit: 1, duration: 0.3, ease: 'power2.out' }, 'open+=0.1')
     tl.addLabel('burst', 'open+=0.25')
     tl.call(() => onPhase('burst'), [], 'burst')
-    lightUp()
+    lightUp(1.2)
     tl.call(() => onPhase('reveal'), [], 'burst+=0.2')
     return tl
   }
 
-  // The close-up. The camera dives first, so the piece is never seen whole on its way up;
-  // it rises into the frame end first, dimly lit, and the light comes up as the camera
-  // travels. Plain light: the rarity is still unknown.
+  // The camera tilts up into the light and moves straight in to the close-up; the piece rises
+  // into the shot the moment the camera is there, so there is no waiting on empty light. It
+  // never looks down into the chest, and the piece is never seen whole first.
+  tl.addLabel('approach', 'open+=0.8')
+  tl.to(anim, { lookUp: 1, duration: 0.35, ease: 'sine.inOut' }, 'approach')
+  tl.set(anim, { macro: 1, along: 0, itemLit: 0.3 }, 'approach+=0.05')
+  tl.to(anim, { frame: 1, duration: 0.75, ease: 'power2.inOut' }, 'approach+=0.05')
+  tl.to(anim, { beam: 0.12, glow: 0.6, duration: 0.9 }, 'approach+=0.3')
+  tl.addPause('approach+=0.8', () => waitForClose(anim, tl, () => tl.seek('back', true).resume()))
+  tl.to(anim, { item: 1, duration: 0.4, ease: 'power2.out' }, 'approach+=0.8')
+  // Travel slowly along the piece; each fact holds 2.8 s.
   const n = Math.max(1, beats)
-  const travel = Math.max(3.3, n * BEAT_S + 0.2)
-  tl.addLabel('dive', 'open+=0.35')
-  tl.set(anim, { macro: 1, along: 0, itemLit: 0.3 }, 'dive')
-  tl.to(anim, { frame: 1, duration: 0.6, ease: 'power2.inOut' }, 'dive')
-  // Hold here until the camera has actually arrived, so a slow device never shows the
-  // whole piece on its way up.
-  tl.addPause('dive+=0.6', () => waitForClose(anim, tl))
-  tl.to(anim, { item: 1, duration: 0.9, ease: 'power3.out' }, 'dive+=0.75')
-  tl.to(anim, { beam: 0.12, glow: 0.6, duration: 1.2 }, 'dive+=0.4')
-  tl.addLabel('travel', 'dive+=1.1')
+  const travel = n * FACT_S + 0.4
+  tl.addLabel('travel', 'approach+=0.95')
+  tl.set(anim, { low: 0, lookUp: 0 }, 'travel')
   tl.to(anim, { along: 1, duration: travel, ease: 'sine.inOut' }, 'travel')
-  tl.to(anim, { itemLit: 1, duration: 1.3, ease: 'power2.out' }, 'travel')
-  tl.fromTo(anim, { glint: 1 }, { glint: 0, duration: travel, ease: 'sine.inOut' }, 'travel')
+  tl.to(anim, { itemLit: 1, duration: 1.8, ease: 'power2.out' }, 'travel')
+  tl.fromTo(anim, { glint: 1 }, { glint: 0, duration: travel, ease: 'sine.inOut', immediateRender: false }, 'travel')
   tl.set(anim, { glint: -1 }, `travel+=${travel}`)
-  for (let i = 0; i < n; i++) tl.call(() => onBeat?.(i), [], `travel+=${0.2 + i * BEAT_S}`)
-  // Pull back to the whole piece, still in plain light.
-  tl.to(anim, { macro: 0, duration: 0.9, ease: 'power3.inOut' }, `travel+=${travel - 0.35}`)
+  for (let i = 0; i <= n; i++) tl.call(() => onBeat?.(i), [], `travel+=${0.2 + i * FACT_S}`)
+  // A slow pull back to the whole piece, still in plain light, and a moment to take it in.
+  tl.addLabel('back', `travel+=${travel - 0.2}`)
+  tl.to(anim, { macro: 0, duration: 1.4, ease: 'sine.inOut' }, 'back')
 
-  // Only now the rarity. The top tiers fall dark for a beat first.
+  // A breath before the rarity: the hall dims; the top tiers fall dark.
   if (tier >= 5) {
-    tl.addLabel('dark', `travel+=${travel + 0.45}`)
-    tl.to(anim, { room: 0.04, glow: 0.12, beam: 0.04, itemLit: 0.25, duration: 0.3, ease: 'power2.in', overwrite: 'auto' }, 'dark')
-    tl.addLabel('burst', 'dark+=0.7')
+    tl.addLabel('dark', 'back+=1.8')
+    tl.to(anim, { room: 0.04, glow: 0.12, beam: 0.04, itemLit: 0.25, duration: 0.4, ease: 'power2.in', overwrite: 'auto' }, 'dark')
+    tl.addLabel('burst', 'dark+=0.75')
     tl.to(anim, { itemLit: 1, levitate: 1, duration: 0.35, ease: 'power2.out' }, 'burst')
     if (!reducedMotion) {
       tl.to(anim, { aberration: tier >= 6 ? 1.6 : 1, duration: 0.06 }, 'burst')
       tl.to(anim, { aberration: 0, duration: 0.6, ease: 'power2.out' }, 'burst+=0.06')
     }
   } else {
-    tl.addLabel('burst', `travel+=${travel + 0.6}`)
+    tl.addLabel('dim', 'back+=1.8')
+    tl.to(anim, { room: 0.55, glow: 0.45, beam: 0.06, duration: 0.45, ease: 'sine.inOut', overwrite: 'auto' }, 'dim')
+    tl.addLabel('burst', 'dim+=0.5')
   }
   tl.call(() => onPhase('burst'), [], 'burst')
-  lightUp()
-  tl.call(() => onPhase('reveal'), [], `burst+=${tier >= 5 ? 1.4 : 1.1}`)
+  lightUp(2.4)
+  // The rarity holds the screen on its own; then the name, provenance and value; then the receipt.
+  tl.call(() => onPhase('title'), [], `burst+=${RARITY_HOLD_S}`)
+  tl.call(() => onPhase('reveal'), [], `burst+=${RARITY_HOLD_S + TITLE_S}`)
   return tl
 }
 
-/** Resumes a paused reveal once the camera reports the close-up, or after 2.5 s at most. */
-function waitForClose(anim: ChestAnim, tl: gsap.core.Timeline) {
+/**
+ * Resumes a paused reveal once the piece's photo is in and the camera is close on it. A slow
+ * device is asked to jump to the close-up after 2.5 s. Without a live scene (no WebGL, or the
+ * scene failed) the reveal goes on after 3.5 s, facts and all. A photo that failed, or is not in
+ * after 12 s, skips the study: there is nothing to study, so the camera pulls back and the
+ * rarity follows.
+ */
+function waitForClose(anim: ChestAnim, tl: gsap.core.Timeline, skipStudy: () => void) {
   const start = performance.now()
   const check = () => {
     // A killed timeline (skip, close, replay) has left its parent: stop waiting.
     if (!tl.parent) return gsap.ticker.remove(check)
-    if (anim.closeReady || performance.now() - start > 2500) {
+    const waited = performance.now() - start
+    // A live scene's camera has run since the wait began (a hidden tab pauses both alike).
+    const live = anim.rigTick > start
+    if (anim.closeReady || (!live && waited > 3500)) {
       gsap.ticker.remove(check)
       tl.resume()
+    } else if (anim.itemFailed || waited > 12000) {
+      gsap.ticker.remove(check)
+      skipStudy()
+    } else if (waited > 2500 && anim.itemReady) {
+      anim.snap = true
     }
   }
   gsap.ticker.add(check)
@@ -246,6 +268,8 @@ export function settleReveal(anim: ChestAnim, final: RarityId, multi = false) {
   anim.gapLight = 0
   anim.orbit = 0
   anim.crane = 0
+  anim.low = 0
+  anim.lookUp = 0
   anim.drop = 1
   if (!multi) {
     anim.item = 1

@@ -44,16 +44,16 @@ export function shortEra(era: string): string {
   return e.charAt(0).toUpperCase() + e.slice(1)
 }
 
-/** One line on where a piece comes from: era and origin for antiques, maker for new work. */
+/** One line on where a piece comes from: era and origin for antiques, maker for newly forged pieces. */
 export function provenanceLine(item: Pick<Item, 'provenance' | 'era' | 'origin' | 'maker'>): string {
-  return item.provenance === 'antique' ? `${shortEra(item.era)} · ${item.origin} · Antique, authenticated` : `New · ${item.maker ?? 'Workshop'} · ${item.origin}`
+  return item.provenance === 'antique' ? `${shortEra(item.era)} · ${item.origin} · Antique, authenticated` : `Newly forged · ${item.maker ?? 'Workshop'} · ${item.origin}`
 }
 
 export function resaleLabel(r: Item['resale']): string {
   return r === 'strong' ? 'Strong resale' : r === 'medium' ? 'Steady resale' : 'Low resale'
 }
 
-/** When the retail prices of new work were read. */
+/** When the retail prices of newly forged pieces were read. */
 export const RETAIL_CHECKED = 'October 2026'
 export const RETAIL_CHECKED_SHORT = 'Oct 2026'
 
@@ -64,5 +64,45 @@ export function sourceHost(url?: string): string {
     return new URL(url).hostname.replace(/^www\./, '')
   } catch {
     return ''
+  }
+}
+
+const LICENSE_DEEDS: Record<string, string> = {
+  CC0: 'https://creativecommons.org/publicdomain/zero/1.0/',
+  'CC BY 2.0': 'https://creativecommons.org/licenses/by/2.0/',
+  'CC BY 4.0': 'https://creativecommons.org/licenses/by/4.0/',
+  'CC BY-SA 3.0': 'https://creativecommons.org/licenses/by-sa/3.0/',
+  'CC BY-SA 4.0': 'https://creativecommons.org/licenses/by-sa/4.0/',
+}
+
+export interface PhotoCreditParts {
+  /** "Photograph", "Photo" or "Example photo". */
+  label: string
+  by: string
+  license: string | null
+  licenseUrl: string | null
+  /** Public domain: no attribution is owed, so small surfaces may leave the credit out. */
+  publicDomain: boolean
+  /** Every photo is a cutout of the original, and share-alike cutouts carry the same license. */
+  changes: string
+}
+
+/**
+ * Splits a stored credit ("Example photo: The Swedish History Museum, Stockholm, CC BY 2.0" or
+ * "The Metropolitan Museum of Art, Open Access (CC0)") into who took it and its license, and
+ * says what was changed.
+ */
+export function photoCredit(item: Pick<Item, 'credit' | 'provenance' | 'photoExact'>): PhotoCreditParts {
+  const text = item.credit.replace(/^(Example photo|Photo): /, '')
+  const match = text.match(/^(.*?)[,(]?\s*\(?(CC0|CC BY(?:-SA)? \d\.\d)\)?$/)
+  const license = match?.[2] ?? null
+  const shareAlike = !!license?.includes('-SA')
+  return {
+    label: item.provenance === 'antique' ? 'Photograph' : item.photoExact === false ? 'Example photo' : 'Photo',
+    by: (match?.[1] ?? text).replace(/[,\s]+$/, ''),
+    license,
+    licenseUrl: license ? (LICENSE_DEEDS[license] ?? null) : null,
+    publicDomain: license === 'CC0',
+    changes: shareAlike ? 'Cut out from the original photo; the cutout is shared under the same license.' : 'Cut out from the original photo.',
   }
 }

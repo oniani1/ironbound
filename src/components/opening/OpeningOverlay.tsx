@@ -8,7 +8,7 @@ import { ChestAnim } from '../chest3d/animState'
 import { applyCharge, introTimeline, revealTimeline, settleReveal, type Phase } from '../chest3d/timeline'
 import { RARITIES, RARITY_ORDER } from '../../config/rarity'
 import type { RarityId } from '../../types'
-import { chestPool } from '../../lib/gacha'
+import { buybackOffer, chestPool } from '../../lib/gacha'
 import { ITEMS } from '../../data/items'
 import { ItemImg } from '../ui/ItemImg'
 import { actions, useStore } from '../../lib/store'
@@ -21,9 +21,6 @@ import { Pips } from '../ui/RarityTag'
 import { RevealCard } from './RevealCard'
 import { MultiReveal } from './MultiReveal'
 import { useOpening, type OpeningSession } from './OpeningProvider'
-
-/** How long the piece is named on its own before the receipt, by rarity tier. */
-const TITLE_MS: Record<number, number> = { 1: 750, 2: 900, 3: 1100, 4: 1250, 5: 1500, 6: 1700 }
 
 function useReducedMotion() {
   return useMemo(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches, [])
@@ -40,14 +37,23 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   // The rarity, once named, and how many facts about the piece are showing.
   const [named, setNamed] = useState<RarityId | null>(null)
   const [beat, setBeat] = useState(-1)
-  const [cardReady, setCardReady] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
+  // Whether the piece's photograph is in, checked while the result is up: a photo that never
+  // loaded is said plainly on the receipt, and the line goes if it arrives late.
+  const [photoMissing, setPhotoMissing] = useState(false)
   const root = useRef<HTMLDivElement>(null)
   const closeBtn = useRef<HTMLButtonElement>(null)
   const skipBtn = useRef<HTMLButtonElement>(null)
   const fast = useStore((s) => s.settings.fast)
   const balance = useStore((s) => s.balance)
   const reduced = useReducedMotion()
+  useEffect(() => {
+    if (phase !== 'title' && phase !== 'reveal') return
+    const check = () => setPhotoMissing(!anim.itemReady)
+    check()
+    const id = window.setInterval(check, 400)
+    return () => window.clearInterval(id)
+  }, [phase, anim])
   const { open, close } = useOpening()
   const navigate = useNavigate()
 
@@ -59,6 +65,9 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   const facts = useMemo(() => revealFacts(first.item), [first.item])
   const fastRef = useRef(fast)
   fastRef.current = fast
+  // A replay starts a moment after the card leaves; Skip, Close or another replay cancel it.
+  const replayTimer = useRef(0)
+  useEffect(() => () => window.clearTimeout(replayTimer.current), [])
 
   const startReveal = useCallback(() => {
     tl.current?.kill()
@@ -98,6 +107,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   }, [anim, startReveal])
 
   const skip = useCallback(() => {
+    window.clearTimeout(replayTimer.current)
     tl.current?.kill()
     settleReveal(anim, best.rarity, multi)
     setPhase('reveal')
@@ -105,10 +115,11 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
 
   const replay = useCallback(() => {
     tl.current?.kill()
+    window.clearTimeout(replayTimer.current)
     if (reduced) {
       // Reduced motion: no second flight. The card fades out and back in.
       setPhase('tell')
-      window.setTimeout(() => setPhase('reveal'), 200)
+      replayTimer.current = window.setTimeout(() => setPhase('reveal'), 200)
       return
     }
     anim.reset()
@@ -116,7 +127,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     setBeat(-1)
     setNamed(null)
     setPhase('tell')
-    window.setTimeout(() => {
+    replayTimer.current = window.setTimeout(() => {
       tl.current = revealTimeline(anim, { rarity: best.rarity, fast: false, multi, reducedMotion: reduced, onPhase: setPhase, onRarity: setNamed, beats: facts.length, onBeat: setBeat })
     }, 250)
   }, [anim, multi, reduced, best.rarity, facts.length])
@@ -161,17 +172,10 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
     return () => window.removeEventListener('keydown', onKey)
   }, [collapsed, anim])
 
-  // Let the player look at the piece before the receipt slides in.
+  // Inspect belongs to the finished receipt; a replay starts with the card whole again.
   useEffect(() => {
-    if (phase !== 'reveal') {
-      setCardReady(false)
-      setCollapsed(false)
-      return
-    }
-    const ms = fastRef.current || reduced || multi ? 0 : TITLE_MS[RARITIES[best.rarity].tier] ?? 900
-    const t = window.setTimeout(() => setCardReady(true), ms)
-    return () => window.clearTimeout(t)
-  }, [phase, reduced, multi, best.rarity])
+    if (phase !== 'reveal') setCollapsed(false)
+  }, [phase])
 
   // Keyboard focus: Close while the chest lands, the seal while it waits, Skip while it
   // opens, the result card after. The provider returns it to the launcher on exit.
@@ -185,6 +189,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   // Close works from the first frame. Before the seal breaks, a free chest stays unopened;
   // a paid opening keeps its pieces in the vault.
   const exit = useCallback(() => {
+    window.clearTimeout(replayTimer.current)
     if (spectate) {
       tl.current?.kill()
       return close({ skipCallback: true })
@@ -202,7 +207,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   // Fast switched on while waiting: break the seal now.
   useEffect(() => {
     if (!fast || phase !== 'await') return
-    hold.current?.stop()
+    hold.current?.cancel()
     tl.current?.kill()
     const o = { p: 0 }
     tl.current = gsap.timeline()
@@ -212,12 +217,12 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') exit()
-      if ((e.key === 's' || e.key === 'S') && (phase === 'tell' || phase === 'rise' || phase === 'burst')) skip()
+      if ((e.key === 's' || e.key === 'S') && (phase === 'tell' || phase === 'rise' || phase === 'burst' || phase === 'title')) skip()
       // Tab cycles inside the opening; the batch Inspect sheet runs its own cycle.
       if (e.key === 'Tab' && root.current && !e.defaultPrevented) {
         const active = document.activeElement
         if (active?.closest('[data-testid="multi-inspect"], [data-testid="share-sheet"]')) return
-        const nodes = [...root.current.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter((n) => n.getClientRects().length > 0)
+        const nodes = [...root.current.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter((n) => n.getClientRects().length > 0 && n.tabIndex >= 0 && !n.closest('[inert]'))
         const firstNode = nodes[0]
         const lastNode = nodes[nodes.length - 1]
         if (!firstNode || !lastNode) return
@@ -240,7 +245,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   const sell = (uids: string[]) => {
     uids.forEach((u) => {
       const r = results.find((x) => x.uid === u)!
-      actions.sellBack(u, Math.round(r.item.value * chest.buyback))
+      actions.sellBack(u, buybackOffer(r.item.value, chest))
     })
     setSoldUids((s) => {
       const n = new Set(s)
@@ -267,6 +272,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
   // The facts run while the camera studies the piece; the burst belongs to the rarity.
   const fact = beat >= 0 ? facts[beat] : undefined
   const showFacts = !multi && phase === 'rise' && !!fact
+  const card = !multi && (phase === 'title' || phase === 'reveal')
 
   return (
     <motion.div
@@ -347,7 +353,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
             </span>
             Fast
           </button>
-          {(phase === 'tell' || phase === 'rise' || phase === 'burst') && (
+          {(phase === 'tell' || phase === 'rise' || phase === 'burst' || phase === 'title') && (
             <button
               ref={skipBtn}
               data-testid="skip"
@@ -405,71 +411,65 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         </AnimatePresence>
       </div>
 
-      {/* What the piece is, one fact at a time, while the camera studies it: earlier facts
-          gather in a ledger line, the newest is set large. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[17%] flex justify-center px-5 sm:bottom-[11%] sm:justify-start sm:pl-[max(2rem,6vw)]" aria-live="polite">
-        <AnimatePresence>
+      {/* What the piece is, one fact at a time, while the camera studies it. Each holds the
+          screen at least 2.5 s, set large over a dark reading surface. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-[15%] flex justify-center px-5 sm:bottom-[10%] sm:justify-start sm:pl-[max(2rem,6vw)]" aria-live="polite">
+        <AnimatePresence mode="wait">
           {showFacts && fact && (
             <motion.div
-              key="facts"
-              // A quiet shade behind the words, so they read on bright steel as well as on dark.
-              className="flex max-w-[min(92vw,680px)] flex-col items-center bg-[radial-gradient(closest-side,oklch(8%_0.01_60/.6),transparent)] px-10 py-6 text-center sm:-ml-10 sm:items-start sm:text-left"
-              exit={{ opacity: 0, transition: { duration: 0.25 } }}
+              key={beat}
+              // Its own stacking context: the scrim must stay above the scene once the caption settles.
+              className="relative isolate flex max-w-[min(92vw,760px)] flex-col items-center px-6 py-4 text-center sm:-ml-6 sm:items-start sm:text-left"
+              initial={{ opacity: 0, y: reduced ? 0 : 8 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } }}
+              exit={{ opacity: 0, transition: { duration: 0.1 } }}
               data-testid="reveal-facts"
               data-beat={beat}
             >
-              <p className="caps flex min-h-[1.2em] flex-wrap justify-center gap-x-2 text-bone-300 [text-shadow:0_1px_10px_oklch(0%_0_0/.95)] sm:justify-start">
-                {facts.slice(0, beat).map((f, i) => (
-                  <motion.span key={f.label} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.45 }}>
-                    {i > 0 && (
-                      <span className="mr-2 text-bone-500" aria-hidden>
-                        ·
-                      </span>
-                    )}
-                    {f.value}
-                  </motion.span>
-                ))}
-              </p>
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={beat}
-                  className="mt-2.5"
-                  initial={{ opacity: 0, y: 14, filter: 'blur(4px)' }}
-                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, y: -10, transition: { duration: 0.16 } }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <p className="eyebrow [text-shadow:0_1px_10px_oklch(0%_0_0/.95)]">{fact.label}</p>
-                  <p className="font-display mt-1 text-[48px] font-semibold leading-[0.98] text-bone-50 [text-shadow:0_3px_28px_oklch(0%_0_0/.9)] sm:text-[84px]">{fact.value}</p>
-                </motion.div>
-              </AnimatePresence>
+              {/* A soft dark plate, even across the words: a radial scrim thinned out at the corner where the label sits. */}
+              <span aria-hidden className="absolute -inset-x-12 -inset-y-10 -z-10 rounded-[56px] bg-[oklch(9%_0.012_60/.8)] blur-xl" />
+              <p className="eyebrow !text-bone-300">{fact.label}</p>
+              <p className="font-display mt-1.5 text-[52px] font-semibold leading-[0.98] text-bone-50 [text-shadow:0_2px_24px_oklch(0%_0_0/.8)] sm:text-[88px]">{fact.value}</p>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* The rarity, last and on its own: named in words and pips, never by color alone. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[15%] flex justify-center px-4" aria-live="polite">
+      {/* The rarity, alone: in words and pips, never by color alone. It stands where the name
+          and the receipt follow, beside the piece on wide screens and under it on phones. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-[17%] flex justify-center px-4 md:inset-y-0 md:left-auto md:right-[max(2rem,6vw)] md:w-[620px] md:items-center md:justify-end md:px-7" aria-live="polite">
         <AnimatePresence>
-          {phase === 'burst' && named && (
+          {phase === 'burst' && named && !multi && (
             <motion.div
-              key={named}
-              initial={{ opacity: 0, scale: reduced ? 1 : 1.3, filter: 'blur(10px)' }}
-              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, transition: { duration: 0.2 } }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col items-center gap-3"
+              key="rarity"
+              className="flex flex-col items-center gap-4 md:items-end"
               style={{ color: RARITIES[named].cssVar }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.25 } }}
+              transition={{ duration: 0.3 }}
               data-testid="rarity-stamp"
             >
-              <Pips tier={RARITIES[named].tier} color={RARITIES[named].cssVar} />
-              <span className="flex items-center gap-4">
-                <span className="h-px w-10 bg-current opacity-60 sm:w-20" aria-hidden />
-                <span className="font-gothic text-[48px] leading-none sm:text-[76px]" style={{ textShadow: `0 0 34px color-mix(in oklch, ${RARITIES[named].cssVar} 60%, transparent), 0 2px 12px oklch(0% 0 0 / .85)` }}>
-                  {RARITIES[named].stamp}
-                </span>
-                <span className="h-px w-10 bg-current opacity-60 sm:w-20" aria-hidden />
-              </span>
+              <motion.span initial={{ opacity: 0, y: reduced ? 0 : 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }}>
+                <Pips tier={RARITIES[named].tier} color={RARITIES[named].cssVar} />
+              </motion.span>
+              <motion.span
+                layoutId="rarity-word"
+                className="font-gothic block whitespace-nowrap text-[76px] leading-[0.92] sm:text-[100px] md:text-[112px]"
+                style={{ textShadow: `0 0 44px color-mix(in oklch, ${RARITIES[named].cssVar} 55%, transparent), 0 2px 14px oklch(0% 0 0 / .85)` }}
+                initial={{ opacity: 0, scale: reduced ? 1 : 1.08 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {RARITIES[named].stamp}
+              </motion.span>
+              <motion.span
+                aria-hidden
+                className="block h-px w-44 origin-center bg-current opacity-60 md:origin-right"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 0.35, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -530,34 +530,42 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         )}
       </AnimatePresence>
 
-      {/* Title: the piece is named on its own for a beat before the receipt slides in. */}
+      {/* A dark floor under the words, so the title reads before the panel arrives: under them on
+          phones; on wide screens from just left of the card to the edge, clear of the piece. */}
       <AnimatePresence>
-        {phase === 'reveal' && !cardReady && !multi && (
+        {card && !collapsed && (
           <motion.div
-            key="title"
-            className="pointer-events-none absolute inset-x-0 bottom-[9%] flex flex-col items-center px-6 text-center"
-            initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -8, transition: { duration: 0.25 } }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            data-testid="reveal-title"
-          >
-            <p className="caps flex items-center gap-2" style={{ color: RARITIES[first.rarity].cssVar }}>
-              <Pips tier={RARITIES[first.rarity].tier} color={RARITIES[first.rarity].cssVar} />
-              {RARITIES[first.rarity].label}
-            </p>
-            <p className="font-display mt-3 text-[44px] font-semibold leading-[0.95] text-bone-50 [text-shadow:0_4px_30px_oklch(0%_0_0/.85)] sm:text-[68px]">{first.item.name}</p>
-          </motion.div>
+            key="scrim"
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-[linear-gradient(180deg,transparent,oklch(9%_0.012_60/.88)_42%,var(--color-ink-950))] md:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          />
+        )}
+        {card && !collapsed && (
+          <motion.div
+            key="scrim-side"
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 hidden md:block"
+            style={{ left: 'calc(100% - max(2rem, 6vw) - 660px)', background: 'linear-gradient(90deg, transparent, oklch(9% 0.012 60 / .72) 200px, oklch(9% 0.012 60 / .8))' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          />
         )}
       </AnimatePresence>
 
-      {/* Reveal. */}
+      {/* The name, provenance and value build beside the piece, then the receipt settles in around them. */}
       <AnimatePresence>
-        {phase === 'reveal' && cardReady && !multi && (
+        {card && (
           <div
-            className={`pointer-events-none absolute inset-0 flex items-end justify-center ${collapsed ? 'sm:pb-8' : 'md:items-center md:justify-end md:pr-[max(2rem,6vw)]'}`}
+            className={`pointer-events-none absolute inset-0 flex items-end justify-center ${collapsed ? 'sm:pb-8' : 'ib-receipt-dock md:items-center md:justify-end md:pr-[max(2rem,6vw)]'}`}
           >
             <RevealCard
+              stage={phase === 'title' ? 'title' : 'full'}
               fast={fast}
               onHeight={onCardHeight}
               collapsed={collapsed}
@@ -572,7 +580,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
                 close({ skipCallback: true })
                 navigate(`/chests/${chest.id}`)
               }}
-              sold={soldUids.has(first.uid) ? Math.round(first.item.value * chest.buyback) : null}
+              sold={soldUids.has(first.uid) ? buybackOffer(first.item.value, chest) : null}
               onKeep={() => close()}
               onSell={() => sell([first.uid])}
               onShip={() => {
@@ -582,6 +590,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
               onAgain={again}
               onReplay={replay}
               canAfford={canAfford}
+              photoMissing={photoMissing}
             />
           </div>
         )}

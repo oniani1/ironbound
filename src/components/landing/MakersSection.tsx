@@ -10,7 +10,7 @@ import { ItemImg } from '../ui/ItemImg'
 const ease = [0.16, 1, 0.3, 1] as const
 
 /**
- * New work beside the antiques: the makers whose pieces are in the chests, set as a ledger
+ * Newly forged pieces beside the antiques: the makers whose pieces are in the chests, set as a ledger
  * with their country, what they make, what their pieces sell for and how well they resell.
  */
 export function MakersSection() {
@@ -34,10 +34,10 @@ export function MakersSection() {
         <div className="lg:sticky lg:top-28 lg:self-start">
           <p className="eyebrow">From the forge</p>
           <h2 id="makers-title" className="font-display mt-3 text-[38px] font-semibold leading-[1.02] text-bone-50 sm:text-[52px]">
-            New work from <em className="font-medium text-brass-300">working makers.</em>
+            Newly forged by <em className="font-medium text-brass-300">working makers.</em>
           </h2>
           <p className="mt-5 max-w-[46ch] text-[15px] leading-relaxed text-bone-300">
-            Beside the antiques, the chests hold {count} new pieces from {rows.length} makers: budget display steel, HEMA trainers, Albion swords and signed Japanese blades. Every piece carries its retail price and our view of how well the maker resells.
+            The chests hold {count} newly forged pieces from {rows.length} makers, alongside the antiques: budget display steel and HEMA trainers, Albion swords, signed Japanese blades. Every piece carries its retail price and our view of how well the maker resells.
           </p>
           <p className="mt-4 text-[12px] text-bone-400">Demo catalog. Prices are retail as researched in October 2026. Resale labels are our assessment, not measured returns. Many photos show an example of the type. No affiliation with any maker.</p>
           <Link to="/chests" className="caps group mt-7 inline-flex min-h-11 items-center gap-2 text-brass-300 transition-colors hover:text-brass-300/80">

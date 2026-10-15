@@ -182,7 +182,7 @@ def main():
             "id": slug,
             "name": display_name(it),
             "category": cat,
-            "era": "New",
+            "era": "Contemporary",
             "origin": origin_of(maker),
             "provenance": "forged",
             "maker": maker["name"],

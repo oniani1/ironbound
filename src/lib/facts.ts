@@ -52,7 +52,7 @@ export function revealFacts(item: Pick<Item, 'name' | 'origin' | 'category' | 'p
     facts.push({ label: 'Age', value: 'Antique' })
     facts.push({ label: 'Made', value: shortEra(item.era).replace(/^C\.\s*/, 'Around ') })
   } else {
-    facts.push({ label: 'Age', value: 'New work' })
+    facts.push({ label: 'Age', value: 'Newly forged' })
     facts.push({ label: 'Maker', value: item.maker ?? 'Master smith' })
   }
   if (item.weight) facts.push({ label: 'Weight', value: item.weight })

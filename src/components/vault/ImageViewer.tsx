@@ -87,7 +87,7 @@ export function ImageViewer({ item, rarity }: { item: Item; rarity: RarityId }) 
 
   return <div className="ib-viewer vitrine" data-lenis-prevent style={{ '--light': RARITIES[rarity].cssVar } as CSSProperties}>
     <div ref={stage} className="ib-viewer-stage" data-zoomed={view.scale > 1.01} tabIndex={0} role="group" aria-label={`Inspect ${item.name}`} aria-describedby="image-controls-help" onKeyDown={keyboard} onDoubleClick={(event) => zoom(current.current.scale > 1 ? 1 : 2.5, { x: event.clientX, y: event.clientY })} onPointerDown={(event) => { if (event.pointerType === 'mouse' && event.button !== 0) return; pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY }); event.currentTarget.setPointerCapture(event.pointerId); beginGesture() }} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onLostPointerCapture={end}>
-      <div className="ib-viewer-object" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}><ItemArtwork item={item} rarity={rarity} eager full /></div>
+      <div className="ib-viewer-object" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}><ItemArtwork item={item} rarity={rarity} eager full note={false} /></div>
     </div>
     <div className="ib-viewer-controls">
       <IconButton type="button" size="lg" onClick={() => zoom(current.current.scale - 0.5)} disabled={view.scale <= 1} aria-label="Zoom out" title="Zoom out"><MagnifyingGlassMinus size={20} weight="light" aria-hidden="true" /></IconButton>

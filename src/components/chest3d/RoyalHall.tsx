@@ -1,373 +1,428 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
+import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import type { ChestAnim } from './animState'
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { asset } from '../../lib/asset'
 
 /**
- * The room around the altar: a royal hall at night, built in code so nothing is downloaded.
- * Stone columns with torches recede into the dark on both sides, a crimson runner leads to
- * the altar, banners hang in an arched niche on the back wall under a rose window, and the
- * polished floor holds soft reflections of every flame. All of it is lit by the torches and
- * dims with the room light, so a blackout takes the hall away with everything else. Once the
- * rarity is named, its light floods the hall from the chest.
+ * The room around the altar: a royal hall in late afternoon, built in code. Tall lancet
+ * windows in the left wall let the low sun in. Sheets of light with dust in them cross the
+ * hall and land behind the altar, the columns throw long shadows across the floor, and
+ * everything the sun does not reach stays in deep shadow. Crimson banners with a gold crown
+ * hang in an arched niche on the back wall. The sun stays a neutral warm white: color in
+ * this room belongs to rarity, which reaches the hall from the chest once it is named. The
+ * whole room dims with the room light, so a blackout takes the sun away too.
  */
 
-const FLOOR_Y = -0.36
-const COL_X = 2.3
-const COL_Z = [-1.7, -4.4, -7.1]
-const WALL_Z = -9.4
-const SIDE_X = 4.4
-const ARCH_W = 1.35
-const ARCH_SPRING = 3.2
-// High on the back wall: in view when the camera looks up at a piece, never behind the controls.
-const ROSE: [number, number, number] = [0, 7.1, WALL_Z + 0.04]
+export const FLOOR_Y = -0.36
+const WALL_X = 3.9
+const WALL_T = 0.7
+const WALL_H = 9
+const COL_X = 2.15
+const COL_Z = [-1.2, -4.0, -6.8]
+const BACK_Z = -9.4
+const FRONT_Z = 10
+/** Lintels rest on the capitals. */
+const LINTEL_Y = FLOOR_Y + 5.1 + 0.49 + 0.17
+/** The runner leads from the back wall to the front edge of the altar, not past it. */
+const RUNNER_END = 1.25
+// Windows in the left wall: two lancets under a roundel, between the columns.
+const WINDOW_Z = [-2.6, -5.4, -8.2]
+const LANCET_W = 0.46
+const MULLION = 0.16
+const SILL_Y = 1.3
+const SPRING_Y = 4.2
+const APEX_Y = SPRING_Y + LANCET_W * Math.sin(Math.PI / 3)
+const ROUNDEL = { y: APEX_Y + 0.3, r: 0.2 }
+// The niche on the back wall.
+const NICHE = { w: 2.3, sill: 0.15, spring: 3.3, depth: 0.6 }
 
-/** Torch flames, front to back: on the inner face of each column, then two on the back wall. */
-export const TORCHES: [number, number, number][] = [
-  ...COL_Z.flatMap((z) => [
-    [-COL_X + 0.38, 1.25, z] as [number, number, number],
-    [COL_X - 0.38, 1.25, z] as [number, number, number],
-  ]),
-  [-ARCH_W - 0.75, 1.7, WALL_Z + 0.14],
-  [ARCH_W + 0.75, 1.7, WALL_Z + 0.14],
-]
-const N = TORCHES.length
+/** Where the sun points: through the nearest window onto the altar, just behind the chest. */
+const SUN_AIM = new THREE.Vector3(0, 0, -0.6)
+const SUN_THROUGH = new THREE.Vector3(-WALL_X, (SILL_Y + APEX_Y) / 2, WINDOW_Z[0]!)
+const SUN_DIR = SUN_AIM.clone().sub(SUN_THROUGH).normalize()
+const SUN_POS = SUN_AIM.clone().addScaledVector(SUN_DIR, -28)
+/** Late sun, about 4600 K. */
+const SUN_COLOR = new THREE.Color('#ffd2a1')
 
-/** Seeded noise so the stone looks the same on every load. */
-function rng(seed: number) {
-  let s = seed >>> 0
-  return () => {
-    s = (s * 1664525 + 1013904223) >>> 0
-    return s / 4294967296
-  }
+const TEXTURES = {
+  stoneDiff: asset('/textures/hall/stone_diff.webp'),
+  stoneNor: asset('/textures/hall/stone_nor.webp'),
+  stoneArm: asset('/textures/hall/stone_arm.webp'),
+  floorDiff: asset('/textures/hall/floor_diff.webp'),
+  floorNor: asset('/textures/hall/floor_nor.webp'),
+  floorArm: asset('/textures/hall/floor_arm.webp'),
+  velvetNor: asset('/textures/hall/velvet_nor.webp'),
 }
 
-function canvasTexture(w: number, h: number, draw: (g: CanvasRenderingContext2D, r: () => number) => void, seed: number) {
+/** Phones and small GPUs get a smaller shadow map and fewer motes. */
+const LOW =
+  typeof window !== 'undefined' && (window.innerWidth < 768 || (navigator.hardwareConcurrency ?? 8) <= 4)
+
+function repeated(tex: THREE.Texture, x: number, y: number, color = false) {
+  const t = tex.clone()
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  t.repeat.set(x, y)
+  t.anisotropy = 8
+  t.colorSpace = color ? THREE.SRGBColorSpace : THREE.NoColorSpace
+  t.needsUpdate = true
+  return t
+}
+
+// ---------------------------------------------------------------------------------------
+// Cloth: banners and the runner are painted on canvases, so nothing has to be downloaded.
+
+/** The crown: five points with the tallest in the middle, deep valleys, pearls, a jeweled
+ * band. Drawn in a 320 by 200 box and mirrored about its center line, so it is symmetric. */
+function crownPath() {
+  const p = new Path2D()
+  p.moveTo(14, 140)
+  p.lineTo(22, 60)
+  p.quadraticCurveTo(34, 104, 56, 118)
+  p.quadraticCurveTo(78, 100, 88, 46)
+  p.quadraticCurveTo(100, 100, 124, 118)
+  p.quadraticCurveTo(146, 96, 160, 22)
+  p.quadraticCurveTo(174, 96, 196, 118)
+  p.quadraticCurveTo(220, 100, 232, 46)
+  p.quadraticCurveTo(242, 100, 264, 118)
+  p.quadraticCurveTo(286, 104, 298, 60)
+  p.lineTo(306, 140)
+  p.closePath()
+  return p
+}
+
+function drawCrown(g: CanvasRenderingContext2D, cx: number, top: number, width: number) {
+  const s = width / 320
+  g.save()
+  g.translate(cx - 160 * s, top + 16 * s)
+  g.scale(s, s)
+  const gold = g.createLinearGradient(0, -16, 0, 200)
+  gold.addColorStop(0, '#f9e4a3')
+  gold.addColorStop(0.38, '#dcb15a')
+  gold.addColorStop(0.72, '#b0802f')
+  gold.addColorStop(1, '#7a531b')
+  const ink = '#36210a'
+  const outline = (path: Path2D, width = 3.2) => {
+    g.lineJoin = 'round'
+    g.lineWidth = width
+    g.strokeStyle = ink
+    g.stroke(path)
+  }
+  const fill = (path: Path2D) => {
+    g.fillStyle = gold
+    g.fill(path)
+  }
+  // Points.
+  const points = crownPath()
+  fill(points)
+  outline(points)
+  // Band, bowed slightly at the bottom.
+  const band = new Path2D()
+  band.moveTo(10, 138)
+  band.lineTo(310, 138)
+  band.lineTo(310, 186)
+  band.quadraticCurveTo(160, 202, 10, 186)
+  band.closePath()
+  fill(band)
+  outline(band)
+  g.strokeStyle = 'rgba(54,33,10,0.55)'
+  g.lineWidth = 1.6
+  g.beginPath()
+  g.moveTo(14, 148)
+  g.lineTo(306, 148)
+  g.moveTo(14, 178)
+  g.quadraticCurveTo(160, 192, 306, 178)
+  g.stroke()
+  // Pearls on the four outer points; an orb and a cross on the middle one.
+  for (const [x, y] of [
+    [22, 52],
+    [298, 52],
+    [88, 38],
+    [232, 38],
+  ] as const) {
+    const pearl = new Path2D()
+    pearl.arc(x, y, 9, 0, Math.PI * 2)
+    g.fillStyle = '#efe4c8'
+    g.fill(pearl)
+    outline(pearl, 2.4)
+  }
+  const orb = new Path2D()
+  orb.arc(160, 16, 11, 0, Math.PI * 2)
+  fill(orb)
+  outline(orb, 2.6)
+  const cross = new Path2D()
+  cross.rect(155, -22, 10, 30)
+  cross.rect(147, -14, 26, 9)
+  fill(cross)
+  outline(cross, 2.2)
+  // Jewels on the band: a garnet in the middle, lozenges either side, pearls at the ends.
+  const jewel = (path: Path2D) => {
+    g.fillStyle = '#7d0d1b'
+    g.fill(path)
+    outline(path, 2.2)
+  }
+  const garnet = new Path2D()
+  garnet.ellipse(160, 164, 15, 11, 0, 0, Math.PI * 2)
+  jewel(garnet)
+  for (const x of [96, 224]) {
+    const lozenge = new Path2D()
+    lozenge.moveTo(x, 152)
+    lozenge.lineTo(x + 9, 164)
+    lozenge.lineTo(x, 176)
+    lozenge.lineTo(x - 9, 164)
+    lozenge.closePath()
+    jewel(lozenge)
+  }
+  for (const x of [46, 274]) {
+    const pearl = new Path2D()
+    pearl.arc(x, 164, 6, 0, Math.PI * 2)
+    g.fillStyle = '#efe4c8'
+    g.fill(pearl)
+    outline(pearl, 1.8)
+  }
+  // A soft highlight on the jewels.
+  g.fillStyle = 'rgba(255,230,230,0.5)'
+  g.beginPath()
+  g.ellipse(155, 160, 4, 3, -0.5, 0, Math.PI * 2)
+  g.fill()
+  g.restore()
+}
+
+/** A crimson banner with a gold border and a swallowtail hem; the emblem is a crown or a lozenge. */
+function bannerTexture(emblem: 'crown' | 'lozenge') {
+  const W = 512
+  const H = 1408
+  const NOTCH = 150
   const c = document.createElement('canvas')
-  c.width = w
-  c.height = h
+  c.width = W
+  c.height = H
   const g = c.getContext('2d')!
-  draw(g, rng(seed))
+  const outline = new Path2D()
+  outline.moveTo(0, 0)
+  outline.lineTo(W, 0)
+  outline.lineTo(W, H)
+  outline.lineTo(W / 2, H - NOTCH)
+  outline.lineTo(0, H)
+  outline.closePath()
+  g.save()
+  g.clip(outline)
+  const cloth = g.createLinearGradient(0, 0, W, 0)
+  cloth.addColorStop(0, '#3a0509')
+  cloth.addColorStop(0.5, '#6c0d14')
+  cloth.addColorStop(1, '#3a0509')
+  g.fillStyle = cloth
+  g.fillRect(0, 0, W, H)
+  // The sleeve around the rod.
+  g.fillStyle = 'rgba(20,2,4,0.45)'
+  g.fillRect(0, 0, W, 46)
+  // Gold border, following the hem.
+  const inset = (d: number) => {
+    const p = new Path2D()
+    p.moveTo(d, 46 + d * 0.5)
+    p.lineTo(W - d, 46 + d * 0.5)
+    p.lineTo(W - d, H - d * 1.6)
+    p.lineTo(W / 2, H - NOTCH - d * 0.9)
+    p.lineTo(d, H - d * 1.6)
+    p.closePath()
+    return p
+  }
+  g.strokeStyle = '#c9963f'
+  g.lineWidth = 7
+  g.stroke(inset(30))
+  g.lineWidth = 2
+  g.strokeStyle = '#a7782f'
+  g.stroke(inset(46))
+  g.fillStyle = '#c9963f'
+  g.fillRect(0, 44, W, 4)
+  if (emblem === 'crown') {
+    drawCrown(g, W / 2, 300, 330)
+    // A rule with a lozenge under the crown.
+    g.fillStyle = '#c9963f'
+    g.fillRect(W / 2 - 90, 560, 180, 3)
+    g.beginPath()
+    g.moveTo(W / 2, 548)
+    g.lineTo(W / 2 + 12, 561)
+    g.lineTo(W / 2, 574)
+    g.lineTo(W / 2 - 12, 561)
+    g.closePath()
+    g.fill()
+  } else {
+    g.fillStyle = '#c9963f'
+    g.beginPath()
+    g.moveTo(W / 2, 330)
+    g.lineTo(W / 2 + 46, 420)
+    g.lineTo(W / 2, 510)
+    g.lineTo(W / 2 - 46, 420)
+    g.closePath()
+    g.fill()
+    g.strokeStyle = '#36210a'
+    g.lineWidth = 3
+    g.stroke()
+  }
+  g.restore()
   const tex = new THREE.CanvasTexture(c)
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping
   tex.colorSpace = THREE.SRGBColorSpace
   tex.anisotropy = 8
   return tex
 }
 
-/** Fine speckle over a drawn surface, for the grain of the stone. */
-function speckle(g: CanvasRenderingContext2D, r: () => number, w: number, h: number, amount: number) {
-  const img = g.getImageData(0, 0, w, h)
-  for (let i = 0; i < img.data.length; i += 4) {
-    const n = (r() - 0.5) * amount
-    img.data[i] = Math.max(0, Math.min(255, img.data[i]! + n))
-    img.data[i + 1] = Math.max(0, Math.min(255, img.data[i + 1]! + n))
-    img.data[i + 2] = Math.max(0, Math.min(255, img.data[i + 2]! + n))
+/** The runner: crimson wool with a gold border and a quiet lozenge pattern. */
+function carpetTexture() {
+  const c = document.createElement('canvas')
+  c.width = 256
+  c.height = 512
+  const g = c.getContext('2d')!
+  g.fillStyle = '#3d0a0f'
+  g.fillRect(0, 0, 256, 512)
+  g.strokeStyle = 'rgba(30,2,4,0.15)'
+  g.lineWidth = 2
+  for (let y = -128; y < 640; y += 128) {
+    g.beginPath()
+    g.moveTo(128, y)
+    g.lineTo(200, y + 64)
+    g.lineTo(128, y + 128)
+    g.lineTo(56, y + 64)
+    g.closePath()
+    g.stroke()
   }
-  g.putImageData(img, 0, 0)
+  g.fillStyle = '#9c7329'
+  g.fillRect(14, 0, 10, 512)
+  g.fillRect(232, 0, 10, 512)
+  g.fillStyle = '#2c0406'
+  g.fillRect(0, 0, 9, 512)
+  g.fillRect(247, 0, 9, 512)
+  const tex = new THREE.CanvasTexture(c)
+  tex.colorSpace = THREE.SRGBColorSpace
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+  tex.anisotropy = 8
+  return tex
 }
 
-/** Soft large-scale mottling, drawn from a small noise canvas scaled up. */
-function mottle(g: CanvasRenderingContext2D, r: () => number, w: number, h: number, alpha: number) {
-  const n = document.createElement('canvas')
-  n.width = 32
-  n.height = 32
-  const ng = n.getContext('2d')!
-  const img = ng.createImageData(32, 32)
-  for (let i = 0; i < img.data.length; i += 4) {
-    const v = 90 + r() * 165
-    img.data[i] = img.data[i + 1] = img.data[i + 2] = v
-    img.data[i + 3] = 255
-  }
-  ng.putImageData(img, 0, 0)
-  g.save()
-  g.globalAlpha = alpha
-  g.globalCompositeOperation = 'multiply'
-  g.imageSmoothingEnabled = true
-  g.drawImage(n, 0, 0, w, h)
-  g.restore()
+/** The sky seen through the windows: brightest low down, where the sun is. */
+function skyTexture() {
+  const c = document.createElement('canvas')
+  c.width = 8
+  c.height = 256
+  const g = c.getContext('2d')!
+  const grad = g.createLinearGradient(0, 0, 0, 256)
+  grad.addColorStop(0, '#f2dcb4')
+  grad.addColorStop(0.6, '#ffe7bf')
+  grad.addColorStop(1, '#fff3da')
+  g.fillStyle = grad
+  g.fillRect(0, 0, 8, 256)
+  const tex = new THREE.CanvasTexture(c)
+  tex.colorSpace = THREE.SRGBColorSpace
+  return tex
 }
 
-let cache: { masonry: THREE.Texture; drum: THREE.Texture; flags: THREE.Texture; carpet: THREE.Texture } | null = null
-function hallTextures() {
-  if (cache) return cache
-  // Ashlar: sixteen courses of dressed blocks with thin joints and quiet tone changes.
-  const masonry = canvasTexture(
-    1024,
-    1024,
-    (g, r) => {
-      g.fillStyle = '#4a433c'
-      g.fillRect(0, 0, 1024, 1024)
-      const rowH = 64
-      for (let row = 0; row < 16; row++) {
-        const off = row % 2 ? 64 : 0
-        for (let x = -off; x < 1024; x += 128) {
-          const v = 138 + r() * 30
-          g.fillStyle = `rgb(${v * 1.02},${v * 0.99},${v * 0.95})`
-          g.fillRect(x + 1.5, row * rowH + 1.5, 125, rowH - 3)
-          g.fillStyle = `rgba(${r() > 0.5 ? '255,245,230' : '25,20,16'},${0.04 + r() * 0.06})`
-          g.beginPath()
-          g.ellipse(x + 16 + r() * 96, row * rowH + 10 + r() * 44, 14 + r() * 26, 6 + r() * 12, 0, 0, Math.PI * 2)
-          g.fill()
-        }
-      }
-      mottle(g, r, 1024, 1024, 0.35)
-      speckle(g, r, 1024, 1024, 26)
-    },
-    7,
-  )
-  // Column drums: smooth dressed stone, one joint per drum, faint weathering streaks.
-  const drum = canvasTexture(
-    256,
-    512,
-    (g, r) => {
-      g.fillStyle = '#968c82'
-      g.fillRect(0, 0, 256, 512)
-      for (let k = 0; k < 40; k++) {
-        g.fillStyle = `rgba(30,24,20,${0.03 + r() * 0.05})`
-        g.fillRect(r() * 256, r() * 512, 1 + r() * 3, 40 + r() * 200)
-      }
-      mottle(g, r, 256, 512, 0.3)
-      g.fillStyle = 'rgba(40,34,30,0.85)'
-      g.fillRect(0, 0, 256, 3)
-      speckle(g, r, 256, 512, 22)
-    },
-    9,
-  )
-  // Flagstones: large squares with fine grout, each a slightly different stone.
-  const flags = canvasTexture(
-    512,
-    512,
-    (g, r) => {
-      g.fillStyle = '#1a1512'
-      g.fillRect(0, 0, 512, 512)
-      for (let y = 0; y < 2; y++) {
-        for (let x = 0; x < 2; x++) {
-          const v = 78 + r() * 30
-          g.fillStyle = `rgb(${v * 1.02},${v * 0.97},${v * 0.92})`
-          g.fillRect(x * 256 + 2, y * 256 + 2, 252, 252)
-        }
-      }
-      mottle(g, r, 512, 512, 0.35)
-      speckle(g, r, 512, 512, 18)
-    },
-    11,
-  )
-  // The runner: crimson wool with a gold border and a quiet lozenge pattern.
-  const carpet = canvasTexture(
-    128,
-    256,
-    (g, r) => {
-      g.fillStyle = '#6a1013'
-      g.fillRect(0, 0, 128, 256)
-      g.strokeStyle = 'rgba(40,4,6,0.5)'
-      g.lineWidth = 3
-      for (let y = -64; y < 320; y += 64) {
-        g.beginPath()
-        g.moveTo(64, y)
-        g.lineTo(104, y + 32)
-        g.lineTo(64, y + 64)
-        g.lineTo(24, y + 32)
-        g.closePath()
-        g.stroke()
-      }
-      g.fillStyle = '#a77d2c'
-      g.fillRect(6, 0, 6, 256)
-      g.fillRect(116, 0, 6, 256)
-      g.fillStyle = '#3a0608'
-      g.fillRect(0, 0, 5, 256)
-      g.fillRect(123, 0, 5, 256)
-      speckle(g, r, 128, 256, 24)
-    },
-    5,
-  )
-  cache = { masonry, drum, flags, carpet }
-  return cache
+// ---------------------------------------------------------------------------------------
+// Stone.
+
+/** A pointed lancet opening, as a hole in wall coordinates (u along the hall, v up). */
+function lancet(u0: number, w: number) {
+  const u1 = u0 + w
+  const p = new THREE.Path()
+  p.moveTo(u0, SILL_Y)
+  p.lineTo(u1, SILL_Y)
+  p.lineTo(u1, SPRING_Y)
+  p.absarc(u0, SPRING_Y, w, 0, Math.PI / 3, false)
+  p.absarc(u1, SPRING_Y, w, (2 * Math.PI) / 3, Math.PI, false)
+  p.lineTo(u0, SILL_Y)
+  return p
 }
 
-/** Shared lighting: torches, moonlight from the rose window, and the chest's light once named. */
-const LIGHT = /* glsl */ `
-#define TORCHES ${N}
-uniform vec3 uTorch[TORCHES];
-uniform float uAmp[TORCHES];
-uniform vec3 uTorchColor;
-uniform float uRoom;
-uniform vec3 uFillColor;
-uniform float uFill;
-uniform vec3 uMoonColor;
-uniform float uMoon;
-uniform vec3 uFogColor;
-uniform float uFogDensity;
-vec3 hallLight(vec3 pos, vec3 n) {
-  // Faint bounce: cool from the vault above, warm from the floor, so the stone never goes flat black.
-  vec3 light = mix(vec3(0.026, 0.02, 0.016), vec3(0.024, 0.028, 0.038), n.y * 0.5 + 0.5) * uRoom;
-  for (int i = 0; i < TORCHES; i++) {
-    vec3 d = uTorch[i] - pos;
-    float d2 = max(dot(d, d), 0.0004);
-    float ndl = max(dot(n, d * inversesqrt(d2)), 0.0) * 0.85 + 0.15;
-    light += uTorchColor * (uAmp[i] * ndl / (1.0 + d2 * 1.8));
+/** The left wall, pierced by the windows. It casts the shadow that shapes the sunlight. */
+function windowWallGeometry() {
+  const shape = new THREE.Shape()
+  shape.moveTo(BACK_Z, FLOOR_Y)
+  shape.lineTo(FRONT_Z, FLOOR_Y)
+  shape.lineTo(FRONT_Z, FLOOR_Y + WALL_H)
+  shape.lineTo(BACK_Z, FLOOR_Y + WALL_H)
+  shape.closePath()
+  for (const z of WINDOW_Z) {
+    shape.holes.push(lancet(z - MULLION / 2 - LANCET_W, LANCET_W))
+    shape.holes.push(lancet(z + MULLION / 2, LANCET_W))
+    const roundel = new THREE.Path()
+    roundel.absarc(z, ROUNDEL.y, ROUNDEL.r, 0, Math.PI * 2, false)
+    shape.holes.push(roundel)
   }
-  vec3 md = vec3(${ROSE[0].toFixed(2)}, ${ROSE[1].toFixed(2)}, ${(ROSE[2] + 1.5).toFixed(2)}) - pos;
-  float m2 = max(dot(md, md), 0.0004);
-  light += uMoonColor * (uMoon * max(dot(n, md * inversesqrt(m2)), 0.0) / (1.0 + m2 * 0.05));
-  vec3 cd = vec3(0.0, 1.1, 0.0) - pos;
-  float c2 = max(dot(cd, cd), 0.0004);
-  light += uFillColor * (uFill * (max(dot(n, cd * inversesqrt(c2)), 0.0) * 0.8 + 0.2) / (1.0 + c2 * 0.09));
-  return light;
+  return new THREE.ExtrudeGeometry(shape, { depth: WALL_T, bevelEnabled: false, curveSegments: 10 })
 }
-vec3 hallFog(vec3 col, vec3 pos) {
-  float dist = length(pos - cameraPosition);
-  float f = 1.0 - exp(-uFogDensity * uFogDensity * dist * dist);
-  return mix(col, uFogColor, clamp(f, 0.0, 1.0));
-}`
 
-const VERT = /* glsl */ `
-varying vec3 vWorld;
-varying vec3 vNormal;
-varying vec2 vUv;
-void main() {
-  vec4 p = vec4(position, 1.0);
-  vec3 n = normal;
-  #ifdef USE_INSTANCING
-    p = instanceMatrix * p;
-    n = mat3(instanceMatrix) * n;
-  #endif
-  vec4 w = modelMatrix * p;
-  vWorld = w.xyz;
-  vNormal = normalize(mat3(modelMatrix) * n);
-  vUv = uv;
-  gl_Position = projectionMatrix * viewMatrix * w;
-}`
+/** The back wall with the arched niche cut into it. */
+function nicheWallGeometry() {
+  const shape = new THREE.Shape()
+  shape.moveTo(-WALL_X - 0.5, FLOOR_Y)
+  shape.lineTo(WALL_X + 0.5, FLOOR_Y)
+  shape.lineTo(WALL_X + 0.5, FLOOR_Y + WALL_H)
+  shape.lineTo(-WALL_X - 0.5, FLOOR_Y + WALL_H)
+  shape.closePath()
+  const w = NICHE.w
+  const hole = new THREE.Path()
+  hole.moveTo(-w / 2, NICHE.sill)
+  hole.lineTo(w / 2, NICHE.sill)
+  hole.lineTo(w / 2, NICHE.spring)
+  hole.absarc(-w / 2, NICHE.spring, w, 0, Math.PI / 3, false)
+  hole.absarc(w / 2, NICHE.spring, w, (2 * Math.PI) / 3, Math.PI, false)
+  hole.lineTo(-w / 2, NICHE.sill)
+  shape.holes.push(hole)
+  return new THREE.ExtrudeGeometry(shape, { depth: NICHE.depth, bevelEnabled: false, curveSegments: 16 })
+}
 
-/** Stone, carpet and iron. The floor adds glossy reflections; the back wall carves its niche. */
-const STONE_FRAG = /* glsl */ `
-${LIGHT}
-uniform sampler2D uMap;
-uniform vec2 uRepeat;
-uniform vec3 uBase;
-uniform float uGloss;
-uniform float uNiche;
-uniform float uBeam;
-uniform vec3 uBeamColor;
-varying vec3 vWorld;
-varying vec3 vNormal;
-varying vec2 vUv;
-void main() {
-  vec3 albedo = texture2D(uMap, vUv * uRepeat).rgb * uBase;
-  vec3 n = normalize(vNormal);
-  if (uNiche > 0.5) {
-    // The arched niche: a recess in shadow framed by a moulding that catches the light.
-    vec2 q = vec2(abs(vWorld.x), vWorld.y);
-    float inside = q.y < ${ARCH_SPRING.toFixed(2)} ? q.x - ${ARCH_W.toFixed(2)} : length(q - vec2(0.0, ${ARCH_SPRING.toFixed(2)})) - ${ARCH_W.toFixed(2)};
-    float recess = smoothstep(0.02, -0.06, inside);
-    float moulding = smoothstep(0.2, 0.1, abs(inside - 0.08));
-    albedo *= mix(1.0, 0.42, recess);
-    albedo *= 1.0 + moulding * 0.55;
-  }
-  vec3 col = albedo * hallLight(vWorld, n);
-  if (uGloss > 0.0) {
-    // Polished stone: each flame and the chest's beam show as a soft streak below it.
-    vec3 v = normalize(vWorld - cameraPosition);
-    vec3 r = reflect(v, n);
-    float fres = 0.3 + 0.7 * pow(clamp(1.0 + dot(v, n), 0.0, 1.0), 3.0);
-    vec3 refl = vec3(0.0);
-    for (int i = 0; i < TORCHES; i++) {
-      vec3 tp = uTorch[i] - vWorld;
-      float along = max(dot(tp, r), 0.0);
-      vec3 c = r * along - tp;
-      float s = 0.03 + along * 0.025;
-      float off = (c.x * c.x + (c.y * c.y + c.z * c.z) * 0.12) / (s * s);
-      refl += uTorchColor * (uAmp[i] / (1.0 + off * 1.6));
-    }
-    // The beam is a vertical line of light over the chest.
-    vec2 fxz = vWorld.xz - vec2(0.0, 0.02);
-    float rr = max(dot(r.xz, r.xz), 0.0001);
-    float t = max(-dot(fxz, r.xz) / rr, 0.0);
-    float h = vWorld.y + r.y * t;
-    float bd = length(fxz + r.xz * t);
-    float bs = 0.06 + t * 0.04;
-    float beam = step(0.45, h) * smoothstep(5.0, 1.0, h) / (1.0 + (bd * bd) / (bs * bs) * 2.0);
-    refl += uBeamColor * (uBeam * beam * 1.4);
-    refl += uFillColor * (uFill * 0.25 / (1.0 + dot(vWorld.xz, vWorld.xz) * 0.6));
-    col += refl * uGloss * fres;
-  }
-  gl_FragColor = vec4(hallFog(col, vWorld), 1.0);
-}`
+/**
+ * Column parts with crisp mouldings, so they read as dressed stone rather than worn rock: a
+ * square plinth under a round torus for the base, a bell under a square abacus for the capital.
+ */
+function columnParts() {
+  const at = (g: THREE.BufferGeometry, y: number) => g.translate(0, y, 0)
+  const ring = (r: number, tube: number, y: number) => at(new THREE.TorusGeometry(r, tube, 10, 40).rotateX(Math.PI / 2), y)
+  const base = mergeGeometries([
+    at(new THREE.BoxGeometry(0.98, 0.24, 0.98), 0.12),
+    at(new THREE.CylinderGeometry(0.42, 0.44, 0.06, 40), 0.27),
+    ring(0.37, 0.065, 0.36),
+    at(new THREE.CylinderGeometry(0.31, 0.33, 0.08, 40), 0.46),
+  ])
+  const capital = mergeGeometries([
+    ring(0.31, 0.035, 0.03),
+    at(new THREE.CylinderGeometry(0.46, 0.31, 0.3, 40, 1, true), 0.2),
+    at(new THREE.BoxGeometry(1.0, 0.14, 1.0), 0.42),
+  ])
+  if (!base || !capital) throw new Error('RoyalHall: column parts did not merge')
+  return { base, capital, shaft: new THREE.CylinderGeometry(0.3, 0.3, 4.6, 40, 1, true) }
+}
 
-/** Hanging banners: crimson cloth with folds, a gold border and a gold ring and cross. */
-const BANNER_VERT = /* glsl */ `
-uniform float uTime;
-uniform float uPhase;
-varying vec3 vWorld;
-varying vec2 vUv;
-void main() {
-  vUv = uv;
-  vec3 p = position;
-  float k = 1.0 - uv.y;
-  p.z += sin(uTime * 0.7 + uPhase + uv.y * 3.0) * 0.035 * k;
-  p.x += sin(uTime * 0.5 + uPhase * 1.7) * 0.012 * k;
-  vec4 w = modelMatrix * vec4(p, 1.0);
-  vWorld = w.xyz;
-  gl_Position = projectionMatrix * viewMatrix * w;
-}`
-const BANNER_FRAG = /* glsl */ `
-${LIGHT}
-uniform float uEmblem;
-varying vec3 vWorld;
-varying vec2 vUv;
-void main() {
-  vec2 uv = vUv;
-  // Swallowtail hem.
-  float notch = 0.12 - abs(uv.x - 0.5) * 0.24;
-  if (uv.y < notch) discard;
-  float folds = 0.78 + 0.22 * sin(uv.x * 31.0 + sin(uv.y * 4.0) * 1.2);
-  vec3 cloth = vec3(0.32, 0.03, 0.035) * folds;
-  float bx = min(uv.x, 1.0 - uv.x);
-  float by = min(uv.y - notch, 1.0 - uv.y);
-  float border = step(bx, 0.07) * step(0.035, bx) + step(by, 0.05) * step(0.025, by) * step(0.035, bx);
-  vec3 gold = vec3(0.62, 0.43, 0.14);
-  vec3 col = mix(cloth, gold, clamp(border, 0.0, 1.0));
-  if (uEmblem > 0.5) {
-    // A gold crown: a band, three points and a pearl on each.
-    vec2 e = (uv - vec2(0.5, 0.64)) * vec2(1.0, 2.8);
-    float band = max(abs(e.x) - 0.24, abs(e.y + 0.1) - 0.045);
-    float px = abs(e.x) > 0.12 ? abs(abs(e.x) - 0.2) : abs(e.x);
-    float points = max(max(e.y + 0.06 - 0.24, -(e.y + 0.06)), px - (0.24 - (e.y + 0.06)) * 0.32);
-    points = max(points, abs(e.x) - 0.26);
-    float pearls = min(min(length(e - vec2(0.0, 0.2)), length(e - vec2(0.2, 0.2))), length(e - vec2(-0.2, 0.2))) - 0.035;
-    float crown = min(min(band, points), pearls);
-    float mark = smoothstep(0.012, 0.0, crown);
-    col = mix(col, gold * 1.1, mark);
-  }
-  col *= hallLight(vWorld, vec3(0.0, 0.0, 1.0)) * 1.25;
-  gl_FragColor = vec4(hallFog(col, vWorld), 1.0);
-}`
+// ---------------------------------------------------------------------------------------
+// Light.
 
-const ROSE_FRAG = /* glsl */ `
-${LIGHT}
-varying vec2 vUv;
-varying vec3 vWorld;
-void main() {
-  vec2 p = (vUv - 0.5) * 2.0;
-  float r = length(p);
-  if (r > 1.0) discard;
-  float a = atan(p.y, p.x + 1e-6);
-  // Stone tracery: rings, twelve spokes and petal arcs between them.
-  float spokes = abs(sin(a * 6.0));
-  float petals = abs(sin(a * 12.0)) * 0.5;
-  float lead = max(smoothstep(0.05, 0.0, abs(r - 0.3)), smoothstep(0.045, 0.0, abs(r - 0.62)));
-  lead = max(lead, smoothstep(0.09, 0.0, spokes) * step(0.3, r));
-  lead = max(lead, smoothstep(0.05, 0.0, abs(r - (0.8 + petals * 0.25))) * step(0.62, r));
-  lead = max(lead, smoothstep(0.9, 1.0, r));
-  // Dim moonlit glass, mostly cold blue, with a few deep ruby panes and a pale centre.
-  float pane = floor((a + 3.1416) / 0.5236);
-  vec3 glass = mix(vec3(0.2, 0.27, 0.45), vec3(0.42, 0.08, 0.1), step(0.75, fract(pane * 0.37)) * step(0.62, r));
-  glass = mix(glass, vec3(0.5, 0.42, 0.26), step(r, 0.3));
-  vec3 col = glass * (1.0 - lead) * uMoon * 1.4 * (0.45 + 0.55 * uRoom);
-  gl_FragColor = vec4(hallFog(col, vWorld), 1.0);
-}`
+/** One beam of sunlight per lancet: from the middle of the opening to where it lands. */
+interface Beam {
+  from: THREE.Vector3
+  to: THREE.Vector3
+}
+function beams(): Beam[] {
+  const y = SILL_Y + 0.55 * (APEX_Y - SILL_Y)
+  return WINDOW_Z.flatMap((z) =>
+    [z - MULLION / 2 - LANCET_W / 2, z + MULLION / 2 + LANCET_W / 2].map((lz) => {
+      const from = new THREE.Vector3(-WALL_X, y, lz)
+      // Each beam leaves from the sun's own position, so it lands on its light pool.
+      const dir = from.clone().sub(SUN_POS).normalize()
+      const down = -dir.y
+      // A beam ends on the floor, or on the altar top if it lands within the altar.
+      let len = (y - FLOOR_Y) / down
+      const onAltar = y / down
+      const hx = -WALL_X + dir.x * onAltar
+      const hz = lz + dir.z * onAltar
+      if (hx * hx + hz * hz < 1) len = onAltar
+      return { from, to: from.clone().addScaledVector(dir, len) }
+    }),
+  )
+}
+const BEAM_W = 0.62
+const BEAMS = beams()
 
-const SIMPLE_VERT = /* glsl */ `
+const SHAFT_VERT = /* glsl */ `
 varying vec2 vUv;
 varying vec3 vWorld;
 void main() {
@@ -377,293 +432,449 @@ void main() {
   gl_Position = projectionMatrix * viewMatrix * w;
 }`
 
-/** Flame: tongues of fire rising through noise, hottest at the core. Drawn facing the camera. */
-const FLAME_FRAG = /* glsl */ `
-uniform float uTime;
-uniform float uAmp;
-uniform float uSeed;
-varying vec2 vUv;
-float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float noise(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-  f = f * f * (3.0 - 2.0 * f);
-  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
-}
-void main() {
-  vec2 uv = vUv;
-  float t = uTime + uSeed * 17.0;
-  float n = noise(vec2(uv.x * 3.5, uv.y * 2.6 - t * 2.2)) * 0.55 + noise(vec2(uv.x * 8.0, uv.y * 6.0 - t * 3.7)) * 0.45;
-  vec2 p = uv - vec2(0.5, 0.2);
-  p.x += (n - 0.5) * 0.3 * smoothstep(0.0, 0.6, p.y);
-  // A torch burns broad and ragged, not to a candle's point.
-  float h = clamp(p.y / 0.62, 0.0, 1.0);
-  float width = 0.3 * pow(1.0 - h, 0.55) * (0.75 + 0.5 * n);
-  float body = smoothstep(width, width * 0.25, abs(p.x)) * smoothstep(-0.1, 0.0, p.y) * smoothstep(1.0, 0.45, h + (n - 0.5) * 0.55);
-  float core = smoothstep(width * 0.6, 0.0, abs(p.x)) * smoothstep(-0.05, 0.04, p.y) * smoothstep(0.42, 0.05, h);
-  vec3 col = mix(vec3(0.7, 0.13, 0.02), vec3(1.0, 0.48, 0.1), body);
-  col = mix(col, vec3(1.0, 0.74, 0.36), core);
-  float a = body * uAmp;
-  gl_FragColor = vec4(col * (0.95 + core * 0.55) * a, a);
-}`
-const GLOW_FRAG = /* glsl */ `
-uniform vec3 uColor;
-uniform float uA;
-varying vec2 vUv;
-void main() {
-  float d = length(vUv - 0.5) * 2.0;
-  float a = pow(clamp(1.0 - d, 0.0, 1.0), 2.4) * uA;
-  gl_FragColor = vec4(uColor * a, a);
-}`
-
 const SHAFT_FRAG = /* glsl */ `
 uniform vec3 uColor;
 uniform float uA;
-uniform float uTime;
 varying vec2 vUv;
+varying vec3 vWorld;
 void main() {
-  float edge = smoothstep(0.0, 0.35, vUv.x) * smoothstep(1.0, 0.65, vUv.x);
-  float fall = smoothstep(0.0, 0.25, vUv.y) * (0.35 + 0.65 * vUv.y);
-  float motes = 0.85 + 0.15 * sin(vUv.y * 40.0 - uTime * 0.6 + sin(vUv.x * 12.0) * 2.0);
-  float a = edge * fall * motes * uA;
-  gl_FragColor = vec4(uColor * a, a);
+  float a = clamp(vUv.x, 0.0, 1.0);
+  float t = clamp(vUv.y, 0.0, 1.0);
+  float across = smoothstep(0.0, 0.25, a) * smoothstep(1.0, 0.75, a);
+  float along = smoothstep(0.0, 0.15, t) * smoothstep(1.0, 0.85, t) * (1.0 - 0.4 * t);
+  // The far shafts sink into the hall's haze like everything else.
+  vec3 d = vWorld - cameraPosition;
+  float haze = exp(-0.0028 * dot(d, d));
+  float alpha = clamp(across * along * haze * uA, 0.0, 1.0);
+  gl_FragColor = vec4(uColor, alpha);
 }`
 
+const MOTE_VERT = /* glsl */ `
+attribute float aSeed;
+attribute float aGlow;
+uniform float uTime;
+uniform float uPx;
+varying float vGlow;
+void main() {
+  vec3 p = position;
+  p.x += sin(uTime * 0.21 + aSeed * 31.0) * 0.05;
+  p.y += sin(uTime * 0.17 + aSeed * 17.0) * 0.06;
+  p.z += cos(uTime * 0.19 + aSeed * 23.0) * 0.05;
+  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  float z = -mv.z;
+  if (z < 0.3) {
+    gl_PointSize = 0.0;
+    gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+    vGlow = 0.0;
+    return;
+  }
+  vGlow = aGlow * smoothstep(0.3, 1.2, z);
+  gl_PointSize = min((1.6 + aSeed * 2.2) * uPx * (2.4 / z), 14.0);
+  gl_Position = projectionMatrix * mv;
+}`
+
+const MOTE_FRAG = /* glsl */ `
+uniform vec3 uColor;
+uniform float uA;
+varying float vGlow;
+void main() {
+  float d = length(gl_PointCoord - 0.5);
+  float a = smoothstep(0.5, 0.0, d) * vGlow * uA;
+  if (a <= 0.001) discard;
+  gl_FragColor = vec4(uColor, clamp(a, 0.0, 1.0));
+}`
+
+/** Dust hanging in the sunlight, placed inside the beams. */
+function moteGeometry(list: Beam[], count: number) {
+  const pos: number[] = []
+  const seed: number[] = []
+  const glow: number[] = []
+  const p = new THREE.Vector3()
+  for (let i = 0; i < count; i++) {
+    const b = list[i % list.length]!
+    const t = 0.1 + Math.random() * 0.8
+    const r = (Math.random() - 0.5) * BEAM_W * 0.7
+    const lift = (Math.random() - 0.5) * BEAM_W * 0.7
+    p.copy(b.from).lerp(b.to, t)
+    pos.push(p.x + r * 0.3, p.y + lift, p.z + r)
+    seed.push(Math.random())
+    glow.push(Math.sin(Math.PI * t) * (1 - 0.4 * t) * (1 - Math.abs(r) / BEAM_W))
+  }
+  const g = new THREE.BufferGeometry()
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+  g.setAttribute('aSeed', new THREE.Float32BufferAttribute(seed, 1))
+  g.setAttribute('aGlow', new THREE.Float32BufferAttribute(glow, 1))
+  return g
+}
+
 export function RoyalHall({ anim }: { anim: ChestAnim }) {
-  const tex = useMemo(() => hallTextures(), [])
-  const torchColor = useMemo(() => new THREE.Color('#ffae5e'), [])
-  const shared = useMemo(
-    () => ({
-      uTorch: { value: TORCHES.map((p) => new THREE.Vector3(...p)) },
-      uAmp: { value: new Array<number>(N).fill(1) },
-      uTorchColor: { value: torchColor },
-      uRoom: { value: 1 },
-      uFillColor: { value: new THREE.Color() },
-      uFill: { value: 0 },
-      uMoonColor: { value: new THREE.Color('#7f9bd6') },
-      uMoon: { value: 0.35 },
-      uFogColor: { value: new THREE.Color('#0b0806').convertSRGBToLinear() },
-      uFogDensity: { value: 0.06 },
-      uTime: { value: 0 },
-      uBeam: { value: 0 },
-      uBeamColor: { value: new THREE.Color() },
-    }),
-    [torchColor],
-  )
+  const tex = useTexture(TEXTURES)
 
-  const stone = useMemo(() => {
-    const make = (map: THREE.Texture, repeat: [number, number], base: string, opts: { gloss?: number; niche?: boolean } = {}) =>
-      new THREE.ShaderMaterial({
-        uniforms: {
-          ...shared,
-          uMap: { value: map },
-          uRepeat: { value: new THREE.Vector2(...repeat) },
-          uBase: { value: new THREE.Color(base) },
-          uGloss: { value: opts.gloss ?? 0 },
-          uNiche: { value: opts.niche ? 1 : 0 },
-        },
-        vertexShader: VERT,
-        fragmentShader: STONE_FRAG,
+  const materials = useMemo(() => {
+    const stone = (rx: number, ry: number, color: string, relief = 0.35) =>
+      new THREE.MeshStandardMaterial({
+        map: repeated(tex.stoneDiff, rx, ry, true),
+        normalMap: repeated(tex.stoneNor, rx, ry),
+        normalScale: new THREE.Vector2(relief, relief),
+        roughnessMap: repeated(tex.stoneArm, rx, ry),
+        aoMap: repeated(tex.stoneArm, rx, ry),
+        aoMapIntensity: 0.8,
+        roughness: 0.95,
+        metalness: 0,
+        color,
+        envMapIntensity: 0.12,
       })
+    const floorRepeat: [number, number] = [(2 * WALL_X) / 3.6, (FRONT_Z - BACK_Z) / 3.6]
+    const floor = new THREE.MeshStandardMaterial({
+      map: repeated(tex.floorDiff, ...floorRepeat, true),
+      normalMap: repeated(tex.floorNor, ...floorRepeat),
+      normalScale: new THREE.Vector2(0.3, 0.3),
+      roughnessMap: repeated(tex.floorArm, ...floorRepeat),
+      aoMap: repeated(tex.floorArm, ...floorRepeat),
+      roughness: 0.62,
+      metalness: 0,
+      color: '#7d7670',
+      envMapIntensity: 0.3,
+    })
+    const carpet = new THREE.MeshStandardMaterial({
+      map: (() => {
+        const t = carpetTexture()
+        t.repeat.set(1, (RUNNER_END - BACK_Z) / 1.6)
+        return t
+      })(),
+      normalMap: repeated(tex.velvetNor, 1.5, 10),
+      normalScale: new THREE.Vector2(0.4, 0.4),
+      roughness: 0.92,
+      metalness: 0,
+      envMapIntensity: 0.1,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+    })
+    const banner = (emblem: 'crown' | 'lozenge') =>
+      new THREE.MeshStandardMaterial({
+        map: bannerTexture(emblem),
+        normalMap: repeated(tex.velvetNor, 2, 5),
+        normalScale: new THREE.Vector2(0.3, 0.3),
+        roughness: 0.86,
+        metalness: 0,
+        alphaTest: 0.5,
+        side: THREE.DoubleSide,
+        envMapIntensity: 0.1,
+      })
+    const brass = new THREE.MeshStandardMaterial({ color: '#b98a42', metalness: 1, roughness: 0.38, envMapIntensity: 0.6 })
+    const sky = new THREE.MeshBasicMaterial({ map: skyTexture(), toneMapped: false, fog: false })
     return {
-      // Repeats keep flagstones about 1.1 m square, wall blocks about 0.7 by 0.35 m and
-      // column drums about a metre tall.
-      floor: make(tex.flags, [4, 9.7], '#6a625a', { gloss: 0.7 }),
-      carpet: make(tex.carpet, [1, 5.1], '#ffffff', { gloss: 0.05 }),
-      wall: make(tex.masonry, [1.57, 1.79], '#857b72', { niche: true }),
-      side: make(tex.masonry, [3.8, 1.79], '#7a7067'),
-      column: make(tex.drum, [1, 5.6], '#8e847a'),
-      block: make(tex.drum, [1, 0.35], '#8e847a'),
-      iron: make(tex.masonry, [1, 1], '#3a332d'),
-      wood: make(tex.masonry, [0.2, 1], '#5a3a22'),
+      wall: stone(1 / 2.6, 1 / 2.6, '#a39385'),
+      sideWall: stone((FRONT_Z - BACK_Z) / 2.6, WALL_H / 2.6, '#a39385'),
+      backWall: stone(1 / 2.6, 1 / 2.6, '#8f8174'),
+      nicheBack: stone((NICHE.w + 0.4) / 2.6, 4.4 / 2.6, '#6e6359'),
+      column: stone((2 * Math.PI * 0.3) / 2.6, 4.6 / 2.6, '#a79787'),
+      columnTrim: stone(0.6, 0.6, '#9a8b7d', 0.2),
+      lintel: stone(1.5, 0.3, '#8f8174', 0.25),
+      floor,
+      carpet,
+      crown: banner('crown'),
+      lozenge: banner('lozenge'),
+      brass,
+      sky,
     }
-  }, [shared, tex])
+  }, [tex])
 
-  const banner = useMemo(
+  const geometry = useMemo(() => {
+    const parts = columnParts()
+    const bannerGeo = (w: number, h: number) => {
+      const g = new THREE.PlaneGeometry(w, h, 32, 8)
+      const p = g.attributes.position as THREE.BufferAttribute
+      for (let i = 0; i < p.count; i++) {
+        const x = p.getX(i)
+        const y = p.getY(i)
+        // Soft vertical folds, deeper toward the hem.
+        p.setZ(i, Math.sin((x / w) * Math.PI * 6) * 0.03 * (0.5 + 0.5 * (0.5 - y / h)))
+      }
+      g.translate(0, -h / 2, 0)
+      g.computeVertexNormals()
+      return g
+    }
+    return {
+      windowWall: windowWallGeometry(),
+      nicheWall: nicheWallGeometry(),
+      beam: new THREE.PlaneGeometry(1, 1, 1, 12),
+      motes: moteGeometry(BEAMS, LOW ? 48 : 96),
+      bigBanner: bannerGeo(1.2, 3.3),
+      smallBanner: bannerGeo(0.86, 2.5),
+      ...parts,
+    }
+  }, [])
+
+  const shaftMat = useMemo(
     () =>
-      [0, 1, 2].map(
-        (i) =>
-          new THREE.ShaderMaterial({
-            uniforms: { ...shared, uPhase: { value: i * 2.1 }, uEmblem: { value: i === 0 ? 1 : 0 } },
-            vertexShader: BANNER_VERT,
-            fragmentShader: BANNER_FRAG,
-            side: THREE.DoubleSide,
-          }),
-      ),
-    [shared],
-  )
-  const rose = useMemo(() => new THREE.ShaderMaterial({ uniforms: shared, vertexShader: SIMPLE_VERT, fragmentShader: ROSE_FRAG }), [shared])
-  const additive = { transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false } as const
-  const flames = useMemo(
-    () => TORCHES.map((_, i) => new THREE.ShaderMaterial({ ...additive, uniforms: { uTime: shared.uTime, uAmp: { value: 1 }, uSeed: { value: i * 0.37 } }, vertexShader: SIMPLE_VERT, fragmentShader: FLAME_FRAG })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [shared],
-  )
-  const glows = useMemo(
-    () => TORCHES.map(() => new THREE.ShaderMaterial({ ...additive, uniforms: { uColor: { value: new THREE.Color('#ff9a4a') }, uA: { value: 0.3 } }, vertexShader: SIMPLE_VERT, fragmentShader: GLOW_FRAG })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        toneMapped: false,
+        side: THREE.DoubleSide,
+        uniforms: { uColor: { value: SUN_COLOR.clone() }, uA: { value: 0.06 } },
+        vertexShader: SHAFT_VERT,
+        fragmentShader: SHAFT_FRAG,
+      }),
     [],
   )
-  const shaft = useMemo(
-    () => new THREE.ShaderMaterial({ ...additive, side: THREE.DoubleSide, uniforms: { uColor: { value: new THREE.Color('#8fa8e0') }, uA: { value: 0.05 }, uTime: shared.uTime }, vertexShader: SIMPLE_VERT, fragmentShader: SHAFT_FRAG }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [shared],
+  const moteMat = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        toneMapped: false,
+        uniforms: { uColor: { value: new THREE.Color('#fff0d6') }, uA: { value: 0.8 }, uTime: { value: 0 }, uPx: { value: 1 } },
+        vertexShader: MOTE_VERT,
+        fragmentShader: MOTE_FRAG,
+      }),
+    [],
   )
 
-  // Columns, their bases and capitals, and the torch brackets: one instanced draw each.
+  // The columns: one instanced draw for the shafts, the bases and the capitals.
   const columns = useMemo(() => {
-    const shaftGeo = new THREE.CylinderGeometry(0.3, 0.33, 5.6, 28, 1, true)
-    // Octagonal plinths under the shafts and flared capitals above them.
-    const blockGeo = new THREE.CylinderGeometry(0.44, 0.5, 0.34, 8)
-    const capGeo = new THREE.CylinderGeometry(0.5, 0.36, 0.32, 8)
-    const cupGeo = new THREE.CylinderGeometry(0.085, 0.05, 0.13, 14)
-    // Wooden torch hafts, angled out from their brackets.
-    const haftGeo = new THREE.CylinderGeometry(0.028, 0.022, 0.5, 10)
     const count = COL_Z.length * 2
-    const shafts = new THREE.InstancedMesh(shaftGeo, stone.column, count)
-    const bases = new THREE.InstancedMesh(blockGeo, stone.block, count)
-    const caps = new THREE.InstancedMesh(capGeo, stone.block, count)
-    const cups = new THREE.InstancedMesh(cupGeo, stone.iron, N)
-    const hafts = new THREE.InstancedMesh(haftGeo, stone.wood, N)
+    const shafts = new THREE.InstancedMesh(geometry.shaft, materials.column, count)
+    const bases = new THREE.InstancedMesh(geometry.base, materials.columnTrim, count)
+    const caps = new THREE.InstancedMesh(geometry.capital, materials.columnTrim, count)
     const m = new THREE.Matrix4()
     let i = 0
     for (const z of COL_Z) {
       for (const x of [-COL_X, COL_X]) {
-        shafts.setMatrixAt(i, m.makeTranslation(x, FLOOR_Y + 2.8, z))
-        bases.setMatrixAt(i, m.makeTranslation(x, FLOOR_Y + 0.17, z))
-        caps.setMatrixAt(i, m.makeTranslation(x, FLOOR_Y + 5.5, z))
+        bases.setMatrixAt(i, m.makeTranslation(x, FLOOR_Y, z))
+        shafts.setMatrixAt(i, m.makeTranslation(x, FLOOR_Y + 0.5 + 2.3, z))
+        caps.setMatrixAt(i, m.makeTranslation(x, FLOOR_Y + 5.1, z))
         i++
       }
     }
-    const q = new THREE.Quaternion()
-    const e = new THREE.Euler()
-    const one = new THREE.Vector3(1, 1, 1)
-    TORCHES.forEach((p, k) => {
-      // Column torches lean in toward the aisle; wall torches lean out from the wall.
-      const onWall = p[2] < WALL_Z + 0.5
-      const lean = 0.42
-      e.set(onWall ? lean : 0, 0, onWall ? 0 : p[0] < 0 ? -lean : lean)
-      q.setFromEuler(e)
-      const down = new THREE.Vector3(0, -0.27, 0).applyQuaternion(q)
-      cups.setMatrixAt(k, m.compose(new THREE.Vector3(p[0], p[1] - 0.1, p[2]), q, one))
-      hafts.setMatrixAt(k, m.compose(new THREE.Vector3(p[0] + down.x, p[1] - 0.1 + down.y, p[2] + down.z), q, one))
-    })
-    for (const mesh of [shafts, bases, caps, cups, hafts]) {
+    for (const mesh of [shafts, bases, caps]) {
       mesh.instanceMatrix.needsUpdate = true
-      mesh.frustumCulled = false
+      mesh.castShadow = true
+      mesh.receiveShadow = true
+      mesh.computeBoundingSphere()
     }
-    return { shafts, bases, caps, cups, hafts }
-  }, [stone])
+    return { shafts, bases, caps }
+  }, [geometry, materials])
 
-  const flameRefs = useRef<(THREE.Mesh | null)[]>([])
-  const glowRefs = useRef<(THREE.Mesh | null)[]>([])
+  // The sun: far outside the left wall, so its light comes in nearly parallel. The wall's
+  // shadow shapes it into the windows; the columns and the chest cast their own.
+  const sun = useMemo(() => {
+    const l = new THREE.SpotLight(SUN_COLOR, 7, 0, 0.32, 0.3, 0)
+    l.position.copy(SUN_POS)
+    l.target.position.copy(SUN_AIM).add(new THREE.Vector3(0, 0, -1.6))
+    l.castShadow = true
+    l.shadow.mapSize.set(LOW ? 1024 : 2048, LOW ? 1024 : 2048)
+    l.shadow.camera.near = 14
+    l.shadow.camera.far = 46
+    l.shadow.bias = -0.0004
+    l.shadow.normalBias = 0.03
+    l.shadow.radius = 3
+    return l
+  }, [])
+  const fill = useRef<THREE.PointLight>(null)
+  const hemi = useRef<THREE.HemisphereLight>(null)
+  const nicheLight = useRef<THREE.SpotLight>(null)
+  const nicheTarget = useMemo(() => {
+    const o = new THREE.Object3D()
+    o.position.set(0, 1.6, BACK_Z - NICHE.depth)
+    return o
+  }, [])
+  const banners = useRef<(THREE.Group | null)[]>([])
+  const beamRefs = useRef<(THREE.Mesh | null)[]>([])
+  const skyBase = useMemo(() => new THREE.Color(1.45, 1.38, 1.25), [])
+  const { axis, center, view, side, normal, basis } = useMemo(
+    () => ({ axis: new THREE.Vector3(), center: new THREE.Vector3(), view: new THREE.Vector3(), side: new THREE.Vector3(), normal: new THREE.Vector3(), basis: new THREE.Matrix4() }),
+    [],
+  )
+
+  useEffect(() => {
+    if (nicheLight.current) nicheLight.current.target = nicheTarget
+  }, [nicheTarget])
+
+  // Each opening builds the hall in a fresh WebGL context. Decoding its stone and compiling its
+  // materials in one go stalled the first frames for most of a second, so the hall waits out of
+  // sight while the images decode off the main thread, the textures upload and the materials
+  // compile in parallel; then its light comes up. Its lights are in the scene from the first
+  // frame, so nothing else has to compile twice.
+  const { gl, camera, scene } = useThree()
+  const body = useRef<THREE.Group>(null)
+  const fade = useRef(0)
+  const ready = useRef(false)
+  useEffect(() => {
+    const g = body.current
+    if (!g) return
+    let alive = true
+    g.visible = false
+    const textures = new Set<THREE.Texture>()
+    Object.values(materials).forEach((m) => {
+      const mat = m as THREE.MeshStandardMaterial
+      for (const t of [mat.map, mat.normalMap, mat.roughnessMap, mat.aoMap]) if (t) textures.add(t)
+    })
+    const decode = [...textures].map((t) => {
+      const img = t.image as HTMLImageElement | undefined
+      return img && typeof img.decode === 'function' ? img.decode().catch(() => undefined) : Promise.resolve()
+    })
+    Promise.all(decode)
+      .then(() => {
+        if (!alive) return
+        textures.forEach((t) => gl.initTexture(t))
+        return gl.compileAsync(g, camera, scene)
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (!alive) return
+        g.visible = true
+        ready.current = true
+      })
+    return () => {
+      alive = false
+    }
+  }, [gl, camera, scene, materials])
 
   useEffect(
     () => () => {
-      Object.values(stone).forEach((m) => m.dispose())
-      banner.forEach((m) => m.dispose())
-      flames.forEach((m) => m.dispose())
-      glows.forEach((m) => m.dispose())
-      rose.dispose()
-      shaft.dispose()
-      Object.values(columns).forEach((m) => m.geometry.dispose())
+      Object.values(materials).forEach((m) => {
+        const mat = m as THREE.MeshStandardMaterial
+        mat.map?.dispose()
+        mat.normalMap?.dispose()
+        mat.roughnessMap?.dispose()
+        mat.aoMap?.dispose()
+        mat.dispose()
+      })
+      shaftMat.dispose()
+      moteMat.dispose()
+      Object.values(geometry).forEach((g) => (Array.isArray(g) ? g.forEach((x) => x.dispose()) : g.dispose()))
+      sun.dispose()
     },
-    [stone, banner, flames, glows, rose, shaft, columns],
+    [materials, geometry, shaftMat, moteMat, sun],
   )
 
-  useFrame((state) => {
+  useFrame((state, dt) => {
     const t = state.clock.elapsedTime
-    const room = anim.room
-    const amps = shared.uAmp.value
-    for (let i = 0; i < N; i++) {
-      const ph = i * 1.7
-      const flicker = anim.still ? 0.9 : 0.82 + Math.sin(t * 9.3 + ph) * 0.06 + Math.sin(t * 23.1 + ph * 1.3) * 0.05 + Math.sin(t * 3.7 + ph) * 0.07
-      const a = flicker * room * (1 - Math.min(anim.beam, 1) * 0.3) * (1 + anim.flare * 0.3)
-      amps[i] = a * 3.0
-      const f = flames[i]
-      if (f) f.uniforms.uAmp!.value = Math.min(1, a)
-      const g = glows[i]
-      if (g) g.uniforms.uA!.value = 0.3 * a
-      flameRefs.current[i]?.quaternion.copy(state.camera.quaternion)
-      glowRefs.current[i]?.quaternion.copy(state.camera.quaternion)
-    }
-    shared.uTime.value = anim.still ? 0 : t
-    shared.uRoom.value = room
-    // Fog fades into the page's own background color.
-    if (state.scene.background instanceof THREE.Color) shared.uFogColor.value.copy(state.scene.background)
+    if (ready.current && fade.current < 1) fade.current = anim.still ? 1 : Math.min(1, fade.current + dt / 0.8)
+    const room = anim.room * fade.current
+    // The rarity's light pushes the sun back a little when it floods the hall.
+    const sunK = room * (1 - Math.min(anim.beam, 1) * 0.25 * anim.tint)
+    sun.intensity = 7 * sunK
+    shaftMat.uniforms.uA!.value = 0.06 * sunK
+    moteMat.uniforms.uA!.value = 0.8 * sunK
+    moteMat.uniforms.uTime!.value = anim.still ? 0 : t
+    moteMat.uniforms.uPx!.value = state.viewport.dpr * 1.4
+    materials.sky.color.copy(skyBase).multiplyScalar(0.12 + 0.88 * room)
+    if (hemi.current) hemi.current.intensity = 0.1 * room
+    if (nicheLight.current) nicheLight.current.intensity = 26 * room
     // The chest's light reaches the hall; once the rarity is named it carries its color.
-    shared.uFillColor.value.copy(anim.glowColor)
-    shared.uFill.value = (Math.min(anim.beam, 1) * 0.7 + anim.flare * 0.2) * (0.35 + 0.65 * anim.tint)
-    shared.uBeam.value = Math.min(anim.beam, 1)
-    shared.uBeamColor.value.copy(anim.beamColor)
-    shared.uMoon.value = 0.8 * (0.15 + 0.85 * room)
-    shaft.uniforms.uA!.value = 0.045 * room
+    if (fill.current) {
+      fill.current.color.copy(anim.glowColor)
+      fill.current.intensity = (Math.min(anim.beam, 1) * 9 + anim.flare * 3 + Math.min(anim.glow, 2) * 0.6) * (0.3 + 0.7 * anim.tint) * (0.25 + 0.75 * room)
+    }
+    // Each beam turns about its own axis to face the camera, so it always reads as a volume.
+    BEAMS.forEach((b, i) => {
+      const mesh = beamRefs.current[i]
+      if (!mesh) return
+      axis.copy(b.to).sub(b.from)
+      const len = axis.length()
+      axis.divideScalar(len)
+      center.copy(b.from).add(b.to).multiplyScalar(0.5)
+      view.copy(state.camera.position).sub(center)
+      side.crossVectors(axis, view)
+      if (side.lengthSq() < 1e-8) return
+      side.normalize()
+      normal.crossVectors(side, axis)
+      basis.makeBasis(side, axis, normal)
+      mesh.position.copy(center)
+      mesh.quaternion.setFromRotationMatrix(basis)
+      mesh.scale.set(BEAM_W, len, 1)
+    })
+    // The banners stir in a draft.
+    banners.current.forEach((b, i) => {
+      if (b) b.rotation.x = anim.still ? 0 : Math.sin(t * 0.45 + i * 1.9) * 0.012
+    })
   })
 
-  // The shaft runs from the rose window down toward the front of the altar.
-  const shaftPose = useMemo(() => {
-    const from = new THREE.Vector3(ROSE[0], ROSE[1], ROSE[2] + 0.1)
-    const to = new THREE.Vector3(0, FLOOR_Y, -3.2)
-    const dir = to.clone().sub(from)
-    const len = dir.length()
-    const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), dir.normalize())
-    const mid = from.clone().add(to).multiplyScalar(0.5)
-    return { len, q, mid }
-  }, [])
-
-  const hallDepth = 12 - WALL_Z
+  const depth = FRONT_Z - BACK_Z
   return (
     <group>
+      <primitive object={sun} />
+      <primitive object={sun.target} />
+      <primitive object={nicheTarget} />
+      <hemisphereLight ref={hemi} args={['#c3cde0', '#2a2018', 0.1]} />
+      <pointLight ref={fill} position={[0, 1.2, 0.3]} distance={11} decay={1.5} intensity={0} />
+      <spotLight ref={nicheLight} position={[0, 4.4, BACK_Z + 3.2]} angle={0.5} penumbra={0.8} distance={9} decay={2} color="#ffdcb0" intensity={26} />
+      <group ref={body}>
+
       {/* Floor and the runner to the altar. */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FLOOR_Y, (12 + WALL_Z) / 2]} material={stone.floor}>
-        <planeGeometry args={[SIDE_X * 2, hallDepth]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FLOOR_Y, (FRONT_Z + BACK_Z) / 2]} material={materials.floor} receiveShadow>
+        <planeGeometry args={[2 * WALL_X, depth]} />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FLOOR_Y + 0.004, (6 + WALL_Z) / 2]} material={stone.carpet}>
-        <planeGeometry args={[1.5, 6 - WALL_Z]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FLOOR_Y + 0.003, (RUNNER_END + BACK_Z) / 2]} material={materials.carpet} receiveShadow>
+        <planeGeometry args={[1.4, RUNNER_END - BACK_Z]} />
       </mesh>
-      {/* Back wall with its niche, and the side walls behind the columns. */}
-      <mesh position={[0, FLOOR_Y + 5, WALL_Z]} material={stone.wall}>
-        <planeGeometry args={[SIDE_X * 2, 10]} />
+
+      {/* The left wall with its windows, and the sky beyond them. */}
+      <mesh geometry={geometry.windowWall} material={materials.wall} position={[-WALL_X, 0, 0]} rotation={[0, -Math.PI / 2, 0]} castShadow receiveShadow />
+      <mesh position={[-WALL_X - WALL_T - 0.6, (SILL_Y + ROUNDEL.y) / 2, (WINDOW_Z[0]! + WINDOW_Z[WINDOW_Z.length - 1]!) / 2]} rotation={[0, Math.PI / 2, 0]} material={materials.sky}>
+        <planeGeometry args={[WINDOW_Z[0]! - WINDOW_Z[WINDOW_Z.length - 1]! + 3, ROUNDEL.y - SILL_Y + 1.6]} />
       </mesh>
-      <mesh position={[-SIDE_X, FLOOR_Y + 5, (12 + WALL_Z) / 2]} rotation={[0, Math.PI / 2, 0]} material={stone.side}>
-        <planeGeometry args={[hallDepth, 10]} />
+
+      {/* The right wall and the back wall with its niche. */}
+      <mesh position={[WALL_X, FLOOR_Y + WALL_H / 2, (FRONT_Z + BACK_Z) / 2]} rotation={[0, -Math.PI / 2, 0]} material={materials.sideWall} receiveShadow>
+        <planeGeometry args={[depth, WALL_H]} />
       </mesh>
-      <mesh position={[SIDE_X, FLOOR_Y + 5, (12 + WALL_Z) / 2]} rotation={[0, -Math.PI / 2, 0]} material={stone.side}>
-        <planeGeometry args={[hallDepth, 10]} />
+      <mesh geometry={geometry.nicheWall} material={materials.backWall} position={[0, 0, BACK_Z - NICHE.depth]} receiveShadow />
+      <mesh position={[0, FLOOR_Y + 2.2, BACK_Z - NICHE.depth + 0.002]} material={materials.nicheBack} receiveShadow>
+        <planeGeometry args={[NICHE.w + 0.4, 4.4]} />
       </mesh>
+
       <primitive object={columns.shafts} />
       <primitive object={columns.bases} />
       <primitive object={columns.caps} />
-      <primitive object={columns.cups} />
-      <primitive object={columns.hafts} />
-      {/* Banners: the great one in the niche, two smaller on the wall. */}
-      <mesh position={[0, FLOOR_Y + 2.55, WALL_Z + 0.08]} material={banner[0]}>
-        <planeGeometry args={[1.25, 3.5, 1, 16]} />
-      </mesh>
-      <mesh position={[-ARCH_W - 1.75, FLOOR_Y + 3.0, WALL_Z + 0.06]} material={banner[1]}>
-        <planeGeometry args={[0.9, 2.7, 1, 12]} />
-      </mesh>
-      <mesh position={[ARCH_W + 1.75, FLOOR_Y + 3.0, WALL_Z + 0.06]} material={banner[2]}>
-        <planeGeometry args={[0.9, 2.7, 1, 12]} />
-      </mesh>
-      {/* The rose window and its shaft of moonlight. */}
-      <mesh position={ROSE} material={rose}>
-        <planeGeometry args={[1.8, 1.8]} />
-      </mesh>
-      <mesh position={shaftPose.mid} quaternion={shaftPose.q} material={shaft} renderOrder={3}>
-        <planeGeometry args={[1.6, shaftPose.len]} />
-      </mesh>
-      {/* Torch flames and their halos. */}
-      {TORCHES.map((p, i) => (
-        <group key={i} position={p}>
-          <mesh ref={(m) => void (glowRefs.current[i] = m)} position={[0, 0.22, 0]} material={glows[i]} renderOrder={4}>
-            <planeGeometry args={[2.4, 2.4]} />
+      {/* Lintels: the columns carry a beam along each side and one across the hall at each pair. */}
+      {[-COL_X, COL_X].map((x) => (
+        <mesh key={x} position={[x, LINTEL_Y, (COL_Z[0]! + COL_Z[COL_Z.length - 1]!) / 2]} material={materials.lintel} castShadow receiveShadow>
+          <boxGeometry args={[0.92, 0.34, COL_Z[0]! - COL_Z[COL_Z.length - 1]! + 1.0]} />
+        </mesh>
+      ))}
+      {COL_Z.map((z) => (
+        <mesh key={z} position={[0, LINTEL_Y, z]} material={materials.lintel} castShadow receiveShadow>
+          <boxGeometry args={[2 * COL_X + 0.92, 0.34, 0.8]} />
+        </mesh>
+      ))}
+
+      {/* Banners: the crowned one in the niche, a smaller one either side. */}
+      {(
+        [
+          { x: 0, y: 3.55, z: BACK_Z - NICHE.depth + 0.12, w: 1.2, big: true },
+          { x: -2.85, y: 4.1, z: BACK_Z + 0.08, w: 0.86, big: false },
+          { x: 2.85, y: 4.1, z: BACK_Z + 0.08, w: 0.86, big: false },
+        ] as const
+      ).map((b, i) => (
+        <group key={i} position={[b.x, b.y, b.z]}>
+          <group ref={(g) => void (banners.current[i] = g)}>
+            <mesh geometry={b.big ? geometry.bigBanner : geometry.smallBanner} material={b.big ? materials.crown : materials.lozenge} receiveShadow />
+          </group>
+          <mesh rotation={[0, 0, Math.PI / 2]} position={[0, 0.03, 0.02]} material={materials.brass}>
+            <cylinderGeometry args={[0.022, 0.022, b.w + 0.24, 12]} />
           </mesh>
-          <mesh ref={(m) => void (flameRefs.current[i] = m)} position={[0, 0.22, 0]} material={flames[i]} renderOrder={5}>
-            <planeGeometry args={[0.56, 0.78]} />
-          </mesh>
+          {[-1, 1].map((s) => (
+            <mesh key={s} position={[s * (b.w / 2 + 0.14), 0.03, 0.02]} material={materials.brass}>
+              <sphereGeometry args={[0.04, 14, 10]} />
+            </mesh>
+          ))}
         </group>
       ))}
+
+      {/* Sunlight in the air, and the dust that shows it. */}
+      {BEAMS.map((_, i) => (
+        <mesh key={i} ref={(m) => void (beamRefs.current[i] = m)} geometry={geometry.beam} material={shaftMat} renderOrder={4} frustumCulled={false} />
+      ))}
+      <points geometry={geometry.motes} material={moteMat} frustumCulled={false} renderOrder={5} />
+      </group>
     </group>
   )
 }
+
+useTexture.preload(Object.values(TEXTURES))

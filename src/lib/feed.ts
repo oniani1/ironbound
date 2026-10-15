@@ -118,14 +118,6 @@ export function startFeed() {
   started = true
   seedNotable()
   for (let i = 14; i > 0; i--) simulateOne(i * 9000 + random() * 6000)
-  // A couple of memorable recent pulls so the feed is not all commons on first load.
-  const big = ITEMS.filter((i) => i.value > 8000).sort(() => random() - 0.5).slice(0, 2)
-  big.forEach((item, i) => {
-    const chest = CHEST_BY_ID[item.value > 60000 ? 'king' : 'warlord'] ?? VISIBLE_CHESTS[0]!
-    const entry: FeedEntry = { id: uid(), name: NAMES[(i * 7) % NAMES.length] ?? 'Wanderer', itemId: item.id, chestId: chest.id, rarity: i === 0 ? 'legendary' : 'epic', at: Date.now() - (40000 + i * 50000) }
-    entries.splice(3 + i * 4, 0, entry)
-    notable = [...notable, entry].sort((a, b) => b.at - a.at).slice(0, 24)
-  })
   emit()
   const tick = () => {
     simulateOne()

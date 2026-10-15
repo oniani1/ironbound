@@ -32,7 +32,7 @@ async (mcpPage) => {
             signInMethod: 'email',
             balance: 25000,
             pulls: [],
-            settings: { sound: false, fast, force },
+            settings: { fast, force },
             stats: { spent: 0, opened: 0, soldFor: 0 },
           }),
         )
@@ -88,20 +88,31 @@ async (mcpPage) => {
       await page.waitForTimeout(800)
       await page.mouse.up()
     }
-    // From the broken seal to the rarity: a frame every cfg.every ms.
-    const end = Date.now() + 22000
-    while (Date.now() < end) {
-      const p = await mark()
-      if (p === 'reveal') break
+    // From the broken seal to the title stage: a frame every cfg.every ms, 35 s at most.
+    const deadline = Date.now() + 35000
+    let p = null
+    while (Date.now() < deadline) {
+      p = await mark()
+      if (p === 'title' || p === 'reveal') break
       // No auto-wait here: the facts are absent for most of the run.
       const facts = await page.evaluate(() => document.querySelector('[data-testid="reveal-facts"]')?.getAttribute('data-beat') ?? null)
       await shot(`${p ?? 'none'}${facts !== null ? '-f' + facts : ''}`)
       await page.waitForTimeout(cfg.every)
     }
-    if (!(await waitFor('reveal', 4000))) return { stuck: 'reveal', marks, errors }
-    await page.waitForTimeout(450)
-    await shot('title')
-    await page.getByTestId('keep').waitFor({ state: 'visible', timeout: 6000 }).catch(() => {})
+    // The title stage builds the name, provenance and value; Fast goes straight to the receipt.
+    if (p === 'title') {
+      await page.waitForTimeout(450)
+      await shot('title')
+      await page.waitForTimeout(1700)
+      await shot('title-built')
+    } else if (!cfg.fast) return { stuck: 'title', marks, errors }
+    if (!(await waitFor('reveal', Math.max(1000, deadline - Date.now())))) return { stuck: 'reveal', marks, errors }
+    // The receipt counts as arrived once Keep can take focus (it sits invisible under the title stage).
+    const spectating = !!cfg.item
+    const ready = await page
+      .waitForFunction((id) => (document.querySelector(`[data-testid="${id}"]`)?.tabIndex ?? -1) === 0, spectating ? 'spectate-open' : 'keep', { timeout: 6000 })
+      .then(() => true, () => false)
+    if (!ready) return { stuck: spectating ? 'spectate-open' : 'keep', marks, errors }
     marks.push(`card@${Date.now() - t0}`)
     await page.waitForTimeout(1300)
     await shot('card')

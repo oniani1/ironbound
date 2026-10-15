@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import type { Arms, Pull, RarityId } from '../types'
+import type { Arms, Ordinary, Pull, PullStatus, RarityId, Tincture } from '../types'
 
 export interface Profile {
   name: string
@@ -32,13 +32,72 @@ const initial: State = {
   stats: { spent: 0, opened: 0, soldFor: 0 },
 }
 
+// The values a saved state may hold. Records keep them in step with the types.
+const RARITY_IDS: Record<RarityId, true> = { common: true, uncommon: true, rare: true, epic: true, legendary: true, relic: true }
+const STATUS_IDS: Record<PullStatus, true> = { vaulted: true, sold: true, shipping: true, shipped: true }
+const TINCTURE_IDS: Record<Tincture, true> = { or: true, argent: true, gules: true, azure: true, vert: true, sable: true, purpure: true }
+const ORDINARY_IDS: Record<Ordinary, true> = { chevron: true, saltire: true, cross: true, bend: true, pale: true, fess: true, chief: true, quarterly: true }
+const METHOD_IDS: Record<NonNullable<State['signInMethod']>, true> = { email: true, google: true, wallet: true }
+
+type Json = Record<string, unknown>
+const isObject = (v: unknown): v is Json => typeof v === 'object' && v !== null && !Array.isArray(v)
+const oneOf = <T extends string>(ids: Record<T, true>, v: unknown): v is T => typeof v === 'string' && Object.hasOwn(ids, v)
+const finite = (v: unknown, fallback: number) => (typeof v === 'number' && Number.isFinite(v) ? v : fallback)
+
+function readArms(v: unknown): Arms | null {
+  return isObject(v) && oneOf(TINCTURE_IDS, v.field) && oneOf(TINCTURE_IDS, v.charge) && oneOf(ORDINARY_IDS, v.ordinary) ? { field: v.field, charge: v.charge, ordinary: v.ordinary } : null
+}
+
+function readShipment(v: unknown): Pull['shipment'] {
+  if (!isObject(v) || (v.method !== 'standard' && v.method !== 'express')) return undefined
+  const { name, city, country, eta, tracking } = v
+  if (![name, city, country, eta, tracking].every((s) => typeof s === 'string')) return undefined
+  return { name, city, country, eta, tracking, method: v.method } as NonNullable<Pull['shipment']>
+}
+
+function readPull(v: unknown): Pull | null {
+  if (!isObject(v) || typeof v.uid !== 'string' || typeof v.itemId !== 'string' || typeof v.chestId !== 'string') return null
+  if (!oneOf(RARITY_IDS, v.rarity) || !oneOf(STATUS_IDS, v.status)) return null
+  const pull: Pull = { uid: v.uid, itemId: v.itemId, chestId: v.chestId, rarity: v.rarity, status: v.status, price: finite(v.price, 0), value: finite(v.value, 0), at: finite(v.at, 0) }
+  if (typeof v.draw === 'string') pull.draw = v.draw
+  if (typeof v.soldFor === 'number' && Number.isFinite(v.soldFor)) pull.soldFor = v.soldFor
+  const shipment = readShipment(v.shipment)
+  if (shipment) pull.shipment = shipment
+  return pull
+}
+
+/**
+ * Reads a saved state field by field. Anything malformed falls back to its default and a
+ * broken pull is dropped, so an edited or damaged save can never stop the app from starting.
+ */
+export function parseSave(raw: string | null): State {
+  let saved: unknown
+  try {
+    saved = raw ? JSON.parse(raw) : null
+  } catch {
+    return initial
+  }
+  if (!isObject(saved) || saved.version !== 2) return initial
+  const p = saved.profile
+  const arms = isObject(p) ? readArms(p.arms) : null
+  const settings = isObject(saved.settings) ? saved.settings : {}
+  const stats = isObject(saved.stats) ? saved.stats : {}
+  return {
+    version: 2,
+    profile: isObject(p) && typeof p.name === 'string' && arms ? { name: p.name, arms } : null,
+    onboarded: saved.onboarded === true,
+    signedIn: saved.signedIn === true,
+    signInMethod: oneOf(METHOD_IDS, saved.signInMethod) ? saved.signInMethod : null,
+    balance: Math.max(0, finite(saved.balance, 0)),
+    pulls: Array.isArray(saved.pulls) ? saved.pulls.map(readPull).filter((x): x is Pull => x !== null) : [],
+    settings: { fast: settings.fast === true, force: oneOf(RARITY_IDS, settings.force) ? settings.force : null },
+    stats: { spent: finite(stats.spent, 0), opened: finite(stats.opened, 0), soldFor: finite(stats.soldFor, 0) },
+  }
+}
+
 function load(): State {
   try {
-    const raw = localStorage.getItem(KEY)
-    if (!raw) return initial
-    const parsed = JSON.parse(raw) as Partial<State>
-    if (parsed.version !== 2) return initial
-    return { ...initial, ...parsed, settings: { ...initial.settings, ...parsed.settings }, stats: { ...initial.stats, ...parsed.stats } }
+    return parseSave(localStorage.getItem(KEY))
   } catch {
     return initial
   }

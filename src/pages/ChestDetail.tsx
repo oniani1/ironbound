@@ -36,7 +36,8 @@ export default function ChestDetail() {
   const fast = useStore((s) => s.settings.fast)
   const feed = useFeed()
   const reduced = useReducedMotion()
-  const { open } = useOpening()
+  // An opening draws its own scene over the page; this chest holds its last frame meanwhile.
+  const { open, active: opening } = useOpening()
   const { start } = useOnboarding()
 
   if (!chest || chest.hidden) return <Navigate to="/chests" replace />
@@ -67,7 +68,7 @@ export default function ChestDetail() {
       <div className="mx-auto grid max-w-[1400px] gap-8 px-4 pt-6 sm:px-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(380px,0.85fr)] lg:gap-14">
         {/* Live chest. */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} className="relative -mx-4 h-[260px] overflow-hidden sm:mx-0 sm:h-[460px] lg:h-[620px]">
-          <ChestScene theme={chest.theme} anim={anim} parallax distance={0.82} className="!absolute inset-0" />
+          <ChestScene theme={chest.theme} anim={anim} parallax distance={0.82} frameloop={opening ? 'never' : 'always'} className="!absolute inset-0" />
           <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_110px_80px_var(--color-ink-950)]" />
           <Link
             to="/chests"

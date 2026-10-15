@@ -36,7 +36,7 @@ async (mcpPage) => {
       signInMethod: 'email',
       balance: 25000,
       pulls: [],
-      settings: { sound: false, fast: false, force: null },
+      settings: { fast: false, force: null },
       stats: { spent: 0, opened: 0, soldFor: 0 },
       ...extra,
     })
@@ -126,7 +126,7 @@ async (mcpPage) => {
       }
 
       // Signed-in flows.
-      await fresh(signed({ settings: { sound: false, fast: false, force: 'legendary' } }))
+      await fresh(signed({ settings: { fast: false, force: 'legendary' } }))
       await page.goto(BASE + '/chests')
       await page.waitForTimeout(2000)
       await shot(`${tag}-12-chests`)

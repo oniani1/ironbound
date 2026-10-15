@@ -24,15 +24,18 @@ export interface Item {
   aspect: number
   credit: string
   sourceUrl: string
-  /** New work only: the maker's catalog id. */
+  /** Newly forged only: the maker's catalog id. */
   makerId?: string
-  /** New work only: false when the photo shows an example of the type, not this exact model. */
+  /** Newly forged only: false when the photo shows an example of the type, not this exact model. */
   photoExact?: boolean
-  /** New work only: where the retail price was read. */
+  /** Newly forged only: where the retail price was read. */
   priceSource?: string
-  /** New work only: how well the maker's pieces hold value on resale. */
+  /** Newly forged only: how well the maker's pieces hold value on resale. */
   resale?: 'strong' | 'medium' | 'low'
 }
+
+/** What is kept of a piece that has left the catalog, so a vault that holds it can still name it. */
+export type ArchivedItem = Pick<Item, 'id' | 'name' | 'category' | 'era' | 'origin' | 'provenance'> & { sourceUrl?: string }
 
 export interface Maker {
   id: string

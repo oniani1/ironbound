@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { CHESTS, VISIBLE_CHESTS } from '../config/chests'
-import { RARITY_ORDER } from '../config/rarity'
-import { ITEMS } from '../data/items'
-import { chestPool, expectedValue, oddsTotal, rollItem } from './gacha'
+import { RARITIES, RARITY_ORDER } from '../config/rarity'
+import { ARCHIVE_BY_ID, ITEM_BY_ID, ITEMS } from '../data/items'
+import { buybackOffer, chestPool, expectedValue, oddsTotal, rollItem } from './gacha'
 import { revealFacts } from './facts'
 
 describe('chest configuration', () => {
@@ -20,6 +20,14 @@ describe('chest configuration', () => {
     const ratio = expectedValue(chest, ITEMS) / chest.price
     expect(ratio).toBeGreaterThanOrEqual(0.85)
     expect(ratio).toBeLessThanOrEqual(0.95)
+  })
+
+  // The founder's third review: not always a Common. Uncommon and better come up about half the time.
+  it.each(VISIBLE_CHESTS.map((c) => [c.id, c] as const))('%s gives better than Common about half the time', (_, chest) => {
+    const odds = (r: string) => chest.bands.find((b) => b.rarity === r)?.odds ?? 0
+    expect(odds('common')).toBeLessThanOrEqual(0.55)
+    expect(odds('uncommon')).toBeGreaterThanOrEqual(0.25)
+    expect(odds('rare')).toBeGreaterThanOrEqual(0.1)
   })
 
   it('bands are contiguous and ascending', () => {
@@ -75,7 +83,7 @@ describe('reveal facts', () => {
     expect(revealFacts(antique)[3]!.value).toMatch(/^Around \d/)
   })
 
-  it('names the maker for new work and skips a missing weight', () => {
+  it('names the maker for newly forged pieces and skips a missing weight', () => {
     const forged = ITEMS.find((i) => i.provenance === 'forged' && i.maker)!
     const facts = revealFacts({ ...forged, weight: undefined })
     expect(facts.map((f) => f.label)).toEqual(['Origin', 'Type', 'Age', 'Maker'])
@@ -83,8 +91,30 @@ describe('reveal facts', () => {
   })
 
   it('never gives away the name or the rarity', () => {
+    const rarityWord = new RegExp(`\\b(${Object.values(RARITIES).map((r) => r.label).join('|')})\\b`, 'i')
     for (const item of ITEMS) {
-      for (const f of revealFacts(item)) expect(f.value).not.toContain(item.name)
+      for (const f of revealFacts(item)) {
+        expect(f.value).not.toContain(item.name)
+        expect(`${f.label} ${f.value}`).not.toMatch(rarityWord)
+      }
+    }
+  })
+})
+
+describe('sell-back and retired pieces', () => {
+  it('offers whole dollars at the chest rate', () => {
+    expect(buybackOffer(313, { buyback: 0.9 })).toBe(282)
+    for (const chest of VISIBLE_CHESTS) {
+      for (const item of ITEMS) expect(Number.isInteger(buybackOffer(item.value, chest))).toBe(true)
+    }
+  })
+
+  it('keeps a record of every retired piece apart from the catalog', () => {
+    const archived = Object.values(ARCHIVE_BY_ID)
+    expect(archived.length).toBeGreaterThan(0)
+    for (const record of archived) {
+      expect(ITEM_BY_ID[record.id], record.id).toBeUndefined()
+      expect(record.name && record.era && record.origin && record.category, record.id).toBeTruthy()
     }
   })
 })

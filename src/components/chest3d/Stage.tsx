@@ -1,53 +1,38 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { ContactShadows, Environment, Lightformer } from '@react-three/drei'
+import { ContactShadows, Environment, Lightformer, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import type { ChestAnim } from './animState'
-import { TORCHES } from './RoyalHall'
+import { asset } from '../../lib/asset'
+import { Quiet } from './Quiet'
 
-/** Procedural stone texture so the plinth reads as carved rock without any downloads. */
-function useStoneTexture() {
+const STONE = { map: asset('/textures/hall/stone_diff.webp'), normal: asset('/textures/hall/stone_nor.webp') }
+
+/** Dressed stone for the altar, from the hall's own texture set. */
+function useAltarStone() {
+  const tex = useTexture(STONE)
   return useMemo(() => {
-    const size = 256
-    const c = document.createElement('canvas')
-    c.width = c.height = size
-    const g = c.getContext('2d')!
-    const img = g.createImageData(size, size)
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        const i = (y * size + x) * 4
-        const n =
-          Math.sin(x * 0.08 + Math.sin(y * 0.05) * 2) * 0.25 +
-          Math.sin(y * 0.11 + Math.cos(x * 0.03) * 3) * 0.2 +
-          (Math.random() - 0.5) * 0.35
-        const v = 70 + n * 40
-        img.data[i] = v * 1.05
-        img.data[i + 1] = v * 0.97
-        img.data[i + 2] = v * 0.88
-        img.data[i + 3] = 255
-      }
+    const map = tex.map.clone()
+    const normal = tex.normal.clone()
+    for (const t of [map, normal]) {
+      t.wrapS = t.wrapT = THREE.RepeatWrapping
+      t.repeat.set(1, 1)
+      t.anisotropy = 8
+      t.needsUpdate = true
     }
-    g.putImageData(img, 0, 0)
-    const tex = new THREE.CanvasTexture(c)
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping
-    tex.repeat.set(3, 1)
-    tex.colorSpace = THREE.SRGBColorSpace
-    return tex
-  }, [])
+    map.colorSpace = THREE.SRGBColorSpace
+    return { map, normal }
+  }, [tex])
 }
 
-function Torch({ position, phase, anim }: { position: [number, number, number]; phase: number; anim: ChestAnim }) {
-  const light = useRef<THREE.PointLight>(null)
-  useFrame((state) => {
-    const t = state.clock.elapsedTime + phase
-    const flicker = 0.82 + Math.sin(t * 9.3) * 0.06 + Math.sin(t * 23.1) * 0.05 + Math.sin(t * 3.7) * 0.07
-    if (light.current) light.current.intensity = 5.5 * flicker * (1 - anim.beam * 0.35) * anim.room * (1 + anim.flare * 0.45)
-  })
-  return <pointLight ref={light} position={position} color="#ff9b4a" distance={7} decay={1.6} />
+/** The altar in its dressed stone. */
+function StonePlinth({ anim }: { anim: ChestAnim }) {
+  const stone = useAltarStone()
+  return <Plinth anim={anim} stone={stone} />
 }
 
 /** Worn round dais with bevelled edges and an engraved ring that catches the chest's light. */
-function Plinth({ stone, anim }: { stone: THREE.Texture; anim: ChestAnim }) {
+function Plinth({ anim, stone }: { anim: ChestAnim; stone?: { map: THREE.Texture; normal: THREE.Texture } }) {
   const geometry = useMemo(() => {
     const p = (r: number, y: number) => new THREE.Vector2(r, y)
     const profile = [
@@ -56,6 +41,19 @@ function Plinth({ stone, anim }: { stone: THREE.Texture; anim: ChestAnim }) {
     ]
     const g = new THREE.LatheGeometry(profile, 72)
     g.computeVertexNormals()
+    // Lathe UVs run along the profile, which smears the stone into spokes on the top. The top
+    // gets flat XZ coordinates (about a metre per tile), the sides wrap around and up.
+    const pos = g.attributes.position as THREE.BufferAttribute
+    const nor = g.attributes.normal as THREE.BufferAttribute
+    const uv = g.attributes.uv as THREE.BufferAttribute
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i)
+      const y = pos.getY(i)
+      const z = pos.getZ(i)
+      if (nor.getY(i) > 0.7) uv.setXY(i, x * 0.35 + 0.5, z * 0.35 + 0.5)
+      else uv.setXY(i, ((Math.atan2(z, x) / (Math.PI * 2) + 0.5) * Math.PI * 2) / 3, y / 3)
+    }
+    uv.needsUpdate = true
     return g
   }, [])
   const ring = useRef<THREE.Mesh>(null)
@@ -68,7 +66,7 @@ function Plinth({ stone, anim }: { stone: THREE.Texture; anim: ChestAnim }) {
   return (
     <group>
       <mesh geometry={geometry} receiveShadow>
-        <meshStandardMaterial map={stone} color="#4c443d" roughness={0.96} metalness={0} />
+        <meshStandardMaterial map={stone?.map ?? null} normalMap={stone?.normal ?? null} normalScale={[0.3, 0.3]} color="#6f665d" roughness={0.9} metalness={0} envMapIntensity={0.25} />
       </mesh>
       <mesh ref={ring} position={[0, 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]} material={ringMat}>
         <ringGeometry args={[0.78, 0.8, 96]} />
@@ -81,7 +79,6 @@ function Plinth({ stone, anim }: { stone: THREE.Texture; anim: ChestAnim }) {
 }
 
 export function Stage({ anim, plinth = true, floor = true }: { anim: ChestAnim; plinth?: boolean; floor?: boolean }) {
-  const stone = useStoneTexture()
   const floorUniforms = useMemo(() => ({ uColor: { value: new THREE.Color('#1a1410') } }), [])
   const ambient = useRef<THREE.AmbientLight>(null)
   const key = useRef<THREE.SpotLight>(null)
@@ -89,57 +86,48 @@ export function Stage({ anim, plinth = true, floor = true }: { anim: ChestAnim; 
   // Room light: the arrival brings it up, a blackout takes it almost to nothing.
   useFrame((state) => {
     const r = anim.room
-    if (ambient.current) ambient.current.intensity = 0.16 * r
-    if (key.current) key.current.intensity = 42 * (0.12 + r * 0.88)
-    if (rim.current) rim.current.intensity = 16 * r
-    state.scene.environmentIntensity = 1.35 * (0.1 + r * 0.9)
+    if (ambient.current) ambient.current.intensity = 0.12 * r
+    if (key.current) key.current.intensity = 30 * (0.12 + r * 0.88)
+    if (rim.current) rim.current.intensity = 10 * r
+    state.scene.environmentIntensity = 1.2 * (0.1 + r * 0.9)
   })
   return (
     <>
-      <ambientLight ref={ambient} intensity={0.16} color="#ffd9b0" />
-      {/* Key: warm top-front light, the "candle above the vault". */}
-      <spotLight
-        ref={key}
-        position={[1.6, 3.6, 2.4]}
-        angle={0.42}
-        penumbra={0.85}
-        intensity={42}
-        distance={12}
-        decay={1.6}
-        color="#ffd6a3"
-      />
-      {/* Cool rim from behind to separate the silhouette from the dark. */}
-      <spotLight ref={rim} position={[-2.2, 2.6, -2.8]} angle={0.5} penumbra={1} intensity={16} distance={10} color="#9fb4ff" />
-      {/* The two front torches of the hall cast real light on the chest. */}
-      <Torch position={TORCHES[0]!} phase={0} anim={anim} />
-      <Torch position={TORCHES[1]!} phase={2.1} anim={anim} />
-      <Environment resolution={128} frames={1} environmentIntensity={1.35}>
-        <Lightformer form="rect" intensity={1.6} color="#ffcf99" position={[0, 4, 2]} scale={[4, 2, 1]} />
+      <ambientLight ref={ambient} intensity={0.12} color="#ffe2c4" />
+      {/* Key: a soft warm light from the front, so the chest reads against the dark hall. */}
+      <spotLight ref={key} position={[1.6, 3.6, 2.4]} angle={0.42} penumbra={0.9} intensity={30} distance={12} decay={1.6} color="#ffd9ad" />
+      {/* Warm rim from behind, on the side away from the sun, to keep the silhouette. */}
+      <spotLight ref={rim} position={[2.4, 2.6, -2.8]} angle={0.5} penumbra={1} intensity={10} distance={10} color="#ffe0bb" />
+      <Environment resolution={128} frames={1} environmentIntensity={1.2}>
+        <Lightformer form="rect" intensity={1.5} color="#ffd2a0" position={[0, 4, 2]} scale={[4, 2, 1]} />
         <Lightformer form="rect" intensity={0.9} color="#ffe6c4" position={[0.5, 1.6, 4]} scale={[6, 2.5, 1]} />
-        <Lightformer form="rect" intensity={0.6} color="#ff8a3d" position={[-4, 1, 0]} rotation-y={Math.PI / 2} scale={[3, 2, 1]} />
-        <Lightformer form="rect" intensity={0.5} color="#8fa6ff" position={[4, 1.5, -2]} rotation-y={-Math.PI / 2} scale={[3, 2, 1]} />
-        <Lightformer form="ring" intensity={0.8} color="#ffe2b8" position={[0, 2, 4]} scale={1.5} />
+        <Lightformer form="rect" intensity={1.1} color="#ffcf9a" position={[-4, 2.5, -2]} rotation-y={Math.PI / 2} scale={[3, 3, 1]} />
+        <Lightformer form="ring" intensity={0.7} color="#ffe2b8" position={[0, 2, 4]} scale={1.5} />
       </Environment>
-      {plinth && <Plinth stone={stone} anim={anim} />}
-      {/* Floor fades into darkness with a radial falloff. */}
-      {floor && (
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, plinth ? -0.36 : 0, 0]} receiveShadow>
-        <circleGeometry args={[9, 64]} />
-        <shaderMaterial
-          transparent
-          uniforms={floorUniforms}
-          vertexShader={/* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`}
-          fragmentShader={/* glsl */ `
-            uniform vec3 uColor; varying vec2 vUv;
-            void main(){
-              float d = length(vUv - 0.5) * 2.0;
-              float a = smoothstep(1.0, 0.0, d);
-              gl_FragColor = vec4(uColor * (0.6 + 0.6 * (1.0 - d)), a);
-            }`}
-        />
-      </mesh>
+      {plinth && (
+        <Quiet fallback={<Plinth anim={anim} />}>
+          <StonePlinth anim={anim} />
+        </Quiet>
       )}
-      <ContactShadows position={[0, 0.002, 0]} opacity={0.62} scale={2.4} blur={3.2} far={1} resolution={512} color="#000000" />
+      {/* Floor fades into darkness with a radial falloff (used where the hall is not drawn). */}
+      {floor && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, plinth ? -0.36 : 0, 0]} receiveShadow>
+          <circleGeometry args={[9, 64]} />
+          <shaderMaterial
+            transparent
+            uniforms={floorUniforms}
+            vertexShader={/* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`}
+            fragmentShader={/* glsl */ `
+              uniform vec3 uColor; varying vec2 vUv;
+              void main(){
+                float d = length(vUv - 0.5) * 2.0;
+                float a = smoothstep(1.0, 0.0, d);
+                gl_FragColor = vec4(uColor * (0.6 + 0.6 * (1.0 - d)), a);
+              }`}
+          />
+        </mesh>
+      )}
+      <ContactShadows position={[0, 0.002, 0]} opacity={0.55} scale={2.4} blur={3.2} far={1} resolution={512} color="#000000" />
     </>
   )
 }

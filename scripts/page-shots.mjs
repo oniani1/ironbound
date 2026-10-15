@@ -43,7 +43,7 @@ async (mcpPage) => {
               signInMethod: 'email',
               balance: 25000,
               pulls: [],
-              settings: { sound: false, fast: false, force: null },
+              settings: { fast: false, force: null },
               stats: { spent: 0, opened: 0, soldFor: 0 },
             }),
           )

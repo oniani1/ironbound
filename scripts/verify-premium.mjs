@@ -18,7 +18,7 @@ const values = [2000, 540, 180, 960, 4800, 280, 140, 24]
 const seed = {
   version: 2, profile: { name: 'Aldric', arms: { field: 'azure', charge: 'or', ordinary: 'saltire' } },
   onboarded: true, signedIn: true, signInMethod: 'email', balance: 1000,
-  settings: { sound: false, fast: false, force: null }, stats: { spent: 800, opened: 8, soldFor: 123.2 },
+  settings: { fast: false, force: null }, stats: { spent: 800, opened: 8, soldFor: 123.2 },
   pulls: objects.map((item, index) => ({ uid: `premium-${index}`, itemId: item.id, chestId: 'knight', rarity: ['legendary', 'rare', 'uncommon', 'epic', 'relic', 'common', 'common', 'common'][index], price: 100, value: values[index], at: Date.now() - index * 60000, status: index === 5 ? 'shipping' : index === 6 ? 'sold' : index === 7 ? 'shipped' : 'vaulted', ...(index === 6 ? { soldFor: 123.2 } : {}) })),
 }
 const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--enable-gpu', '--use-angle=d3d11', '--ignore-gpu-blocklist'] })
@@ -104,7 +104,8 @@ try {
       await page.waitForFunction(() => document.querySelector('.ib-vault-total')?.innerText === '$8,784')
       assert.equal(await page.locator('.ib-vault-total').innerText(), '$8,784')
       assert.match(await page.locator('.ib-ledger-return').nth(0).innerText(), /Gain\s*\+\$8,107/)
-      assert.match(await page.locator('.ib-ledger-return').nth(1).innerText(), /Gain\s*\+\$7,053/)
+      // Each offer is whole dollars, as the vault credits it: $7,729 at 88% + $123 sold - $800 spent.
+      assert.match(await page.locator('.ib-ledger-return').nth(1).innerText(), /Gain\s*\+\$7,052/)
       const columns = await page.locator('.ib-wall').evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(' ').length)
       assert.equal(columns, width === 390 ? 2 : 4)
       assert.equal(await page.locator('a[href^="/vault/"]').count(), 8)
@@ -153,7 +154,8 @@ try {
       assert.equal(await sort.evaluate((e) => e === document.activeElement), true)
       await sort.click(); await page.keyboard.press('Shift+Tab')
       assert.equal(await sort.evaluate((e) => e === document.activeElement), true)
-      assert.equal(await page.getByRole('listbox').count(), 0)
+      // Tab closes the list a tick later, once native focus has moved.
+      await page.getByRole('listbox').waitFor({ state: 'detached', timeout: 2000 })
       await sort.click(); await page.getByRole('heading', { name: 'Aldric’s vault' }).click()
       assert.equal(await sort.getAttribute('aria-expanded'), 'false')
     })
@@ -302,7 +304,7 @@ try {
       await row.scrollIntoViewIfNeeded()
       await row.locator('summary').click()
       assert.equal(await row.locator('.ib-odds-details li').count(), 6)
-      assert.match(await row.getByRole('img').getAttribute('aria-label'), /Common 88.60%/)
+      assert.match(await row.getByRole('img').getAttribute('aria-label'), /Common 50.35%/)
       assert.equal(await row.getByRole('link', { name: 'Inspect chest' }).getAttribute('href'), '/chests/squire')
       await fits(page, 'tiers')
     })

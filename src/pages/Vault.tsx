@@ -3,10 +3,11 @@ import { Link, useParams } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
 import { ArrowRight, CaretDown, SlidersHorizontal } from '@phosphor-icons/react'
 import type { Category, Pull } from '../types'
-import { ITEM_BY_ID } from '../data/items'
+import { ARCHIVE_BY_ID, ITEM_BY_ID } from '../data/items'
 import { CHEST_BY_ID } from '../config/chests'
 import { RARITIES } from '../config/rarity'
 import { money } from '../lib/format'
+import { buybackOffer } from '../lib/gacha'
 import { useStore } from '../lib/store'
 import { DEFAULT_ARMS, Shield } from '../components/ui/Heraldry'
 import { CountUp } from '../components/ui/CountUp'
@@ -43,19 +44,20 @@ export default function Vault() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const reduced = useReducedMotion()
   const selected = uid ? pulls.find((p) => p.uid === uid) : undefined
-  const item = selected ? ITEM_BY_ID[selected.itemId] : undefined
+  // A piece that has left the catalog still shows, from its archived record.
+  const item = selected ? ITEM_BY_ID[selected.itemId] ?? ARCHIVE_BY_ID[selected.itemId] : undefined
   const owned = pulls.filter((p) => p.status !== 'sold')
   const value = owned.reduce((sum, p) => sum + p.value, 0)
   const estimatedGain = value + stats.soldFor - stats.spent
   const sellBackValue = owned.reduce<number | null>((sum, p) => {
     const chest = CHEST_BY_ID[p.chestId]
-    return sum === null || !chest ? null : sum + p.value * chest.buyback
+    return sum === null || !chest ? null : sum + buybackOffer(p.value, chest)
   }, 0)
   const sellBackNet = sellBackValue === null ? null : sellBackValue + stats.soldFor - stats.spent
   const vaulted = pulls.filter((p) => p.status === 'vaulted').length
   const shipping = pulls.filter((p) => p.status === 'shipping' || p.status === 'shipped').length
   const sold = pulls.filter((p) => p.status === 'sold').length
-  const visible = pulls.filter((p) => (category === 'all' || ITEM_BY_ID[p.itemId]?.category === category) && (status === 'all' || (status === 'shipping' ? p.status === 'shipping' || p.status === 'shipped' : p.status === status))).sort((a, b) => sort === 'value' ? b.value - a.value || b.at - a.at : sort === 'rarity' ? RARITIES[b.rarity].tier - RARITIES[a.rarity].tier || b.value - a.value : b.at - a.at)
+  const visible = pulls.filter((p) => (category === 'all' || (ITEM_BY_ID[p.itemId] ?? ARCHIVE_BY_ID[p.itemId])?.category === category) && (status === 'all' || (status === 'shipping' ? p.status === 'shipping' || p.status === 'shipped' : p.status === status))).sort((a, b) => sort === 'value' ? b.value - a.value || b.at - a.at : sort === 'rarity' ? RARITIES[b.rarity].tier - RARITIES[a.rarity].tier || b.value - a.value : b.at - a.at)
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); document.title = uid && item ? `${item.name} | Ironbound` : 'Your vault | Ironbound' }, [uid, item])
 
@@ -77,7 +79,7 @@ export default function Vault() {
           <div className="ib-controls-bottom"><FilterTabs options={STATUSES} value={status} onChange={setStatus} label="Filter by item status" id="vault-status-line" /><QuietSelect label="Sort by" value={sort} options={SORTS} onChange={setSort} /></div>
         </div>
       </div>}
-      {!pulls.length ? <Reveal className="ib-empty"><div className="ib-empty-rack" aria-hidden="true"><Shield arms={profile?.arms ?? DEFAULT_ARMS} size={72} /></div><p className="ib-kicker">A wall waiting for steel</p><h2 className="ib-title">Start your armory.</h2><p className="ib-copy">Your pulls live here, vaulted and insured in the demo. Inspect every piece, sell it back for credit, or request a shipment.</p><Link to="/chests" className="ib-action-link">Open a chest <ArrowRight size={18} weight="light" aria-hidden="true" /></Link></Reveal> : !visible.length ? <div className="ib-empty"><h2 className="ib-title">No pieces in this selection.</h2><p className="ib-copy">Try another type or include all statuses.</p><Button variant="secondary" onClick={() => { setCategory('all'); setStatus('all') }}>Show every piece</Button></div> : <div className="ib-wall">{visible.map((pull, index) => { const object = ITEM_BY_ID[pull.itemId]; return <motion.div key={pull.uid} initial={{ opacity: 0, y: reduced ? 0 : 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.1 }} transition={{ duration: reduced ? 0.15 : 0.45, delay: reduced ? 0 : (index % 4) * 0.04, ease: EXPO }}><Link to={`/vault/${encodeURIComponent(pull.uid)}`} className="ib-wall-entry">{object ? <ItemArtwork item={object} rarity={pull.rarity} eager={index < 4} sheen /> : <div className="ib-artwork"><span className="ib-photo-unavailable">Catalog record unavailable</span></div>}<div className="ib-wall-label"><RarityTag rarity={pull.rarity} /><h2>{object?.name ?? 'Unrecorded piece'}</h2><p className="ib-wall-provenance">{object?.era ?? 'Era unknown'}{object ? ` · ${object.origin}` : ''}</p><div className="ib-wall-foot"><p className="ib-value tabular">{money(pull.value)} <span className="sr-only">estimated value</span></p><Tag>{statusLabel(pull)}</Tag></div></div></Link></motion.div> })}</div>}
+      {!pulls.length ? <Reveal className="ib-empty"><div className="ib-empty-rack" aria-hidden="true"><Shield arms={profile?.arms ?? DEFAULT_ARMS} size={72} /></div><p className="ib-kicker">A wall waiting for steel</p><h2 className="ib-title">Start your armory.</h2><p className="ib-copy">Your pulls live here, vaulted and insured in the demo. Inspect every piece, sell it back for credit, or request a shipment.</p><Link to="/chests" className="ib-action-link">Open a chest <ArrowRight size={18} weight="light" aria-hidden="true" /></Link></Reveal> : !visible.length ? <div className="ib-empty"><h2 className="ib-title">No pieces in this selection.</h2><p className="ib-copy">Try another type or include all statuses.</p><Button variant="secondary" onClick={() => { setCategory('all'); setStatus('all') }}>Show every piece</Button></div> : <div className="ib-wall">{visible.map((pull, index) => { const object = ITEM_BY_ID[pull.itemId]; const record = object ?? ARCHIVE_BY_ID[pull.itemId]; return <motion.div key={pull.uid} initial={{ opacity: 0, y: reduced ? 0 : 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.1 }} transition={{ duration: reduced ? 0.15 : 0.45, delay: reduced ? 0 : (index % 4) * 0.04, ease: EXPO }}><Link to={`/vault/${encodeURIComponent(pull.uid)}`} className="ib-wall-entry">{object ? <ItemArtwork item={object} rarity={pull.rarity} eager={index < 4} sheen /> : <div className="ib-artwork ib-artwork-empty"><span className="ib-photo-unavailable">{record ? 'Retired from the catalog' : 'Catalog record unavailable'}</span></div>}<div className="ib-wall-label"><RarityTag rarity={pull.rarity} /><h2>{record?.name ?? 'Unrecorded piece'}</h2><p className="ib-wall-provenance">{record?.era ?? 'Era unknown'}{record ? ` · ${record.origin}` : ''}</p><div className="ib-wall-foot"><p className="ib-value tabular">{money(pull.value)} <span className="sr-only">estimated value</span></p><Tag>{statusLabel(pull)}</Tag></div></div></Link></motion.div> })}</div>}
     </>}
     <p className="ib-vault-note">Demo. All items, prices and payouts are simulated. Owned value includes pieces in your vault, shipping and shipped.</p>
   </div></>

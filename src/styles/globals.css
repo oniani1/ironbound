@@ -236,6 +236,36 @@ img {
   display: none;
 }
 
+/* The receipt never runs off the screen. On a short wide screen (a phone on its side, a small
+   laptop window) it settles below the top controls and scrolls inside itself, so every action
+   stays in reach. Taller screens keep it centered beside the piece. */
+.ib-receipt {
+  max-height: calc(100dvh - 1rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-600) transparent;
+}
+@media (min-width: 768px) {
+  .ib-receipt { max-height: calc(100dvh - 7rem); }
+}
+@media (min-width: 768px) and (max-height: 860px) {
+  .ib-receipt-dock { align-items: flex-end; padding-top: 6rem; padding-bottom: 1rem; }
+}
+
+/* Sheets over an opening (share, inspect) scroll inside themselves on a short screen. */
+.ib-sheet {
+  max-height: calc(100dvh - 1rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-600) transparent;
+}
+@media (min-width: 640px) {
+  .ib-sheet { max-height: calc(100dvh - 3rem); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

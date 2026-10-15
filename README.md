@@ -1,6 +1,6 @@
 # Ironbound
 
-Open a chest. Keep the steel. A front-end mock of a gacha platform for real arms and armor: pay a fixed price, open a chest and get one real piece, either an antique from a museum collection or new work from a named maker. Keep it in the vault, ship it home, or sell it back in one tap.
+Open a chest. Keep the steel. A front-end mock of a gacha platform for real arms and armor: pay a fixed price, open a chest and get one real piece, newly forged by a named maker or an antique. Keep it in the vault, ship it home, or sell it back in one tap.
 
 This is a demo. Every item, price, odds table and payout is simulated. There are no contracts, payments or accounts.
 
@@ -19,7 +19,9 @@ Demo controls sit in the corner of every page: force the rarity of the next pull
 
 ## The opening
 
-Hold to break the seal. The lock falls and stays on the altar, the lid breathes twice and opens by itself, and the camera studies the piece up close while its facts arrive one at a time: where it is from, what it is, antique or new, its year or maker, its weight. The camera pulls back, and only then is the rarity named, with its light. About ten seconds from seal to rarity. Skip and Fast are always available, and reduced motion gets crossfades.
+Hold to break the seal. The lock falls and stays on the altar, the camera sinks to the rim line and the lid opens once, by itself, so the inside never shows. The camera tilts up into the light and moves straight in; the piece rises into the close shot as it arrives, and the camera studies it while its facts arrive one at a time, each held at least 2.5 s: where it is from, what it is, antique or newly forged, its year or maker, its weight. Long pieces are read along their metal, round ones circled as the view opens out. The camera pulls back, the rarity is named on its own with its light, then the name, provenance and value build beside the piece before the receipt. About 19 seconds from seal to rarity. Skip and Fast are always available, and reduced motion gets crossfades.
+
+The hall is built in code: late sunlight through lancet windows, shafts of light with dust, long column shadows and crowned banners, on CC0 Poly Haven stone.
 
 ## Builds
 
@@ -37,7 +39,8 @@ VITE_NO_THUMBS=1 node scripts/artifact-page.mjs dist-artifact   # writes ironbou
 |---|---|
 | Opening ritual (3D chest, royal hall, camera, reveal) | `src/components/chest3d`, `src/components/opening` |
 | Chests, odds and expected value | `src/config/chests.ts`, `src/lib/gacha.ts` |
-| Catalog: 175 antiques and 65 pieces of new work | `src/data/items.json` (`scripts/assets/catalog.py`), `src/data/modern.json` (`scripts/assets/modern.py`) |
+| Catalog: 65 newly forged pieces and 72 antiques; retired pieces in `src/data/retired.json` | `src/data/modern.json` (`scripts/assets/modern.py`), `src/data/items.json` (`scripts/assets/catalog.py`) |
+| Odds tuning | `scripts/odds-tune.mjs` (bands and odds for every chest, expected value near 90%) |
 | Item pages and replays of any pull | `src/pages/Item.tsx` |
 | Onboarding | `src/components/onboarding` |
 | Vault, sell-back and shipping | `src/pages/Vault.tsx`, `src/components/vault` |
@@ -46,6 +49,7 @@ VITE_NO_THUMBS=1 node scripts/artifact-page.mjs dist-artifact   # writes ironbou
 ## Credits
 
 - Antique photographs: The Metropolitan Museum of Art, Open Access (CC0), cut out locally.
-- New work: maker names and prices are researched for the demo, with no affiliation. Photos come from Wikimedia Commons, Flickr, The Cleveland Museum of Art and the Kunsthistorisches Museum under the license credited on each piece; many show an example of the type.
+- Newly forged pieces: maker names and prices are researched for the demo, with no affiliation. Photos come from Wikimedia Commons, Flickr, The Cleveland Museum of Art and the Kunsthistorisches Museum under the license credited on each piece; many show an example of the type.
 - 3D chest: "Treasure Chest" by Rico Cilliers, Poly Haven (CC0).
+- Hall textures: "Medieval Blocks 03", "Large Floor Tiles 02" and "Velour Velvet", Poly Haven (CC0).
 - Fonts: Cormorant Garamond, Instrument Sans and Grenze Gotisch (SIL Open Font License).

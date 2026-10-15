@@ -7,7 +7,7 @@ import { Color } from 'three'
 export class ChestAnim {
   /** 0 closed, 1 fully open. */
   lid = 0
-  /** Rattle amplitude while the seal is being broken. */
+  /** The chest strains while the seal is being broken (the body shakes; the lid stays shut). */
   rattle = 0
   /** Lock heat 0..1: dark iron to white-hot. */
   heat = 0
@@ -25,7 +25,7 @@ export class ChestAnim {
   item = 0
   /** Item lighting: 0 silhouette, 1 fully lit. */
   itemLit = 0
-  /** Rarity light on the piece: 0 plain torchlight while it is studied, 1 once the rarity is named. */
+  /** Rarity light on the piece: 0 plain warm light while it is studied, 1 once the rarity is named. */
   tint = 0
   /** Glint sweep position, -1 hidden, 0..1 sweeping. */
   glint = -1
@@ -57,22 +57,45 @@ export class ChestAnim {
   macroBias = 0.26
   /** The reveal's travel along the piece in the macro shot: 0 at one end, 1 at the other. */
   along = 0
+  /**
+   * Where the metal sits, so the close-up follows the piece and not its photo's box (written by
+   * ItemRise, world units from the piece's centre): across the width in bands from top to bottom,
+   * and up or down in bands from left to right.
+   */
+  profileX: number[] = []
+  profileY: number[] = []
   /** True once the camera has arrived at the close-up (written by the camera rig). */
   closeReady = false
+  /** True while the piece's photo is loaded and measured, so its framing is real (written by ItemRise). */
+  itemReady = false
+  /** True when the piece's photo could not load: the reveal skips its study (written by the scene). */
+  itemFailed = false
+  /** When the camera rig last ran (performance.now()); a stale value means no live scene. */
+  rigTick = 0
+  /** Set when a slow device has not reached the close-up in time: the rig jumps there once. */
+  snap = false
   /** Phones: fraction of the screen height covered by the result sheet. */
   sheet = 0.5
   /** Wide screens: 1 while the result card sits on the right, 0 when it is tucked away. */
   cardSide = 1
-  /** A flare in the torchlight and the chest's glow, for beats and the rarity's arrival. */
+  /** A flare in the hall's rarity fill and the chest's glow, for beats and the rarity's arrival. */
   flare = 0
-  /** Room light 0..1: torches, key, rim and environment. Dips to near dark for a blackout. */
+  /** Room light 0..1: the sun through the windows, key, rim and environment. Dips to near dark for a blackout. */
   room = 1
   /** Camera crane: 1 starts high and far for the arrival, 0 is the normal framing. */
   crane = 0
-  /** Slow orbit around the chest during the tease, in radians. */
+  /** Slow orbit around the chest, in radians. */
   orbit = 0
-  /** Light leaking through the cracked lid as rays, 0..1. */
+  /** Light escaping as rays while the lid is still only a little open, 0..1. */
   gapLight = 0
+  /** Camera at the rim line, 0..1: low enough that the open chest never shows its inside. */
+  low = 0
+  /** After the lid opens the camera tilts up into the light above the chest before it climbs, 0..1. */
+  lookUp = 0
+  /** World height of the chest's rim (written by the chest model). */
+  rim = 0.42
+  /** Photo pixels per world unit on the revealed piece (written by ItemRise); caps the close-up. */
+  texDensity = 1000
   /** The chest lifts off the plinth for the top tiers, 0..1. */
   levitate = 0
   /** Inspect: zoom toward the piece 0..1, and where along its height the camera looks (-0.5..0.5). */
@@ -111,6 +134,8 @@ export class ChestAnim {
     this.crane = 0
     this.orbit = 0
     this.gapLight = 0
+    this.low = 0
+    this.lookUp = 0
     this.levitate = 0
   }
 }
