@@ -111,12 +111,18 @@ export interface Pull {
   shipment?: { name: string; city: string; country: string; method: 'standard' | 'express'; eta: string; tracking: string }
 }
 
-export type Tincture = 'or' | 'argent' | 'gules' | 'azure' | 'vert' | 'sable' | 'purpure'
-export type Ordinary = 'chevron' | 'saltire' | 'cross' | 'bend' | 'pale' | 'fess' | 'chief' | 'quarterly'
+export type Tincture = 'or' | 'argent' | 'gules' | 'azure' | 'vert' | 'sable' | 'purpure' | 'tenne' | 'murrey' | 'celeste' | 'cendree'
+export type Ordinary = 'chevron' | 'saltire' | 'cross' | 'bend' | 'pale' | 'fess' | 'chief' | 'quarterly' | 'bordure' | 'pile' | 'perpale' | 'perfess' | 'paly' | 'barry' | 'chequy' | 'gyronny' | 'plain'
+/** A charge drawn over the field and the ordinary, or none. */
+export type Charge = 'none' | 'lion' | 'crown' | 'eagle' | 'stag' | 'boar' | 'wolf' | 'bear' | 'griffin' | 'unicorn' | 'horse' | 'raven' | 'castle' | 'fleur' | 'swords' | 'rose' | 'sun'
 
 /** A coat of arms: a field tincture with one ordinary in a second tincture. */
 export interface Arms {
   field: Tincture
+  /** The ordinary's tincture. */
   charge: Tincture
   ordinary: Ordinary
+  symbol: Charge
+  /** The charge's tincture. */
+  symbolColor: Tincture
 }

@@ -3,7 +3,7 @@
 .ib-vault-nav { border-bottom: 1px solid var(--color-ink-700); }
 .ib-vault-nav > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; }
 .ib-vault-nav nav { display: flex; align-items: center; gap: 16px; }
-.ib-vault-header { padding-block: 28px 24px; }
+.ib-vault-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px; padding-block: 28px 24px; }
 .ib-owner { display: flex; align-items: center; gap: 18px; min-width: 0; }
 .ib-owner h1 { font-size: 64px; margin: 6px 0; overflow-wrap: anywhere; }
 .ib-vault-ledger { border-block: 1px solid color-mix(in oklch, var(--color-bone-100) 10%, transparent); padding-block: 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center; gap: 20px; }

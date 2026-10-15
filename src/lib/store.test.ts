@@ -35,6 +35,20 @@ describe('saved state', () => {
     }
   })
 
+  it('gives arms saved before the charges no charge and a contrasting color', () => {
+    const s = parseSave(JSON.stringify(good))
+    expect(s.profile?.arms).toEqual({ field: 'azure', charge: 'or', ordinary: 'saltire', symbol: 'none', symbolColor: 'or' })
+    const light = parseSave(JSON.stringify({ ...good, profile: { name: 'Nika', arms: { field: 'argent', charge: 'gules', ordinary: 'chevron' } } }))
+    expect(light.profile?.arms.symbolColor).toBe('gules')
+  })
+
+  it('keeps a charge it knows and drops one it does not', () => {
+    const lion = parseSave(JSON.stringify({ ...good, profile: { name: 'Nika', arms: { field: 'gules', charge: 'or', ordinary: 'chequy', symbol: 'lion', symbolColor: 'argent' } } }))
+    expect(lion.profile?.arms).toEqual({ field: 'gules', charge: 'or', ordinary: 'chequy', symbol: 'lion', symbolColor: 'argent' })
+    const dragon = parseSave(JSON.stringify({ ...good, profile: { name: 'Nika', arms: { field: 'gules', charge: 'or', ordinary: 'bend', symbol: 'dragon', symbolColor: 'pink' } } }))
+    expect(dragon.profile?.arms).toEqual({ field: 'gules', charge: 'or', ordinary: 'bend', symbol: 'none', symbolColor: 'or' })
+  })
+
   it('keeps the sound pulls of a partly damaged save', () => {
     const s = parseSave(JSON.stringify({ ...good, pulls: [null, { uid: 'b' }, pull, { ...pull, uid: 'c', rarity: 'mythic' }, { ...pull, uid: 'd', status: 'lost' }] }))
     expect(s.pulls.map((p) => p.uid)).toEqual(['a'])

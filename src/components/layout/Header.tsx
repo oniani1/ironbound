@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { useStore } from '../../lib/store'
 import { Logo } from './Logo'
@@ -65,7 +65,11 @@ export function Header() {
           {signedIn ? (
             <>
               <Purse />
-              {profile && <Shield arms={profile.arms} size={26} className="hidden sm:block" />}
+              {profile && (
+                <Link to="/vault" aria-label="Your vault" className="hidden sm:block">
+                  <Shield arms={profile.arms} size={26} />
+                </Link>
+              )}
             </>
           ) : (
             <Button size="sm" variant="secondary" onClick={() => start()} data-testid="header-cta">
