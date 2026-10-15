@@ -58,11 +58,6 @@ export class ChestAnim {
   /** The reveal's travel along the piece in the macro shot: 0 at one end, 1 at the other. */
   along = 0
   /**
-   * A long-hafted piece (a spear, a halberd): the close-up studies its head and the top of its
-   * haft, not a long plain shaft, and the pull back shows its full length (written by ItemRise).
-   */
-  headed = false
-  /**
    * Where the metal sits, so the close-up follows the piece and not its photo's box (written by
    * ItemRise, world units from the piece's centre): across the width in bands from top to bottom,
    * and up or down in bands from left to right.

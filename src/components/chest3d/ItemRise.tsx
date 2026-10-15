@@ -249,8 +249,6 @@ export function ItemRise({ item, anim, color, glow = 1, hero = false }: Props) {
     anim.focusH = content.h * s
     anim.focusW = content.w * s
     anim.macroBias = MACRO_BIAS[item.category] ?? 0.2
-    // A spear or a halberd is studied at its head; the pull back shows its full length.
-    anim.headed = item.category === 'polearm'
     anim.profileX = profile.x
     anim.profileY = profile.y
     anim.texDensity = texelsPerUnit * (1 / s)

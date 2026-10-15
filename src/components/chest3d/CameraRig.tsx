@@ -102,14 +102,9 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
       let macroX = 0
       // Along the piece's longest side as the screen shows it: the share of it that may be in view.
       let crop: number
-      if (H >= W * 1.35) {
+      const tall = H >= W * 1.35
+      if (tall) {
         close = Math.max(0.42, H * 0.42)
-        // Down to just above the low end: lower, the open lid would fill the background. Phones
-        // see more of the frame's height, so they stop sooner. A long-hafted piece is studied
-        // from its point down its head and the top of its haft; the pull back shows the rest.
-        macroLook = anim.headed ? anim.focusY + H * (0.38 - a * 0.18) : anim.focusY + H * (0.36 - a * (portrait ? 0.41 : 0.58))
-        // Across to where the metal is at that height: a curved blade or a crooked haft stays in the shot.
-        macroX = sample(anim.profileX, 0.5 - (macroLook - anim.focusY) / H)
         crop = H
       } else if (W >= H * 1.35) {
         close = Math.max(0.42, W * 0.45)
@@ -137,6 +132,17 @@ export function CameraRig({ anim, parallax = false, distance = 1 }: Props) {
       const screenPx = size.height * Math.min(state.viewport.dpr, 1.5)
       const minView = screenPx / (2 * Math.max(1, anim.texDensity))
       close = Math.min(Math.max(close, minView / (2 * tanHalf)), (0.9 * crop) / (2 * tanHalf))
+      if (tall) {
+        // Top to bottom in one move, from the top edge of the piece to its bottom edge, allowing
+        // for the share of its height the frame shows at this distance: a spear is read from
+        // its point to its butt without a stop (the founder, fifth review), and phones, which
+        // see more of the height, travel a little less to reach the same ends.
+        const share = Math.min(0.9, (2 * close * tanHalf) / H)
+        const reach = 0.5 - share / 2
+        macroLook = anim.focusY + H * reach * (1 - 2 * a)
+        // Across to where the metal is at that height: a curved blade or a crooked haft stays in the shot.
+        macroX = sample(anim.profileX, 0.5 - (macroLook - anim.focusY) / H)
+      }
       dist += (close - dist) * m
       lookY += (macroLook - lookY) * m
       height += (macroLook + 0.04 - height) * m
