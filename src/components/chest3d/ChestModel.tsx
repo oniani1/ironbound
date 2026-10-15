@@ -4,6 +4,7 @@ import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import type { ChestTheme } from '../../types'
 import type { ChestAnim } from './animState'
+import { buildCrown } from './crown'
 import { asset } from '../../lib/asset'
 
 const URL = asset('/models/chest.glb')
@@ -215,26 +216,10 @@ function buildOrnament(theme: ChestTheme): THREE.Object3D | null {
   const g = new THREE.Group()
   const metal = new THREE.MeshStandardMaterial({ color: theme.metal, metalness: 1, roughness: 0.32 })
   if (theme.ornament === 'crown') {
+    // The reliquary's crown, built to the banner's design (crown.ts), seated on the lid.
     g.position.set(0, 0.196, 0.26)
-    g.scale.setScalar(1.25)
-    const band = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.08, 0.035, 28, 1, true), metal)
-    band.material = metal.clone()
-    ;(band.material as THREE.MeshStandardMaterial).side = THREE.DoubleSide
-    band.position.y = 0.018
-    g.add(band)
-    const jewel = new THREE.MeshStandardMaterial({ color: '#c3122a', emissive: '#ff2a3a', emissiveIntensity: 0.9, metalness: 0.2, roughness: 0.15 })
-    for (let i = 0; i < 5; i++) {
-      const a = (i / 5) * Math.PI * 2
-      const spike = new THREE.Mesh(new THREE.ConeGeometry(0.016, 0.055, 10), metal)
-      spike.position.set(Math.cos(a) * 0.072, 0.06, Math.sin(a) * 0.072)
-      g.add(spike)
-      const gem = new THREE.Mesh(new THREE.SphereGeometry(0.011, 12, 10), jewel)
-      gem.position.set(Math.cos(a) * 0.072, 0.093, Math.sin(a) * 0.072)
-      g.add(gem)
-    }
-    const center = new THREE.Mesh(new THREE.SphereGeometry(0.02, 16, 12), jewel)
-    center.position.set(0, 0.03, 0.08)
-    g.add(center)
+    g.scale.setScalar(1.45)
+    g.add(buildCrown(theme.metal))
   } else if (theme.ornament === 'tassel') {
     // A vermilion silk knot and tassel tied at the front of the lid.
     g.position.set(0, 0.035, 0.528)
