@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import type { Arms, Ordinary, Pull, PullStatus, RarityId, Tincture } from '../types'
+import type { Arms, Charge, Ordinary, Pull, PullStatus, RarityId, Tincture } from '../types'
 
 export interface Profile {
   name: string
@@ -35,8 +35,12 @@ const initial: State = {
 // The values a saved state may hold. Records keep them in step with the types.
 const RARITY_IDS: Record<RarityId, true> = { common: true, uncommon: true, rare: true, epic: true, legendary: true, relic: true }
 const STATUS_IDS: Record<PullStatus, true> = { vaulted: true, sold: true, shipping: true, shipped: true }
-const TINCTURE_IDS: Record<Tincture, true> = { or: true, argent: true, gules: true, azure: true, vert: true, sable: true, purpure: true }
-const ORDINARY_IDS: Record<Ordinary, true> = { chevron: true, saltire: true, cross: true, bend: true, pale: true, fess: true, chief: true, quarterly: true }
+const TINCTURE_IDS: Record<Tincture, true> = { or: true, argent: true, gules: true, azure: true, vert: true, sable: true, purpure: true, tenne: true, murrey: true, celeste: true, cendree: true }
+const ORDINARY_IDS: Record<Ordinary, true> = { chevron: true, saltire: true, cross: true, bend: true, pale: true, fess: true, chief: true, quarterly: true, bordure: true, pile: true, perpale: true, perfess: true, paly: true, barry: true, chequy: true, gyronny: true, plain: true }
+const CHARGE_IDS: Record<Charge, true> = { none: true, lion: true, crown: true, eagle: true, stag: true, boar: true, wolf: true, bear: true, griffin: true, unicorn: true, horse: true, raven: true, castle: true, fleur: true, swords: true, rose: true, sun: true }
+/** A metal on a color and a color on a metal, so a charge always reads against its field. */
+const LIGHT_TINCTURES: Partial<Record<Tincture, true>> = { or: true, argent: true, celeste: true, cendree: true }
+export const contrasting = (field: Tincture): Tincture => (LIGHT_TINCTURES[field] ? 'gules' : 'or')
 const METHOD_IDS: Record<NonNullable<State['signInMethod']>, true> = { email: true, google: true, wallet: true }
 
 type Json = Record<string, unknown>
@@ -45,7 +49,11 @@ const oneOf = <T extends string>(ids: Record<T, true>, v: unknown): v is T => ty
 const finite = (v: unknown, fallback: number) => (typeof v === 'number' && Number.isFinite(v) ? v : fallback)
 
 function readArms(v: unknown): Arms | null {
-  return isObject(v) && oneOf(TINCTURE_IDS, v.field) && oneOf(TINCTURE_IDS, v.charge) && oneOf(ORDINARY_IDS, v.ordinary) ? { field: v.field, charge: v.charge, ordinary: v.ordinary } : null
+  if (!isObject(v) || !oneOf(TINCTURE_IDS, v.field) || !oneOf(TINCTURE_IDS, v.charge) || !oneOf(ORDINARY_IDS, v.ordinary)) return null
+  // Saves from before the charges have none; a bad charge or color falls back the same way.
+  const symbol = oneOf(CHARGE_IDS, v.symbol) ? v.symbol : 'none'
+  const symbolColor = oneOf(TINCTURE_IDS, v.symbolColor) ? v.symbolColor : contrasting(v.field)
+  return { field: v.field, charge: v.charge, ordinary: v.ordinary, symbol, symbolColor }
 }
 
 function readShipment(v: unknown): Pull['shipment'] {

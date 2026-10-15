@@ -38,7 +38,7 @@
 .ib-ordinary[aria-pressed="true"] { color: var(--color-bone-100); }
 .ib-ordinary[aria-pressed="true"]::after { content: ''; position: absolute; inset-inline: 12px; bottom: 0; height: 1px; background: var(--color-brass-400); }
 .ib-ordinary-check { position: absolute; top: 8px; right: 8px; color: var(--color-brass-400); }
-.ib-swatches { display: flex; flex-wrap: wrap; gap: 4px; padding-bottom: 16px; }
+.ib-swatches { display: flex; flex-wrap: wrap; gap: 18px 4px; padding-bottom: 16px; }
 .ib-swatch { position: relative; display: grid; place-items: center; width: 44px; height: 44px; padding: 4px; border: 0; border-radius: 2px; background: none; }
 .ib-swatch[aria-pressed="true"]::after { content: ''; position: absolute; inset-inline: 7px; bottom: -3px; height: 1px; background: var(--color-brass-400); }
 .ib-tincture-check { position: absolute; top: 13px; left: 14px; }
@@ -79,4 +79,39 @@
     padding: 14px 0 calc(14px + env(safe-area-inset-bottom));
     background: linear-gradient(180deg, transparent, var(--color-ink-950) 32%);
   }
+}
+
+/* The pattern book's charges and the vault's edit sheet. */
+.ib-charge-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.ib-charge { position: relative; display: grid; justify-items: center; align-content: center; gap: 8px; min-height: 84px; padding: 10px 4px; color: var(--color-bone-400); transition: color .15s ease, background-color .15s ease; }
+.ib-charge svg { width: 34px; height: 34px; }
+.ib-charge:hover { background: var(--color-ink-850); color: var(--color-bone-100); }
+.ib-charge[aria-pressed="true"] { color: var(--color-bone-100); }
+.ib-charge[aria-pressed="true"]::after { content: ''; position: absolute; inset-inline: 12px; bottom: 0; height: 1px; background: var(--color-brass-400); }
+.ib-profile-layout { display: grid; gap: 20px; }
+.ib-profile-preview { display: grid; justify-items: center; gap: 10px; padding: 24px 12px; background: var(--color-ink-950); border-radius: 2px; text-align: center; }
+.ib-profile-preview .ib-large-shield { width: 120px; height: 144px; }
+.ib-profile-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.ib-profile-sheet .plate { background: var(--color-ink-950); }
+@media (min-width: 768px) {
+  .ib-charge-options { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .ib-ordinary-options { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .ib-profile-layout { grid-template-columns: 220px minmax(0, 1fr); gap: 32px; align-items: start; }
+  .ib-profile-preview { position: sticky; top: 0; }
+}
+
+/* Onboarding's strips: one scrolling row each, so the step keeps its footer on the screen. */
+.ib-arms-picker--strip .ib-ordinary-options, .ib-arms-picker--strip .ib-charge-options { display: flex; overflow-x: auto; scroll-snap-type: x proximity; gap: 8px; padding-bottom: 6px; scrollbar-width: thin; scrollbar-color: var(--color-ink-600) transparent; }
+.ib-arms-picker--strip .ib-ordinary, .ib-arms-picker--strip .ib-charge { flex: 0 0 84px; min-height: 64px !important; padding: 6px 4px; gap: 4px; scroll-snap-align: start; }
+.ib-arms-picker--strip .ib-ordinary svg { width: 26px; height: 31px; }
+.ib-arms-picker--strip .ib-charge svg { width: 24px; height: 24px; }
+.ib-arms-picker--compact legend { margin-bottom: 6px; }
+@media (min-width: 768px) {
+  /* Onboarding on a desktop: eleven swatches on one row, so the step's footer stays on screen. */
+  .ib-arms-picker--compact .ib-swatches { gap: 14px 3px; padding-bottom: 8px; }
+  .ib-arms-picker--compact .ib-swatch { width: 34px; height: 34px; padding: 2px; }
+  .ib-arms-picker--compact .ib-swatch svg { width: 24px; height: 30px; }
+  .ib-arms-picker--compact .ib-tincture-check { top: 9px; left: 9px; }
+  .ib-arms-picker--compact .ib-tincture-name { top: 36px; }
+  .ib-arms-picker--compact .ib-swatch[aria-pressed="true"]::after { inset-inline: 5px; }
 }

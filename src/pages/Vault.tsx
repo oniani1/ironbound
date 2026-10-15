@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { ArrowRight, CaretDown, SlidersHorizontal } from '@phosphor-icons/react'
 import type { Category, Pull } from '../types'
 import { ARCHIVE_BY_ID, ITEM_BY_ID } from '../data/items'
@@ -13,6 +13,7 @@ import { DEFAULT_ARMS, Shield } from '../components/ui/Heraldry'
 import { CountUp } from '../components/ui/CountUp'
 import { RarityTag, Tag } from '../components/ui/RarityTag'
 import { Button } from '../components/ui/Button'
+import { ProfileSheet } from '../components/vault/ProfileSheet'
 import { QuietSelect } from '../components/ui/QuietSelect'
 import { EXPO, Reveal } from '../components/vault/Experience'
 import { ItemArtwork } from '../components/vault/ItemArtwork'
@@ -38,6 +39,7 @@ function FilterTabs<T extends string>({ options, value, onChange, label, id }: {
 export default function Vault() {
   const { uid } = useParams()
   const profile = useStore((s) => s.profile)
+  const [editing, setEditing] = useState(false)
   const pulls = useStore((s) => s.pulls)
   const stats = useStore((s) => s.stats)
   const [category, setCategory] = useState<Category | 'all'>('all')
@@ -67,7 +69,7 @@ export default function Vault() {
 
   return <><div className="ib-shell" id="vault-main">
     {uid ? selected && item ? <ItemDetail key={uid} pull={selected} item={item} /> : <div className="ib-empty"><p className="ib-kicker">Vault record unavailable</p><h1 className="ib-title">This piece is not here.</h1><p className="ib-copy">{selected ? 'Its catalog record is unavailable in this demo.' : 'This vault belongs to this browser. The item may be saved in another session.'}</p><Link to="/vault" className="ib-action-link">Return to your vault</Link></div> : <>
-      <Reveal><header className="ib-vault-header"><div className="ib-owner"><Shield arms={profile?.arms ?? DEFAULT_ARMS} size={58} /><div><p className="ib-kicker">Your private armory</p><h1 className="ib-title">{profile?.name ?? 'Wanderer'}’s vault</h1></div></div></header>
+      <Reveal><header className="ib-vault-header"><div className="ib-owner"><Shield arms={profile?.arms ?? DEFAULT_ARMS} size={58} /><div><p className="ib-kicker">Your private armory</p><h1 className="ib-title">{profile?.name ?? 'Wanderer'}’s vault</h1></div></div><Button variant="secondary" size="sm" onClick={() => setEditing(true)} data-testid="edit-profile">Edit arms and name</Button></header><AnimatePresence>{editing && <ProfileSheet onClose={() => setEditing(false)} />}</AnimatePresence>
         <div className="ib-vault-ledger">
           <div className="ib-ledger-owned"><p className="ib-ledger-label">Owned value</p><div className="ib-vault-total font-display tabular"><CountUp to={value} duration={0.45} /></div></div>
           <div className="ib-ledger-return"><p className="ib-ledger-label">Estimated result</p><strong className="tabular"><span className="ib-result-word">{resultWord(estimatedGain)}</span><CountUp to={estimatedGain} duration={0.45} format={signedMoney} /></strong></div>
