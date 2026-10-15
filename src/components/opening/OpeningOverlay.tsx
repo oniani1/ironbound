@@ -410,26 +410,28 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
         className={`absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 ${multi && phase === 'reveal' ? 'bg-[linear-gradient(180deg,var(--color-ink-950)_60%,transparent)] pb-5' : ''}`}
       >
         <div className="min-w-0">
-          <p className="eyebrow truncate">
-            {spectate ? (
-              <>
-                {/* Phones keep the disclosure whole; the name of the opener fits on wider screens. */}
-                <span className="sm:hidden">Simulated replay</span>
-                <span className="hidden sm:inline">Watching {spectate.by === 'You' ? 'your' : spectate.by ? `${spectate.by}'s` : 'a'} pull · simulated</span>
-              </>
-            ) : trial ? (
-              'Your first chest'
-            ) : (
-              chest.epithet
-            )}
-          </p>
+          {/* The chest name stands alone; its epithet lives on the chest page. A replay or the
+              trial says what it is above the name. */}
+          {(spectate || trial) && (
+            <p className="eyebrow truncate">
+              {spectate ? (
+                <>
+                  {/* Phones keep the disclosure whole; the name of the opener fits on wider screens. */}
+                  <span className="sm:hidden">Simulated replay</span>
+                  <span className="hidden sm:inline">Watching {spectate.by === 'You' ? 'your' : spectate.by ? `${spectate.by}'s` : 'a'} pull · simulated</span>
+                </>
+              ) : (
+                'Your first chest'
+              )}
+            </p>
+          )}
           <p className="font-display truncate text-xl font-semibold text-bone-50">
             {trial ? 'Trial Chest' : chest.name}
             {multi && <span className="ml-2 text-base font-normal text-bone-300">× {results.length}</span>}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Switch checked={fast} onChange={(v) => actions.setFast(v)} label="Fast opening" className="h-11 border border-bone-100/[0.16] bg-ink-950/75 px-3.5 max-sm:[&_.ib-switch-state]:hidden">
+          <Switch checked={fast} onChange={(v) => actions.setFast(v)} label="Fast opening" className="h-10 rounded-[2px] bg-bone-100/10 px-3.5 text-bone-50 hover:bg-bone-100/[0.16] max-sm:[&_.ib-switch-state]:hidden">
             Fast
           </Switch>
           {(phase === 'tell' || phase === 'rise' || phase === 'burst' || phase === 'title') && (
@@ -437,7 +439,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
               ref={skipBtn}
               data-testid="skip"
               onClick={skip}
-              className="flex min-h-11 items-center gap-2 rounded-[2px] border border-bone-100/[0.22] bg-ink-950/75 px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-bone-100 transition-colors hover:border-bone-100/45 hover:bg-ink-900 max-sm:fixed max-sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:px-6"
+              className="ib-button ib-button--ghost h-10 gap-2 px-4 text-[14px] max-sm:fixed max-sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:h-12 max-sm:px-6"
             >
               Skip <FastForward size={14} weight="light" aria-hidden />
             </button>
@@ -465,7 +467,7 @@ export default function OpeningOverlay({ session }: { session: OpeningSession })
                   <div className="vitrine h-[56px] p-1">
                     <ItemImg item={it} className="h-full w-full" />
                   </div>
-                  <p className="mt-1.5 text-[11px] font-semibold text-bone-300 tabular">{money(it.value, { compact: true })}</p>
+                  <p className="mt-1.5 text-[12px] font-semibold text-bone-300 tabular">{money(it.value, { compact: true })}</p>
                 </div>
               ))}
             </div>

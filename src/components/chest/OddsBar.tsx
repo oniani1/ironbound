@@ -26,7 +26,7 @@ export function OddsBar({ chest, height = 6, defaultExpanded = false }: { chest:
         aria-expanded={expanded}
         aria-controls={legendId}
         onClick={() => setExpanded((open) => !open)}
-        className="pointer-events-auto relative z-20 mt-1.5 inline-flex min-h-10 items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-bone-400 transition-colors hover:text-bone-100"
+        className="pointer-events-auto relative z-20 mt-1.5 inline-flex min-h-10 items-center gap-1.5 text-[14px] font-medium text-bone-300 transition-colors hover:text-bone-50"
       >
         Odds
         {expanded ? <Minus size={11} weight="bold" aria-hidden /> : <Plus size={11} weight="bold" aria-hidden />}

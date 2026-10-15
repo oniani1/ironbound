@@ -247,11 +247,10 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         </motion.div>
       )}
 
-      {/* The value, entered like a line in a ledger, and what it means against the chest. */}
+      {/* The value under its label, and what it means against the chest. */}
       <motion.div {...head(1.6, 0.4)} className="receipt-value">
         <p className="receipt-value-line">
           <span className="receipt-value-label">{item.provenance === 'forged' ? 'Retail price, new' : 'Estimated value'}</span>
-          <span className="receipt-leader" aria-hidden />
           <span className="receipt-value-number">
             {/* The value is stated, not teased: it lands at once below Epic and rolls briefly above. */}
             {/* Below Epic the figure is final before its line fades in, so no $0 shows through. */}
@@ -274,7 +273,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
             </motion.a>
           )}
           <motion.span className="receipt-comparison" initial={{ opacity: 0 }} animate={counted || instant ? { opacity: 1 } : {}} transition={{ duration: instant ? 0.2 : 0.4 }}>
-            {trial ? <Tag tone="moss">Free chest</Tag> : delta >= 0 ? `${mult >= 10 ? mult.toFixed(0) : mult.toFixed(1)} times the chest price` : `${money(delta)} against the chest price`}
+            {trial ? <Tag tone="moss">Free chest</Tag> : delta >= 0 ? `${mult >= 10 ? mult.toFixed(0) : mult.toFixed(1)}× the chest price · ${money(chest.price)} paid` : `${money(delta)} against the chest price · ${money(chest.price)} paid`}
           </motion.span>
         </div>
       </motion.div>
@@ -330,17 +329,20 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
                 <Button ref={keepRef} data-testid="keep" variant="primary" size="lg" className="w-full" onClick={onKeep} tabIndex={built ? 0 : -1} aria-describedby={summaryId}>
                   Keep in vault
                 </Button>
-                {/* Sell and Ship: entries in the ledger, the action and its terms. */}
+                {/* Sell back and Ship to me: two outlined buttons, their terms in one line under them. */}
                 <div className="receipt-commands">
                   <button type="button" data-testid="sell" className="receipt-command" onClick={sellWithCoins} tabIndex={built ? 0 : -1}>
-                    <span className="receipt-command-label">Sell for {money(offer)}</span>
-                    <span className="receipt-command-note">{trial ? `${pct}% instant` : `${pct}% · ${net >= 0 ? '+' : ''}${money(net)} net`}</span>
+                    Sell back · {money(offer)}
                   </button>
                   <button type="button" className="receipt-command" onClick={onShip} disabled={trial} tabIndex={built ? 0 : -1}>
-                    <span className="receipt-command-label">Ship to me</span>
-                    <span className="receipt-command-note">{trial ? 'After you claim your purse' : 'Insured courier'}</span>
+                    Ship to me
                   </button>
                 </div>
+                <p className="receipt-terms">
+                  {trial
+                    ? `Sell-back is ${pct}% of the value, paid at once. Shipping opens after you claim your purse.`
+                    : `Sell-back is ${pct}% of the value, ${net >= 0 ? '+' : ''}${money(net)} net of the chest. Shipping is by insured courier.`}
+                </p>
               </>
             )}
             {!trial && (
@@ -349,7 +351,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
                 data-testid="again"
                 variant={sold != null ? 'primary' : 'ghost'}
                 size={sold != null ? 'lg' : 'md'}
-                className={`w-full ${sold != null ? 'mt-3' : 'mt-1'}`}
+                className={`w-full ${sold != null ? 'mt-3' : 'mt-2.5'}`}
                 onClick={onAgain}
                 disabled={!canAfford}
                 tabIndex={built ? 0 : -1}
