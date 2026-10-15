@@ -190,7 +190,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
                     aria-label={`Inspect ${r.item.name}, ${rr.label}, ${money(r.item.value)}`}
                   >
                     <ItemImg item={r.item} eager className="absolute inset-2 h-[calc(100%-16px)] w-[calc(100%-16px)] drop-shadow-[0_10px_18px_oklch(0%_0_0/.6)]" />
-                    {r.item.photoExact === false && <span className="absolute bottom-1.5 left-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-bone-300">Example photo</span>}
+                    {r.item.photoExact === false && <span className="absolute bottom-1.5 left-2 text-[12px] font-medium text-bone-300">Example photo</span>}
                   </button>
                   {isSold ? (
                     <span className="absolute inset-x-0 top-0 flex justify-center bg-ink-950/80 py-1.5">
@@ -414,29 +414,29 @@ function InspectSheet({ result, chest, sold, instant, onSell, onKeep, onClose }:
           {item.provenance === 'forged' && (
             <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
               <Tag tone={item.resale === 'strong' ? 'moss' : 'bone'}>{resaleLabel(item.resale)}</Tag>
-              <span className="text-[11px] text-bone-400">Our assessment{item.photoExact === false ? ' · Example photo of the type' : ''}</span>
+              <span className="text-[12px] text-bone-400">Our assessment{item.photoExact === false ? ' · Example photo of the type' : ''}</span>
             </p>
           )}
           {!photoCredit(item).publicDomain && (
-            <p className="mt-2 text-[11px] leading-snug text-bone-400">
+            <p className="mt-2 text-[12px] leading-snug text-bone-400">
               <PhotoCredit item={item} />
             </p>
           )}
         </div>
         <dl className="mt-4 grid grid-cols-2 items-end gap-3 border-t border-bone-100/10 pt-3 tabular">
           <div>
-            <dt className="eyebrow !text-[11px]">{item.provenance === 'forged' ? 'Retail price, new' : 'Estimated value'}</dt>
+            <dt className="eyebrow">{item.provenance === 'forged' ? 'Retail price, new' : 'Estimated value'}</dt>
             <dd className="ib-money mt-1 text-[30px] leading-none text-bone-50">{money(item.value)}</dd>
             {item.provenance === 'forged' && item.priceSource && (
               <dd className="mt-1">
-                <a href={item.priceSource} target="_blank" rel="noreferrer" className="text-[11px] text-bone-300 underline decoration-bone-100/25 underline-offset-2 hover:text-bone-100">
+                <a href={item.priceSource} target="_blank" rel="noreferrer" className="text-[12px] text-bone-300 underline decoration-bone-100/25 underline-offset-2 hover:text-bone-100">
                   {sourceHost(item.priceSource)} · {RETAIL_CHECKED_SHORT}
                 </a>
               </dd>
             )}
           </div>
           <div>
-            <dt className="eyebrow !text-[11px]">Sell-back offer</dt>
+            <dt className="eyebrow">Sell-back offer</dt>
             <dd className="ib-money mt-1 text-[30px] leading-none text-bone-100">
               {money(offer)} <span className="text-[13px] font-normal text-bone-300">{Math.round(chest.buyback * 100)}%</span>
             </dd>

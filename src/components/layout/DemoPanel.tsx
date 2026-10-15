@@ -63,12 +63,12 @@ export function DemoPanel() {
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="plate w-[264px] p-3.5 md:mb-2"
           >
-            <p className="eyebrow !text-[10px]">Demo controls</p>
-            <p className="mt-2 text-[12px] text-bone-300">Next pull lands as</p>
+            <p className="eyebrow">Demo controls</p>
+            <p className="mt-2 text-[13px] text-bone-300">Next pull lands as</p>
             <div className="mt-2 grid grid-cols-3 gap-1.5">
               <button
                 onClick={() => actions.setForce(null)}
-                className={`rounded-[4px] px-2 py-1.5 text-[11px] font-semibold ${force === null ? 'bg-bone-100 text-ink-950' : 'bg-ink-800 text-bone-300 hover:text-bone-50'}`}
+                className={`rounded-[4px] px-2 py-1.5 text-[12px] font-semibold ${force === null ? 'bg-bone-100 text-ink-950' : 'bg-ink-800 text-bone-300 hover:text-bone-50'}`}
               >
                 Odds
               </button>
@@ -78,7 +78,7 @@ export function DemoPanel() {
                   onClick={() => {
                     actions.setForce(r)
                   }}
-                  className="rounded-[4px] px-2 py-1.5 text-[11px] font-semibold transition-colors"
+                  className="rounded-[4px] px-2 py-1.5 text-[12px] font-semibold transition-colors"
                   style={
                     force === r
                       ? { background: RARITIES[r].cssVar, color: 'var(--color-ink-950)' }
@@ -94,7 +94,7 @@ export function DemoPanel() {
                 onClick={() => {
                   actions.addFunds(1000)
                 }}
-                className="rounded-[4px] bg-ink-800 px-2 py-1.5 text-[11px] font-semibold text-bone-200 hover:text-bone-50"
+                className="rounded-[4px] bg-ink-800 px-2 py-1.5 text-[12px] font-semibold text-bone-200 hover:text-bone-50"
               >
                 + $1,000
               </button>
@@ -104,7 +104,7 @@ export function DemoPanel() {
                   setOpen(false)
                   navigate('/')
                 }}
-                className="rounded-[4px] bg-ink-800 px-2 py-1.5 text-[11px] font-semibold text-bone-200 hover:text-ember-400"
+                className="rounded-[4px] bg-ink-800 px-2 py-1.5 text-[12px] font-semibold text-bone-200 hover:text-ember-400"
               >
                 Reset demo
               </button>

@@ -133,11 +133,11 @@ export function ShareSheet({ pull, onClose }: { pull: SharePull; onClose: () => 
           <div className="vitrine relative aspect-[4/3.4]">
             <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 pt-3.5">
               <Wordmark className="text-[17px] leading-none text-bone-100" />
-              <span className="caps !text-[10px] text-bone-400">{pull.chestName}</span>
+              <span className="text-[12px] font-medium text-bone-400">{pull.chestName}</span>
             </div>
             <ItemImg item={pull.item} size="full" eager alt="" className="relative h-full w-full p-[13%] drop-shadow-[0_18px_26px_oklch(0%_0_0/.6)]" />
             {/* The disclosure travels with the picture: many newly forged pieces show an example of the type. */}
-            {pull.item.photoExact === false && <span className="caps absolute bottom-3 left-4 !text-[10px] text-bone-400">Example photo of the type</span>}
+            {pull.item.photoExact === false && <span className="absolute bottom-3 left-4 text-[12px] font-medium text-bone-400">Example photo of the type</span>}
           </div>
           <figcaption className="border-t border-bone-100/[0.08] px-4 pb-4 pt-3.5">
             <div className="flex items-center gap-2.5">
@@ -152,7 +152,7 @@ export function ShareSheet({ pull, onClose }: { pull: SharePull; onClose: () => 
             </p>
             <div className="mt-3 flex items-end justify-between border-t border-bone-100/[0.08] pt-3">
               <span className="ib-money text-[32px] leading-none text-bone-50">{money(pull.item.value)}</span>
-              <span className="text-right text-[11px] leading-tight text-bone-400">
+              <span className="text-right text-[12px] leading-tight text-bone-400">
                 {pull.by ? `${pull.by} · ` : ''}
                 {date}
                 <br />
@@ -160,7 +160,7 @@ export function ShareSheet({ pull, onClose }: { pull: SharePull; onClose: () => 
               </span>
             </div>
             {!photoCredit(pull.item).publicDomain && (
-              <p className="mt-2.5 text-[10px] leading-snug text-bone-400">
+              <p className="mt-2.5 text-[12px] leading-snug text-bone-400">
                 <PhotoCredit item={pull.item} />
               </p>
             )}

@@ -59,7 +59,7 @@ export default function Chests() {
 function Figure({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <dt className="truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-bone-400">{label}</dt>
+      <dt className="truncate text-[13px] font-medium text-bone-400">{label}</dt>
       <dd className="mt-1 text-[15px] font-semibold text-bone-100 tabular">{value}</dd>
     </div>
   )

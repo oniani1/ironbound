@@ -2,12 +2,16 @@ import type { ReactNode } from 'react'
 import type { RarityId } from '../../types'
 import { RARITIES } from '../../config/rarity'
 
-/** Rarity is always named and marked with pips, never color alone. A label, not a pill. */
-export function RarityTag({ rarity, size = 'sm', className = '' }: { rarity: RarityId; size?: 'xs' | 'sm' | 'md'; className?: string }) {
+const SIZES = { xs: 'text-[15px]', sm: 'text-[18px]', md: 'text-[22px]' } as const
+
+/**
+ * Rarity is always named and marked with pips, never color alone: the Gothic word in its
+ * color with a pool of its own light behind it (globals.css, .ib-rarity). A label, not a pill.
+ */
+export function RarityTag({ rarity, size = 'sm', className = '' }: { rarity: RarityId; size?: keyof typeof SIZES; className?: string }) {
   const r = RARITIES[rarity]
-  const text = size === 'xs' ? 'text-[10px] gap-1' : size === 'sm' ? 'text-[11px] gap-1.5' : 'text-[12px] gap-2'
   return (
-    <span className={`inline-flex items-center font-semibold uppercase tracking-[0.16em] ${text} ${className}`} style={{ color: r.cssVar }}>
+    <span className={`ib-rarity ${SIZES[size]} ${className}`} style={{ color: r.cssVar }}>
       <Pips tier={r.tier} color={r.cssVar} />
       {r.label}
     </span>
@@ -32,11 +36,11 @@ const TONES = {
   relic: 'var(--r-relic)',
 } as const
 
-/** A status label: small caps in the meaning color, in words. The diamond belongs to rarity alone. */
+/** A status label: 13 px, medium, sentence case, in the meaning color. The diamond belongs to rarity alone. */
 export function Tag({ children, tone = 'bone', className = '', title }: { children: ReactNode; tone?: keyof typeof TONES; className?: string; title?: string }) {
   const color = TONES[tone]
   return (
-    <span className={`inline-flex items-center text-[11px] font-semibold uppercase tracking-[0.18em] ${className}`} style={{ color }} title={title}>
+    <span className={`inline-flex items-center text-[13px] font-medium ${className}`} style={{ color }} title={title}>
       {children}
     </span>
   )

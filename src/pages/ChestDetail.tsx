@@ -94,9 +94,10 @@ export default function ChestDetail() {
 
         {/* Purchase column. */}
         <motion.div initial={{ opacity: 0, y: reduced ? 0 : 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1, ease }} className="flex flex-col justify-center">
-          <p className="eyebrow">{chest.epithet}</p>
-          <h1 className="font-display mt-3 text-[46px] font-semibold leading-[0.95] text-bone-50 sm:text-[64px]">{chest.name}</h1>
-          <p className="mt-4 max-w-[48ch] text-[15px] leading-relaxed text-bone-300">{chest.tagline}</p>
+          <h1 className="font-display text-[46px] font-semibold leading-[0.95] text-bone-50 sm:text-[64px]">{chest.name}</h1>
+          {/* The epithet sits under the name in the italic serif, where an epithet belongs. */}
+          <p className="font-display mt-3 text-[20px] italic leading-snug text-bone-200">{chest.epithet}.</p>
+          <p className="mt-4 max-w-[48ch] text-[16px] leading-relaxed text-bone-300">{chest.tagline}</p>
 
           <div className="mt-8">
             <OddsBar chest={chest} height={6} defaultExpanded />

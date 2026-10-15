@@ -11,15 +11,17 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   sub?: ReactNode
 }
 
+// 40, 48 and 52 px: the heights the auction houses use (Sotheby's lot page 48 px, Aston Martin
+// 40 to 56 px), text at 14 to 15 px.
 const sizes: Record<Size, string> = {
-  sm: 'h-9 px-4 text-[11.5px] gap-2',
-  md: 'h-11 px-5 text-[12.5px] gap-2',
-  lg: 'h-14 px-7 text-[13.5px] gap-2.5',
+  sm: 'h-10 px-4 text-[14px] gap-2',
+  md: 'h-12 px-6 text-[15px] gap-2',
+  lg: 'h-[52px] px-7 text-[15px] gap-2.5',
 }
 
-// One button language (globals.css, .ib-button): a flat brass plate for the single most
-// important action on a view, a square hairline for everything secondary, plain words for the
-// rest. No gradients, no sheen, no glow.
+// One button language (globals.css, .ib-button): a brass fill for the single most important
+// action on a view, a 1 px outline for everything secondary, a translucent fill for the rest.
+// Sentence case, 2 px corners. No gradients, no sheen, no glow.
 const variants: Record<Variant, string> = {
   primary: 'ib-button--primary',
   secondary: 'ib-button--secondary bg-transparent hover:bg-bone-100/[0.05]',

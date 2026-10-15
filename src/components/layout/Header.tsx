@@ -48,12 +48,12 @@ export function Header() {
             <NavLink
               key={n.to}
               to={n.to}
-              className={({ isActive }) => `relative py-2 text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors duration-200 ${isActive ? 'text-bone-50' : 'text-bone-400 hover:text-bone-100'}`}
+              className={({ isActive }) => `relative py-2 text-[14px] font-medium transition-colors duration-200 ${isActive ? 'text-bone-50' : 'text-bone-300 hover:text-bone-50'}`}
             >
               {({ isActive }) => (
                 <>
                   {n.label}
-                  {n.to === '/vault' && vaultCount > 0 && <sup className="ml-1 text-[10px] tracking-normal text-brass-300 tabular">{vaultCount}</sup>}
+                  {n.to === '/vault' && vaultCount > 0 && <sup className="ml-1 text-[12px] text-brass-300 tabular">{vaultCount}</sup>}
                   {isActive && <motion.span layoutId="nav-hairline" className="absolute inset-x-0 -bottom-0.5 mx-auto h-px w-6 bg-brass-400" transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} />}
                 </>
               )}

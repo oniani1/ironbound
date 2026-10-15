@@ -19,14 +19,14 @@ export function BottomNav() {
             <NavLink
               to={to}
               end={to === '/'}
-              className={({ isActive }) => `relative flex flex-col items-center gap-1 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] transition-colors ${isActive ? 'text-brass-300' : 'text-bone-400'}`}
+              className={({ isActive }) => `relative flex flex-col items-center gap-1 py-2.5 text-[12px] font-medium transition-colors ${isActive ? 'text-brass-300' : 'text-bone-400'}`}
             >
               {({ isActive }) => (
                 <>
                   <Icon size={22} weight={isActive ? 'regular' : 'light'} aria-hidden />
                   {label}
                   {to === '/vault' && vaultCount > 0 && (
-                    <span className="absolute right-[calc(50%-20px)] top-1.5 min-w-[15px] rounded-[2px] bg-brass-500 px-1 text-center text-[10px] font-bold leading-[15px] tracking-normal text-ink-950 tabular">{vaultCount}</span>
+                    <span className="absolute right-[calc(50%-20px)] top-1.5 min-w-[18px] rounded-[2px] bg-brass-500 px-1 text-center text-[12px] font-bold leading-[18px] text-ink-950 tabular">{vaultCount}</span>
                   )}
                 </>
               )}
