@@ -136,7 +136,7 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
-            className="w-full max-w-[980px]"
+            className="w-full max-w-[1120px]"
             initial={{ opacity: 0, y: reduced ? 0 : 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, transition: { duration: 0.2 } }}

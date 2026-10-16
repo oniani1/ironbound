@@ -10,7 +10,7 @@
 .ib-ledger-label { margin: 0 0 8px; color: var(--color-bone-400); font-size: 13px; }
 .ib-vault-total { font-size: 44px; line-height: 1; overflow-wrap: anywhere; }
 .ib-ledger-return strong { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 15px; line-height: 1.5; font-weight: 500; overflow-wrap: anywhere; }
-.ib-result-word { color: var(--color-bone-400); font-size: 13px; }
+.ib-ledger-note { color: var(--color-bone-400); font-size: 13px; overflow-wrap: anywhere; }
 .ib-ledger-calculation summary { min-height: 44px; display: flex; align-items: center; gap: 8px; color: var(--color-bone-400); cursor: pointer; list-style: none; }
 .ib-ledger-calculation summary::-webkit-details-marker { display: none; }
 .ib-ledger-calculation summary svg { transition: transform .2s var(--ease-out-expo); }

@@ -5,7 +5,10 @@ import { actions, useStore } from '../../lib/store'
 import { money } from '../../lib/format'
 import { CountUp } from '../ui/CountUp'
 
-/** The purse as a ledger figure, not a pill. Changes roll to the new value and show a signed delta. */
+/**
+ * The purse as a ledger figure, not a pill. Changes roll to the new value; money coming in, a sale
+ * or a top-up, also shows its amount. A chest's price is never flashed as a loss (the founder, 2026-10-16).
+ */
 export function Purse() {
   const balance = useStore((s) => s.balance)
   const prev = useRef(balance)
@@ -14,9 +17,14 @@ export function Purse() {
 
   useEffect(() => {
     if (balance !== prev.current) {
+      const gained = balance - prev.current
       setFrom(prev.current)
-      setDelta({ id: Date.now(), v: balance - prev.current })
       prev.current = balance
+      if (gained <= 0) {
+        setDelta(null)
+        return
+      }
+      setDelta({ id: Date.now(), v: gained })
       const t = window.setTimeout(() => setDelta(null), 1800)
       return () => window.clearTimeout(t)
     }
@@ -45,10 +53,9 @@ export function Purse() {
             animate={{ opacity: 1, y: 18 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className={`pointer-events-none absolute right-2 top-6 text-[12px] font-semibold tabular ${delta.v >= 0 ? 'text-moss-400' : 'text-ember-400'}`}
+            className="pointer-events-none absolute right-2 top-6 text-[12px] font-semibold text-moss-400 tabular"
           >
-            {delta.v >= 0 ? '+' : ''}
-            {money(delta.v)}
+            +{money(delta.v)}
           </motion.span>
         )}
       </AnimatePresence>

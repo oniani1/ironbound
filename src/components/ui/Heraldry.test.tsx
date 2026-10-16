@@ -26,7 +26,8 @@ describe('the shield', () => {
       const charge = CHARGES[symbol as Exclude<Charge, 'none'>]
       expect(html, symbol).toContain(TINCTURES.argent.fill)
       expect(html, symbol).toContain(charge.d.slice(0, 24))
-      expect(charge.by, symbol).toMatch(/Lorc|Delapouite|Caro Asercion/)
+      expect(charge.by, symbol).toBeTruthy()
+      expect(['CC0', 'Public domain', 'CC BY 2.5', 'CC BY 3.0', 'CC BY-SA 3.0', 'CC BY-SA 4.0', 'Original'], symbol).toContain(charge.license)
     }
   })
 
