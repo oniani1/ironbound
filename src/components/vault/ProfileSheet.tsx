@@ -9,9 +9,9 @@ import { ArmsEditor } from '../onboarding/ArmsEditor'
 import './experience.css'
 
 /**
- * Edit your arms and name, from the vault. The same pattern book as onboarding, in a sheet:
- * the live shield beside the controls, Save writes the profile, Cancel and Escape leave it as
- * it was. Focus stays inside and returns to the opener.
+ * Edit your arms and name, from the vault. The same pattern book as onboarding, page by page,
+ * in a sheet: the live shield beside the pages, Save (on any page) writes the profile, Cancel
+ * and Escape leave it as it was. Focus stays inside and returns to the opener.
  */
 export function ProfileSheet({ onClose }: { onClose: () => void }) {
   const reduced = useReducedMotion()
@@ -73,7 +73,7 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
       <motion.div
         ref={panel}
         onClick={(e) => e.stopPropagation()}
-        className="ib-sheet ib-ledger ib-profile-sheet w-full max-w-[760px] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-7"
+        className="ib-sheet ib-ledger ib-profile-sheet w-full max-w-[880px] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-7"
         initial={{ y: reduced ? 0 : 36, opacity: reduced ? 0 : 1 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: reduced ? 0 : 24, opacity: reduced ? 0 : 1 }}
@@ -85,30 +85,30 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
             <X size={16} weight="light" />
           </IconButton>
         </div>
-        <form
-          className="ib-profile-layout mt-4"
-          onSubmit={(e) => {
-            e.preventDefault()
-            save()
-          }}
-        >
+        <div className="ib-profile-layout mt-4">
           <div className="ib-profile-preview">
             <Shield arms={arms} size={140} className="ib-large-shield" />
-            <p className="font-display text-[26px] leading-tight text-bone-50 break-words max-w-full m-0">{name.trim() || 'Wanderer'}</p>
-            <p className="ib-kicker m-0">{blazon(arms).replace(/^Arms: /, '')}</p>
+            <div className="ib-arms-caption">
+              <p className="ib-arms-name">{name.trim() || 'Wanderer'}</p>
+              <p className="ib-kicker m-0">{blazon(arms).replace(/^Arms: /, '')}</p>
+            </div>
           </div>
-          <div className="ib-arms-controls">
-            <ArmsEditor name={name} onName={setName} arms={arms} onArms={setArms} nameId="profile-name" />
-            <div className="ib-profile-footer">
+          <ArmsEditor
+            name={name}
+            onName={setName}
+            arms={arms}
+            onArms={setArms}
+            nameId="profile-name"
+            onDone={save}
+            doneLabel="Save"
+            saveAnyPage
+            lead={
               <Button type="button" variant="ghost" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" data-testid="profile-save">
-                Save
-              </Button>
-            </div>
-          </div>
-        </form>
+            }
+          />
+        </div>
       </motion.div>
     </motion.div>
   )
