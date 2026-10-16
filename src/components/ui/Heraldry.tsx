@@ -48,6 +48,8 @@ const SHIELD = 'M6 6 H94 V52 C94 84 72 104 50 115 C28 104 6 84 6 52 Z'
 const SHIELD_INNER = 'M14 14 H86 V52 C86 78 68 94 50 103 C32 94 14 78 14 52 Z'
 const CX = 50
 const CY = 56
+/** The charge's box: a rampant beast stands most of the shield's height, as heraldry draws it. */
+const CHARGE = 66
 
 /** Eight wedges from the centre, every other one in the charge's tincture. */
 function gyrons(fill: string) {
@@ -142,12 +144,12 @@ function OrdinaryShape({ ordinary, fill }: { ordinary: Ordinary; fill: string })
   }
 }
 
-/** A charge drawn in a 60-unit box centred on the shield, with a dark edge so it reads on any tincture. */
+/** A charge drawn in a 66-unit box centred on the shield, with a dark edge so it reads on any tincture. */
 function ChargeShape({ charge, fill }: { charge: Charge; fill: string }) {
   if (charge === 'none') return null
-  const k = 60 / 512
+  const k = CHARGE / 512
   return (
-    <g transform={`translate(${CX - 30} ${CY - 30}) scale(${k})`}>
+    <g transform={`translate(${CX - CHARGE / 2} ${CY - CHARGE / 2}) scale(${k})`}>
       <path d={CHARGES[charge].d} fill={fill} stroke="#1a1512" strokeOpacity="0.55" strokeWidth={1.1 / k} strokeLinejoin="round" paintOrder="stroke" />
     </g>
   )
