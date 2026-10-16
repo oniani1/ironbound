@@ -108,12 +108,13 @@ try {
     const page = await context.newPage()
     page.on('pageerror', (error) => errors.push(`${width}: ${error.message}`))
     await seedPage(page)
-    await check(`${width} ledger retains ownership and rates`, async () => {
+    await check(`${width} ledger counts value, never a loss`, async () => {
       await page.waitForFunction(() => document.querySelector('.ib-vault-total')?.innerText === '$8,784')
       assert.equal(await page.locator('.ib-vault-total').innerText(), '$8,784')
-      assert.match(await page.locator('.ib-ledger-return').nth(0).innerText(), /Gain\s*\+\$8,107/)
-      // Each offer is whole dollars, as the vault credits it: $7,729 at 88% + $123 sold - $800 spent.
-      assert.match(await page.locator('.ib-ledger-return').nth(1).innerText(), /Gain\s*\+\$7,052/)
+      assert.match(await page.locator('.ib-ledger-return').nth(0).innerText(), /\$4,800/)
+      // Only pieces in the vault can be sold back, each offer in whole dollars at 88%: $8,480 becomes $7,462.
+      await page.waitForFunction(() => document.querySelectorAll('.ib-ledger-return')[1]?.innerText.includes('$7,462'))
+      assert.doesNotMatch(await page.locator('.ib-vault-ledger').innerText(), /Gain|Loss|spent|[-−]\$/)
       const columns = await page.locator('.ib-wall').evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(' ').length)
       assert.equal(columns, width === 390 ? 2 : 4)
       assert.equal(await page.locator('a[href^="/vault/"]').count(), 8)
@@ -363,17 +364,46 @@ try {
   const page = await context.newPage()
   page.on('pageerror', (error) => errors.push(`reduced: ${error.message}`))
   await seedPage(page, { ...seed, profile: { ...seed.profile, name: 'VeryLongUnbrokenCollectorName123' }, stats: { ...seed.stats, spent: 1500000 }, pulls: [{ ...seed.pulls[0], value: 1200000 }] })
-  await check('reduced motion, long names, million-dollar value and losses', async () => {
+  await check('reduced motion, long names and million-dollar value', async () => {
     assert.equal(await page.locator('.ib-vault-total').innerText(), '$1,200,000')
-    assert.match(await page.locator('.ib-ledger-return').first().innerText(), /Loss\s*-\$299,877/)
+    assert.match(await page.locator('.ib-ledger-return').first().innerText(), /\$1,200,000/)
     await page.locator('.ib-wall-entry').first().hover()
     assert.equal(await page.locator('.ib-image-fit').first().evaluate((e) => getComputedStyle(e).transform), 'none')
     await fits(page, 'long names and values')
   })
   await seedPage(page, { ...seed, pulls: [{ ...seed.pulls[0], chestId: 'missing' }] })
-  await check('missing chest makes sell-back net unavailable', async () => { assert.match(await page.locator('.ib-ledger-return').nth(1).innerText(), /Unavailable/) })
+  await check('missing chest makes sell-back unavailable', async () => { assert.match(await page.locator('.ib-ledger-return').nth(1).innerText(), /Unavailable/) })
   await seedPage(page, { ...seed, pulls: [] })
   await check('empty collection has a chest path', async () => { await page.getByRole('heading', { name: 'Start your armory.' }).waitFor(); assert.equal(await page.getByRole('link', { name: 'Open a chest' }).getAttribute('href'), '/chests') })
+  await seedPage(page, seed, '/')
+  await check('hero offers one chest path and a replay', async () => {
+    const hero = page.locator('section').filter({ has: page.locator('h1') }).first()
+    assert.equal(await hero.locator('a[href="/chests"]').count(), 1)
+    await page.getByTestId('hero-watch').click()
+    await page.getByTestId('spectate-open').waitFor({ state: 'visible', timeout: 30000 })
+    const receipt = await page.getByTestId('reveal-card').innerText()
+    assert.match(receipt, /12× the chest price/)
+    assert.doesNotMatch(receipt, /\$[\d,]+ paid|against|net of/)
+  })
+  // The last chest of an opening is forced Common: on the $250 Knight's chest it is worth $90 to $150.
+  const below = { ...seed, balance: 5000, settings: { fast: true, force: 'common' } }
+  await seedPage(page, below, '/chests/knight')
+  await check('a piece worth less than its chest shows no loss', async () => {
+    await page.getByTestId('open-chest-mobile').click()
+    await page.getByTestId('keep').waitFor({ state: 'visible', timeout: 30000 })
+    const receipt = await page.getByTestId('reveal-card').innerText()
+    assert.doesNotMatch(receipt, /\$[\d,]+ paid|against|net of|×|[-−]\$/)
+    assert.match(receipt, /Sell-back is 88% of the value, paid at once\./)
+  })
+  await seedPage(page, below, '/chests/knight')
+  await check('a batch shows its best pull, never its cost against its value', async () => {
+    await page.getByRole('radiogroup', { name: 'How many chests' }).last().getByRole('radio', { name: '×3' }).click()
+    await page.getByTestId('open-chest-mobile').click()
+    await page.getByTestId('multi-summary').waitFor({ state: 'visible', timeout: 30000 })
+    const summary = await page.getByTestId('multi-summary').innerText()
+    assert.match(summary, /Best pull/)
+    assert.doesNotMatch(summary, /\$[\d,]+ paid|against|below|[-−]\$/)
+  })
   await seedPage(page, { ...seed, profile: null, signedIn: false, onboarded: false, balance: 0, pulls: [], stats: { spent: 0, opened: 0, soldFor: 0 } }, '/')
   await check('free chest Keep reaches the vault and optional setup', async () => {
     await page.getByTestId('header-cta').click()

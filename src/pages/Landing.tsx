@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowRight } from '@phosphor-icons/react'
+import { ArrowRight, Play } from '@phosphor-icons/react'
 import gsap from 'gsap'
 import { ChestScene } from '../components/chest3d/ChestScene'
 import { ChestAnim } from '../components/chest3d/animState'
 import { CHEST_BY_ID } from '../config/chests'
+import { chestPool } from '../lib/gacha'
 import { ITEMS } from '../data/items'
 import { money, shortEra } from '../lib/format'
 import { RarityTag } from '../components/ui/RarityTag'
@@ -46,14 +47,17 @@ function Hero() {
     return a
   }, [])
   const featured = useMemo(() => ITEMS.find((i) => i.id === 'knightly-longsword-27458') ?? ITEMS.find((i) => i.category === 'sword' && i.value > 40000) ?? ITEMS[ITEMS.length - 1]!, [])
+  const king = CHEST_BY_ID.king!
+  // The featured piece's rarity where it can be pulled, so the card and the replay agree.
+  const rarity = useMemo(() => chestPool(king, ITEMS).find((g) => g.items.some((i) => i.id === featured.id))?.band.rarity ?? 'legendary', [king, featured])
   const { start } = useOnboarding()
   // An opening draws its own scene over the page; the hero holds its last frame meanwhile.
-  const { active: opening } = useOpening()
+  const { open, active: opening } = useOpening()
   const covered = useRef(opening)
   covered.current = opening
   const guestCta = useGuestCta()
   const signedIn = useStore((s) => s.signedIn)
-  const theme = CHEST_BY_ID.king!.theme
+  const theme = king.theme
   const teaseTimer = useRef(0)
 
   // Every few seconds the chest strains against its lock, as if something inside wants out.
@@ -98,7 +102,7 @@ function Hero() {
         transition={{ duration: 0.8, delay: 1.4, ease }}
         className="pointer-events-none absolute right-[4%] top-[47%] z-10 hidden w-[220px] border-t border-bone-100/15 pt-3 [text-shadow:0_1px_10px_oklch(0%_0_0/.9)] lg:block xl:right-[6%]"
       >
-        <RarityTag rarity="legendary" size="xs" />
+        <RarityTag rarity={rarity} size="xs" />
         <p className="font-display mt-1.5 text-[20px] leading-tight text-bone-50">{featured.name}</p>
         <p className="mt-1 truncate text-[12px] text-bone-400">
           {shortEra(featured.era)} · {featured.origin.replace(/\s*\(.*\)$/, '')}
@@ -138,10 +142,17 @@ function Hero() {
                 {guestCta}
               </Button>
             )}
-            <Link to="/chests" className="caps group flex min-h-14 items-center gap-2.5 whitespace-nowrap px-4 text-bone-200 transition-colors hover:text-bone-50 sm:px-5">
-              See the chests
-              <ArrowRight size={16} weight="light" className="transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
-            </Link>
+            {/* The second way in: watch the featured piece come out of the King's Reliquary. A replay,
+                so nothing is charged and nothing enters the vault. */}
+            <button
+              type="button"
+              onClick={() => open(king.id, 1, { spectate: { itemId: featured.id, rarity } })}
+              className="caps group flex min-h-14 items-center gap-2.5 whitespace-nowrap px-4 text-bone-200 transition-colors hover:text-bone-50 sm:px-5"
+              data-testid="hero-watch"
+            >
+              <Play size={15} weight="light" className="transition-transform duration-300 group-hover:scale-110" aria-hidden />
+              Watch an opening
+            </button>
           </motion.div>
           <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.1 }} className="mt-12 hidden flex-wrap gap-x-7 gap-y-2 md:flex">
             {['Odds on every chest', '85 to 92% sell-back', 'Insured shipping'].map((t, i) => (

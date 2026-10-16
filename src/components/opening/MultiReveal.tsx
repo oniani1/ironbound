@@ -73,7 +73,10 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
   const credited = results.filter((r) => soldUids.has(r.uid)).reduce((s, r) => s + offerOf(r), 0)
   const picked = unsold.filter((r) => selected.has(r.uid))
   const pickedSum = picked.reduce((s, r) => s + offerOf(r), 0)
-  const belowPrice = unsold.filter((r) => r.item.value < chest.price)
+  // A quick pick for selling: the batch's lowest rarity, named by rarity rather than as pieces
+  // worth less than the chest (the founder, 2026-10-16). Never offered for the batch's best rarity.
+  const lowest = unsold.reduce<RarityId | null>((low, r) => (low === null || RARITY_ORDER.indexOf(r.rarity) < RARITY_ORDER.indexOf(low) ? r.rarity : low), null)
+  const filler = lowest && RARITY_ORDER.indexOf(lowest) < RARITY_ORDER.indexOf(best.rarity) ? unsold.filter((r) => r.rarity === lowest) : []
 
   const flip = (r: MultiResult) => {
     if (flipped.has(r.uid)) return
@@ -244,8 +247,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
             className="ib-ledger w-full p-4 sm:p-5"
             data-testid="multi-summary"
           >
-            {/* The batch, entered like the receipt: what it is worth, and what that means against
-                what it cost, so no one has to do the sum. */}
+            {/* The batch, entered like the receipt: what it is worth and the best piece in it. */}
             <p className="receipt-value-line">
               <span className="receipt-value-label">Item value</span>
               <span className="receipt-leader" aria-hidden />
@@ -253,8 +255,7 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
             </p>
             <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-[13px] text-bone-300 tabular">
               <span>
-                {total - cost >= 0 ? '+' : ''}
-                {money(total - cost)} against {money(cost)} paid
+                Best pull <b className="font-semibold text-bone-100">{best.item.name}</b>
               </span>
               <span>
                 Sell-back left <b className="font-semibold text-bone-100">{money(offersLeft)}</b>
@@ -282,13 +283,13 @@ export function MultiReveal({ results, chest, soldUids, onSell, onDone, onAgain,
               </Button>
             </div>
             <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3">
-              {belowPrice.length > 0 ? (
+              {filler.length > 0 && lowest ? (
                 <button
                   type="button"
-                  onClick={() => setSelected(new Set(belowPrice.map((r) => r.uid)))}
+                  onClick={() => setSelected(new Set(filler.map((r) => r.uid)))}
                   className="min-h-11 text-[13px] text-bone-300 underline-offset-4 hover:text-bone-100 hover:underline"
                 >
-                  Select the {belowPrice.length} below chest price
+                  {filler.length === 1 ? `Select the ${RARITIES[lowest].label} piece` : `Select the ${filler.length} ${RARITIES[lowest].label} pieces`}
                 </button>
               ) : (
                 <span />
