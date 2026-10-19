@@ -64,8 +64,10 @@ const ease = [0.16, 1, 0.3, 1] as const
 export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, onUndoSell, undoUntil, onShip, onAgain, onReplay, canAfford, trial, spectate, onOpenChest, fast, onHeight, collapsed, onToggle, stage = 'full', photoMissing = false }: Props) {
   const r = RARITIES[rarity]
   const offer = buybackOffer(item.value, chest)
-  const delta = item.value - chest.price
+  // How many times over the piece beats its chest. Only a win is counted: a piece worth less than
+  // the chest is shown at its value alone, never as a loss (the founder, 2026-10-16).
   const mult = chest.price > 0 ? item.value / chest.price : 0
+  const beats = mult >= 1.05
   const [counted, setCounted] = useState(false)
   const [sharing, setSharing] = useState(false)
   const [coins, setCoins] = useState<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null)
@@ -192,7 +194,6 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
   }
 
   const pct = Math.round(chest.buyback * 100)
-  const net = offer - chest.price
 
   return (
     <motion.aside
@@ -247,7 +248,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
         </motion.div>
       )}
 
-      {/* The value under its label, and what it means against the chest. */}
+      {/* The value under its label, and how many times over it beats the chest when it does. */}
       <motion.div {...head(1.6, 0.4)} className="receipt-value">
         <p className="receipt-value-line">
           <span className="receipt-value-label">{item.provenance === 'forged' ? 'Retail price, new' : 'Estimated value'}</span>
@@ -273,7 +274,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
             </motion.a>
           )}
           <motion.span className="receipt-comparison" initial={{ opacity: 0 }} animate={counted || instant ? { opacity: 1 } : {}} transition={{ duration: instant ? 0.2 : 0.4 }}>
-            {trial ? <Tag tone="moss">Free chest</Tag> : delta >= 0 ? `${mult >= 10 ? mult.toFixed(0) : mult.toFixed(1)}× the chest price · ${money(chest.price)} paid` : `${money(delta)} against the chest price · ${money(chest.price)} paid`}
+            {trial ? <Tag tone="moss">Free chest</Tag> : beats && `${mult >= 10 ? mult.toFixed(0) : mult.toFixed(1)}× the chest price`}
           </motion.span>
         </div>
       </motion.div>
@@ -341,7 +342,7 @@ export function RevealCard({ draw, item, rarity, chest, sold, onKeep, onSell, on
                 <p className="receipt-terms">
                   {trial
                     ? `Sell-back is ${pct}% of the value, paid at once. Shipping opens after you claim your purse.`
-                    : `Sell-back is ${pct}% of the value, ${net >= 0 ? '+' : ''}${money(net)} net of the chest. Shipping is by insured courier.`}
+                    : `Sell-back is ${pct}% of the value, paid at once. Shipping is by insured courier.`}
                 </p>
               </>
             )}

@@ -9,7 +9,6 @@
 .ib-setup-receipt p { margin: 0; }
 .ib-setup h1:focus { outline: none; }
 .ib-setup .ib-arms-layout { margin-top: 16px; }
-.ib-setup .ib-arms-layout .ib-step-footer { margin-top: 4px; }
 .ib-guest-invite { width: min(100% - 40px, 1248px); margin-inline: auto; }
 .ib-invite-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding-block: 16px; border-bottom: 1px solid color-mix(in oklch, var(--color-bone-100) 10%, transparent); }
 .ib-invite-object { width: 40px; height: 48px; flex-shrink: 0; }
@@ -23,9 +22,6 @@
   .ib-setup .ib-step { padding-block: 20px 32px; }
   .ib-setup .ib-step-top { margin-bottom: 8px; }
   .ib-setup .ib-arms-layout { margin-top: 12px; }
-  .ib-setup .ib-arms-controls { gap: 8px; }
-  .ib-setup .ib-ordinary { min-height: 80px !important; padding-block: 8px; gap: 6px; }
-  .ib-setup .ib-arms-picker legend { margin-bottom: 8px; }
 }
 @media (max-width: 767px) {
   .ib-setup-header { gap: 8px; padding-inline: 20px; }

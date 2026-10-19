@@ -25,8 +25,6 @@ const FITTINGS: { id: Category; label: string } = { id: 'fitting', label: 'Fitti
 type Status = 'all' | 'vaulted' | 'shipping' | 'sold'
 const STATUSES: { id: Status; label: string }[] = [{ id: 'all', label: 'All statuses' }, { id: 'vaulted', label: 'In vault' }, { id: 'shipping', label: 'Shipping' }, { id: 'sold', label: 'Sold' }]
 const statusLabel = (pull: Pull) => pull.status === 'vaulted' ? 'In vault' : pull.status === 'sold' ? 'Sold' : pull.status === 'shipped' ? 'Shipped' : 'Shipping'
-const signedMoney = (n: number) => `${n >= 0 ? '+' : '-'}${money(Math.abs(n))}`
-const resultWord = (n: number) => n > 0 ? 'Gain' : n < 0 ? 'Loss' : 'Even'
 const SORTS = [{ value: 'newest', label: 'Newest' }, { value: 'value', label: 'Highest value' }, { value: 'rarity', label: 'Highest rarity' }] as const
 
 function FilterTabs<T extends string>({ options, value, onChange, label, id }: { options: { id: T; label: string }[]; value: T; onChange: (value: T) => void; label: string; id: string }) {
@@ -41,7 +39,6 @@ export default function Vault() {
   const profile = useStore((s) => s.profile)
   const [editing, setEditing] = useState(false)
   const pulls = useStore((s) => s.pulls)
-  const stats = useStore((s) => s.stats)
   const [category, setCategory] = useState<Category | 'all'>('all')
   const [status, setStatus] = useState<Status>('all')
   const [sort, setSort] = useState<'newest' | 'value' | 'rarity'>('newest')
@@ -52,12 +49,13 @@ export default function Vault() {
   const item = selected ? ITEM_BY_ID[selected.itemId] ?? ARCHIVE_BY_ID[selected.itemId] : undefined
   const owned = pulls.filter((p) => p.status !== 'sold')
   const value = owned.reduce((sum, p) => sum + p.value, 0)
-  const estimatedGain = value + stats.soldFor - stats.spent
-  const sellBackValue = owned.reduce<number | null>((sum, p) => {
+  // The ledger counts what the steel is worth, never what was spent on it (the founder, 2026-10-16).
+  const best = pulls.reduce<Pull | null>((top, p) => (!top || p.value > top.value ? p : top), null)
+  const bestRecord = best ? ITEM_BY_ID[best.itemId] ?? ARCHIVE_BY_ID[best.itemId] : undefined
+  const sellBackValue = pulls.filter((p) => p.status === 'vaulted').reduce<number | null>((sum, p) => {
     const chest = CHEST_BY_ID[p.chestId]
     return sum === null || !chest ? null : sum + buybackOffer(p.value, chest)
   }, 0)
-  const sellBackNet = sellBackValue === null ? null : sellBackValue + stats.soldFor - stats.spent
   const vaulted = pulls.filter((p) => p.status === 'vaulted').length
   const shipping = pulls.filter((p) => p.status === 'shipping' || p.status === 'shipped').length
   const sold = pulls.filter((p) => p.status === 'sold').length
@@ -72,11 +70,11 @@ export default function Vault() {
       <Reveal><header className="ib-vault-header"><div className="ib-owner"><Shield arms={profile?.arms ?? DEFAULT_ARMS} size={58} /><div><p className="ib-kicker">Your private armory</p><h1 className="ib-title">{profile?.name ?? 'Wanderer'}’s vault</h1></div></div><Button variant="secondary" size="sm" onClick={() => setEditing(true)} data-testid="edit-profile">Edit arms and name</Button></header><AnimatePresence>{editing && <ProfileSheet onClose={() => setEditing(false)} />}</AnimatePresence>
         <div className="ib-vault-ledger">
           <div className="ib-ledger-owned"><p className="ib-ledger-label">Owned value</p><div className="ib-vault-total font-display tabular"><CountUp to={value} duration={0.45} /></div></div>
-          <div className="ib-ledger-return"><p className="ib-ledger-label">Estimated result</p><strong className="tabular"><span className="ib-result-word">{resultWord(estimatedGain)}</span><CountUp to={estimatedGain} duration={0.45} format={signedMoney} /></strong></div>
-          <div className="ib-ledger-return"><p className="ib-ledger-label">At sell-back rates</p><strong className="tabular">{sellBackNet === null ? 'Unavailable' : <><span className="ib-result-word">{resultWord(sellBackNet)}</span><CountUp to={sellBackNet} duration={0.45} format={signedMoney} /></>}</strong></div>
+          <div className="ib-ledger-return"><p className="ib-ledger-label">Best pull</p><strong className="tabular">{best ? <><CountUp to={best.value} duration={0.45} /><span className="ib-ledger-note">{bestRecord?.name ?? 'Unrecorded piece'}</span></> : 'None yet'}</strong></div>
+          <div className="ib-ledger-return"><p className="ib-ledger-label">Sell-back now</p><strong className="tabular">{sellBackValue === null ? 'Unavailable' : <CountUp to={sellBackValue} duration={0.45} />}</strong></div>
           <div className="ib-counts">{[[vaulted, 'In vault'], [shipping, 'Shipping'], [sold, 'Sold']].map(([count, label]) => <span key={label}><strong className="tabular"><CountUp to={Number(count)} duration={0.45} format={(n) => Math.round(n).toLocaleString('en-US')} /></strong><span className="caps">{label}</span></span>)}</div>
         </div>
-        <details className="ib-ledger-calculation"><summary className="caps">How totals work <CaretDown size={16} weight="light" aria-hidden="true" /></summary><p className="tabular">Estimated result: {money(value)} owned + {money(stats.soldFor)} sold - {money(stats.spent)} spent.</p><p className="tabular">At sell-back rates: {sellBackValue === null ? 'Unavailable. An owned piece has no recorded chest rate.' : `${money(sellBackValue)} at chest buyback rates + ${money(stats.soldFor)} sold - ${money(stats.spent)} spent.`}</p><p>Owned value includes shipping and shipped pieces. Sell-back net applies each original chest's rate to all owned pieces. Shipping pieces cannot be sold back. Shipping costs are included in spent.</p></details>
+        <details className="ib-ledger-calculation"><summary className="caps">How totals work <CaretDown size={16} weight="light" aria-hidden="true" /></summary><p>Owned value: every piece you hold, in the vault, shipping or shipped.</p><p>Best pull: the most valuable piece you have pulled.</p><p>Sell-back now: {sellBackValue === null ? 'unavailable. A piece in your vault has no recorded chest rate.' : "each piece in your vault at its chest's sell-back rate, credited at once. Shipping pieces cannot be sold back."}</p></details>
       </Reveal>
       {pulls.length > 0 && <div className="ib-vault-controls">
         <div className="ib-control-summary"><p className="caps tabular text-bone-400 m-0" role="status">{visible.length} {visible.length === 1 ? 'piece' : 'pieces'}</p><button type="button" className="ib-filter-toggle caps" aria-expanded={filtersOpen} aria-controls="vault-filter-panel" onClick={() => setFiltersOpen(!filtersOpen)}><SlidersHorizontal size={18} weight="light" aria-hidden="true" />Filter{(category !== 'all' || status !== 'all') && <span className="ib-filter-active" aria-label="Filters applied"> · On</span>}</button></div>
